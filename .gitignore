@@ -3,6 +3,17 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# files
+*.html
+
+#folders
+cython_debug/
+.vscode/**
+archive/
+importTypes/
+.DS_Store
+*.zip
+
 # C extensions
 *.so
 
@@ -23,7 +34,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -102,3 +112,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+*.code-workspace
+
+# file
+mrinversion/c_lib/src/fista.c
