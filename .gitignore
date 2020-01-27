@@ -13,6 +13,8 @@ archive/
 importTypes/
 .DS_Store
 *.zip
+app/
+c_lib/
 
 # C extensions
 *.so
@@ -115,4 +117,6 @@ venv.bak/
 *.code-workspace
 
 # file
-mrinversion/c_lib/src/fista.c
+*.temp
+*.o
+__main__.py

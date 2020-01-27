@@ -1,14 +1,15 @@
-import platform
+# import platform
 from os.path import abspath
 from os.path import dirname
 from os.path import join
-from os.path import split
 
-import numpy as np
-import numpy.distutils.system_info as sysinfo
-from Cython.Build import cythonize
-from setuptools import Extension
 from setuptools import setup
+
+# from os.path import split
+# import numpy as np
+# import numpy.distutils.system_info as sysinfo
+# from Cython.Build import cythonize
+# from setuptools import Extension
 
 
 with open("mrinversion/__init__.py", "r") as f:
@@ -19,81 +20,81 @@ with open("mrinversion/__init__.py", "r") as f:
 
 module_dir = dirname(abspath(__file__))
 
-include_dirs = [
-    "/opt/local/include/",
-    "/usr/include/",
-    "/usr/include/openblas",
-    "/usr/include/x86_64-linux-gnu/",
-]
+# include_dirs = [
+#     "/opt/local/include/",
+#     "/usr/include/",
+#     "/usr/include/openblas",
+#     "/usr/include/x86_64-linux-gnu/",
+# ]
 
-library_dirs = [
-    "/opt/local/lib/",
-    "/usr/lib64/",
-    "/usr/lib/",
-    "/usr/lib/x86_64-linux-gnu/",
-]
+# library_dirs = [
+#     "/opt/local/lib/",
+#     "/usr/lib64/",
+#     "/usr/lib/",
+#     "/usr/lib/x86_64-linux-gnu/",
+# ]
 
-libraries = []
-data_files = []
+# libraries = []
+# data_files = []
 
-numpy_include = np.get_include()
+# numpy_include = np.get_include()
 
-if platform.system() == "Windows":
-    conda_location = numpy_include
-    for _ in range(5):
-        conda_location = split(conda_location)[0]
-    include_dirs += [join(conda_location, "Library", "include", "openblas")]
-    include_dirs += [join(conda_location, "Library", "include")]
-    include_dirs += [join(conda_location, "include")]
-    library_dirs += [join(conda_location, "Library", "lib")]
-    libraries += ["openblas"]
-    name = "openblas"
+# if platform.system() == "Windows":
+#     conda_location = numpy_include
+#     for _ in range(5):
+#         conda_location = split(conda_location)[0]
+#     include_dirs += [join(conda_location, "Library", "include", "openblas")]
+#     include_dirs += [join(conda_location, "Library", "include")]
+#     include_dirs += [join(conda_location, "include")]
+#     library_dirs += [join(conda_location, "Library", "lib")]
+#     libraries += ["openblas"]
+#     name = "openblas"
 
-    extra_link_args = ["-lm"]
-    extra_compile_args = []
+#     extra_link_args = ["-lm"]
+#     extra_compile_args = []
 
-# this section is important for travis-ci build.
-else:
-    libraries = ["openblas", "pthread"]
-    openblas_info = sysinfo.get_info("openblas")
+# # this section is important for travis-ci build.
+# else:
+#     libraries = ["openblas", "pthread"]
+#     openblas_info = sysinfo.get_info("openblas")
 
-    if openblas_info != {}:
-        name = "openblas"
-        library_dirs += openblas_info["library_dirs"]
-        libraries += openblas_info["libraries"]
+#     if openblas_info != {}:
+#         name = "openblas"
+#         library_dirs += openblas_info["library_dirs"]
+#         libraries += openblas_info["libraries"]
 
-    extra_link_args = ["-lm"]
-    extra_compile_args = ["-g", "-O3"]
+#     extra_link_args = ["-lm"]
+#     extra_compile_args = ["-g", "-O3"]
 
-include_dirs = list(set(include_dirs))
-library_dirs = list(set(library_dirs))
-libraries = list(set(libraries))
+# include_dirs = list(set(include_dirs))
+# library_dirs = list(set(library_dirs))
+# libraries = list(set(libraries))
 
-include_dirs += ["mrinversion/c_lib/include/", numpy_include]
+# include_dirs += ["mrinversion/c_lib/include/", numpy_include]
 
-print(include_dirs)
-print(library_dirs)
-print(libraries)
+# print(include_dirs)
+# print(library_dirs)
+# print(libraries)
 
-print(extra_compile_args)
-print(extra_link_args)
+# print(extra_compile_args)
+# print(extra_link_args)
 
-ext_modules = [
-    Extension(
-        name="mrinversion.minimizer.fista",
-        sources=[
-            "mrinversion/c_lib/src/fista_lapack.c",
-            "mrinversion/c_lib/src/fista.pyx",
-        ],
-        include_dirs=include_dirs,
-        language="c",
-        libraries=libraries,
-        library_dirs=library_dirs,
-        data_files=data_files,
-        extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
-    )
-]
+# ext_modules = [
+#     Extension(
+#         name="mrinversion.minimizer.fista",
+#         sources=[
+#             "mrinversion/c_lib/src/fista_GD.c",
+#             "mrinversion/c_lib/src/fista.pyx",
+#         ],
+#         include_dirs=include_dirs,
+#         language="c",
+#         libraries=libraries,
+#         library_dirs=library_dirs,
+#         data_files=data_files,
+#         extra_compile_args=extra_compile_args,
+#         extra_link_args=extra_link_args,
+#     )
+# ]
 
 
 # ext_modules = [
@@ -133,7 +134,7 @@ setup(
         "mrsimulator>=0.2.0",
     ],
     extras_require={"fancy feature": ["plotly>=3.6", "dash>=0.40", "dash_daq>=0.1"]},
-    ext_modules=cythonize(ext_modules, language_level=3),
+    # ext_modules=cythonize(ext_modules, language_level=3),
     include_package_data=True,
     zip_safe=False,
     license="BSD-3-Clause",

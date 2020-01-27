@@ -1,6 +1,6 @@
 [flake8]
 ignore = E741, W503, C901, E203
-exclude = .eggs,*.egg,build, src/mrsimulator/__init__.py
+exclude = .eggs,*.egg,build, mrinversion/kernel/__init__.py
 filename = *.pyx,*.px*, *py
 max-line-length = 88
 max-complexity = 18

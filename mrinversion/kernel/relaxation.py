@@ -1,17 +1,19 @@
 import numpy as np
 
+# from mrinversion.util import _check_dimension_type
 
-def T2(x, nx=2, rangex=[0, 1], oversample=1, log_scale=True):
 
-    message_extension = "Only positive range is defined"
-    if rangex[0] < 0:
-        message = "ValueError: 'rangex[0]" + message_extension
-        print(message)
-        return
-    if rangex[1] < 0:
-        message = "ValueError: 'rangex[1]" + message_extension
-        print(message)
-        return
+def T2(direct_dimension, inverse_dimension):
+    # _check_dimension_type(direct_dimension, inverse_dimension)
+    x = direct_dimension.coordinates
+    x_inverse = inverse_dimension.coordinates
+    return np.exp(np.tensordot(-x, (1 / x_inverse), 0))
+
+
+def T2_old(x, nx=2, rangex=[0, 1], oversample=1, log_scale=True):
+
+    if rangex[0] < 0 or rangex[1] < 0:
+        raise ValueError("Range cannot include negative values.")
 
     if log_scale:
         x_min = np.log10(rangex[0])

@@ -5,36 +5,35 @@ import numpy as np
 # from matplotlib import gridspec
 
 
-def get_polar_grids(x, ax):
-
+def get_polar_grids(x, ax, offset):
+    l = 0.3
     x = np.asarray(x)
-    t1 = plt.Polygon(
-        [[x[0], x[0]], [x[0], x[-1]], [x[-1], x[-1]]], color="r", alpha=0.05
-    )
-    t2 = plt.Polygon(
-        [[x[0], x[0]], [x[-1], x[0]], [x[-1], x[-1]]], color="b", alpha=0.05
-    )
+    t1 = plt.Polygon([[0, 0], [0, x[-1]], [x[-1], x[-1]]], color="r", alpha=0.05)
+    t2 = plt.Polygon([[0, 0], [x[-1], 0], [x[-1], x[-1]]], color="b", alpha=0.05)
+
     ax.add_artist(t1)
     ax.add_artist(t2)
     for x_ in x:
-        ax.add_artist(
-            plt.Circle(
-                (0, 0),
-                x_,
-                fill=False,
-                color="k",
-                linestyle="--",
-                linewidth=0.5,
-                alpha=0.5,
+        if x_ - offset > 0:
+            ax.add_artist(
+                plt.Circle(
+                    (0, 0),
+                    x_ - offset,
+                    fill=False,
+                    color="k",
+                    linestyle="--",
+                    linewidth=l,
+                    alpha=0.5,
+                )
             )
-        )
+
     angle1 = np.tan(np.pi * np.asarray([0, 0.2, 0.4, 0.6, 0.8]) / 4.0)
     angle2 = np.tan(np.pi * np.asarray([0.8, 0.6, 0.4, 0.2, 0]) / 4.0)
     for ang_ in angle1:
-        ax.plot(x, x * ang_, "k--", alpha=0.5, linewidth=0.5)
+        ax.plot(x, ((x - offset) * ang_) + offset, "k--", alpha=0.5, linewidth=l)
     for ang_ in angle2:
-        ax.plot(x * ang_, x, "k--", alpha=0.5, linewidth=0.5)
-    ax.plot(x, x, "k", alpha=0.5, linewidth=0.8)
+        ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=l)
+    ax.plot(x, x, "k", alpha=0.5, linewidth=2 * l)
 
 
 # from IPython.display import display, clear_output

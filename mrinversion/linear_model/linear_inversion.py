@@ -151,13 +151,26 @@ def TSVD(K):
 # In[9]:
 
 
-def reduced_subspace_kernel_and_data(U, S, VT, signal):
+# standard deviation of noise remains unchanged after unitary tranformation.
+def reduced_subspace_kernel_and_data(U, S, VT, signal, sigma=None):
     diagS = np.diag(S)
     K_tilde = np.dot(diagS, VT)
     s_tilde = np.dot(U.T, signal)
+
+    # sigma_tilde = 0.0
+    # if sigma is not None:
+    #     vector = np.random.normal(loc=0.0, scale=sigma, size=signal.size)
+    #     vector.shape = signal.shape
+    #     vector_tilde = np.dot(U.T, vector)
+    #     print(sigma_tilde, vector_tilde.ravel().mean())
+    #     plt.plot(vector_tilde)
+    #     plt.plot(U.T.sum(axis=-1) * sigma, "r--")
+    #     plt.show()
+
     projectedSignal = np.dot(U, s_tilde)
+    guess_solution = np.dot(np.dot(VT.T, np.diag(1 / S)), s_tilde)
 
     K_tilde = np.asfortranarray(K_tilde)
     s_tilde = np.asfortranarray(s_tilde)
     projectedSignal = np.asfortranarray(projectedSignal)
-    return K_tilde, s_tilde, projectedSignal
+    return K_tilde, s_tilde, projectedSignal, guess_solution
