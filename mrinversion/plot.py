@@ -5,9 +5,18 @@ import numpy as np
 # from matplotlib import gridspec
 
 
-def get_polar_grids(x, ax, offset):
+def get_polar_grids(ax, ticks=None, offset=0):
+    limy = ax.get_ylim()
+    limx = ax.get_xlim()
+    if ticks is None:
+        x = np.asarray(ax.get_xticks())
+        inc = x[1] - x[0]
+        size = x.size
+        x = np.arange(size + 5) * inc
+    else:
+        x = np.asarray(ticks)
+
     l = 0.3
-    x = np.asarray(x)
     t1 = plt.Polygon([[0, 0], [0, x[-1]], [x[-1], x[-1]]], color="r", alpha=0.05)
     t2 = plt.Polygon([[0, 0], [x[-1], 0], [x[-1], x[-1]]], color="b", alpha=0.05)
 
@@ -34,6 +43,8 @@ def get_polar_grids(x, ax, offset):
     for ang_ in angle2:
         ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=l)
     ax.plot(x, x, "k", alpha=0.5, linewidth=2 * l)
+    ax.set_xlim(limx)
+    ax.set_ylim(limy)
 
 
 # from IPython.display import display, clear_output

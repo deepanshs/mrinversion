@@ -14,8 +14,8 @@ import os
 import sys
 import warnings
 
-# from sphinx_gallery.sorting import ExplicitOrder
-# from sphinx_gallery.sorting import FileNameSortKey
+from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.sorting import FileNameSortKey
 
 sys.path.insert(0, os.path.abspath("../.."))
 
@@ -54,7 +54,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinxjp.themes.basicstrap",
-    # "sphinx_gallery.gen_gallery",
+    "sphinx_gallery.gen_gallery",
     "sphinx.ext.intersphinx",
 ]
 
@@ -67,55 +67,48 @@ warnings.filterwarnings(
     message="Matplotlib is currently using agg, which is a"
     " non-GUI backend, so cannot show the figure.",
 )
-warnings.filterwarnings(
-    "ignore",
-    category=UserWarning,
-    message=(
-        "The physical quantity name, 'plane angle', is not "
-        "defined in the astropy.units package. Continuing "
-        "with 'plane angle' as the physical quantity name "
-        "for unit deg."
-    ),
-)
-warnings.filterwarnings(
-    "ignore",
-    category=UserWarning,
-    message=(
-        "The physical quantity name, 'electric field strength', is not "
-        "defined in the astropy.units package. Continuing "
-        "with 'electric field strength' as the physical quantity name "
-        "for unit N / C."
-    ),
-)
+# warnings.filterwarnings(
+#     "ignore",
+#     category=UserWarning,
+#     message=(
+#         "The physical quantity name, 'plane angle', is not "
+#         "defined in the astropy.units package. Continuing "
+#         "with 'plane angle' as the physical quantity name "
+#         "for unit deg."
+#     ),
+# )
+# warnings.filterwarnings(
+#     "ignore",
+#     category=UserWarning,
+#     message=(
+#         "The physical quantity name, 'electric field strength', is not "
+#         "defined in the astropy.units package. Continuing "
+#         "with 'electric field strength' as the physical quantity name "
+#         "for unit N / C."
+#     ),
+# )
 
 # sphinx gallery config
-# sphinx_gallery_conf = {
-#     "examples_dirs": "../examples",  # path to your example scripts
-#     "remove_config_comments": True,
-#     "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
-#     "within_subsection_order": FileNameSortKey,
-#     "subsection_order": ExplicitOrder(
-#         [
-#             "../examples/1D_1_examples",
-#             "../examples/2D_1_examples",
-#             "../examples/vector",
-#             "../examples/pixel",
-#             "../examples/correlated_examples",
-#             "../examples/sparse",
-#         ]
-#     ),
-#     "reference_url": {
-#         # The module you locally document uses None
-#         "csdmpy": None,
-#         # "matplotlib": "https://matplotlib.org",
-#         # "numpy": "https://numpy.org",
-#     },
-# }
+sphinx_gallery_conf = {
+    "examples_dirs": "../examples",  # path to your example scripts
+    "remove_config_comments": True,
+    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+    "within_subsection_order": FileNameSortKey,
+    "subsection_order": ExplicitOrder(["../examples/plot_1D_MAF"]),
+    "reference_url": {
+        # The module you locally document uses None
+        "mrinversion": None,
+        # "matplotlib": "https://matplotlib.org",
+        # "numpy": "https://numpy.org",
+    },
+}
 
-# intersphinx_mapping = {
-#     "matplotlib": ("https://matplotlib.org", None),
-#     "numpy": ("https://numpy.org", None),
-# }
+intersphinx_mapping = {
+    "matplotlib": ("https://matplotlib.org", None),
+    "numpy": ("https://numpy.org", None),
+    "csdmpy": ("https://csdmpy.readthedocs.io/en/latest/", None),
+    # "csdmpy": ("https://github.com/DeepanshS/csdmpy", None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -220,21 +213,7 @@ html_theme_options = {
 }
 
 # Theme options
-html_logo = "_static/csdmpy.png"
-
-# html_context = {
-#     "display_github": True,
-#     "github_user": "DeepanshS",
-#     "github_repo": "csdmpy",
-#     "github_version": "master/docs/",
-#     "css_files": [
-#         "_static/button.css",
-#         #     "_static/theme_overrides.css",  # override wide tables in RTD theme
-#         #     "_static/style.css",
-#         #     "_static/custom.css",
-#         #     "_static/bootstrap-toc.css",
-#     ],
-# }
+# html_logo = "_static/csdmpy.png"
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -245,11 +224,11 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "CSDMdoc"
+htmlhelp_basename = "Mrinversiondoc"
 
 # -- Options for LaTeX output ------------------------------------------------
 latex_engine = "xelatex"
-latex_logo = "_static/csdmpy.png"
+# latex_logo = "_static/csdmpy.png"
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
@@ -292,11 +271,11 @@ man_pages = [(master_doc, "csdm", "CSDM Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "CSDM",
-        "CSDM Documentation",
+        "Mrinversion",
+        "Mrinversion Documentation",
         author,
-        "CSDM",
-        "One line description of project.",
+        "Mrinversion",
+        "Statistical learning of tensor distribution from NMR anisotropic spectra",
         "Miscellaneous",
     )
 ]

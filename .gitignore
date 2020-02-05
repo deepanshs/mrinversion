@@ -15,6 +15,7 @@ importTypes/
 *.zip
 app/
 c_lib/
+docs/auto_examples/**
 
 # C extensions
 *.so

@@ -72,10 +72,6 @@ the NMR spectra.
 
 ----
 
-.. e.. rubric:: Please cite the following if you use the CSD model or csdmpy library.
-.. .. [#f10] Srivastava DJ, Vosegaard T, Massiot D, Grandinetti PJ (2020) Core Scientific Dataset Model: A lightweight and portable model and file format for multi-dimensional scientific data. PLOS ONE 15(1): e0225953. https://doi.org/10.1371/journal.pone.0225953
-
-
 .. only:: html
 
     Indices and tables

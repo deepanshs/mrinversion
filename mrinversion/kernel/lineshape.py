@@ -2,11 +2,9 @@ import numpy as np
 from mrsimulator import Dimension as NMR_dimension
 from mrsimulator.tests.tests import _one_d_simulator
 
+from mrinversion.kernel.base import _check_dimension_type
 from mrinversion.kernel.base import BaseModel
-from mrinversion.util import _check_dimension_type
 from mrinversion.util import supersampled_coordinates
-
-# import csdmpy as cp
 
 
 def x_y_to_zeta_eta(x, y):
@@ -24,12 +22,12 @@ def x_y_to_zeta_eta(x, y):
             \eta = (4/\pi) \tan^{-1} |y/x|.
 
         Args:
-            x: ndarray or list of floats, or a float. The coordinate x.
-            y: ndarray or list of floats, or a float. The coordinate y.
+            x: ndarray or list of floats. The coordinate x.
+            y: ndarray or list of floats. The coordinate y.
 
         Return:
-            zeta: ndarray or list of floats, or a float. The coordinate :math:`zeta`.
-            eta: ndarray or list of floats, or a float. The coordinate :math:`\eta`.
+            zeta: 1D-ndarray. The coordinate :math:`zeta`.
+            eta: 1D-ndarray. The coordinate :math:`\eta`.
     """
     x = np.abs(x)
     y = np.abs(y)
@@ -42,7 +40,7 @@ def x_y_to_zeta_eta(x, y):
     index = np.where(x < y)
     eta[index] = (4.0 / np.pi) * np.arctan(x[index] / y[index])
 
-    return zeta, eta
+    return zeta.ravel(), eta.ravel()
 
 
 def zeta_eta_to_x_y(zeta, eta):
@@ -62,22 +60,29 @@ def zeta_eta_to_x_y(zeta, eta):
         where :math:`\theta = \pi\eta/4`.
 
         Args:
-            x: ndarray or list of floats, or a float. The coordinate x.
-            y: ndarray or list of floats, or a float. The coordinate y.
+            x: ndarray or list of floats. The coordinate x.
+            y: ndarray or list of floats. The coordinate y.
 
         Return:
-            zeta: ndarray or list of floats, or a float. The coordinate :math:`zeta`.
-            eta: ndarray or list of floats, or a float. The coordinate :math:`\eta`.
+            zeta: 1D-ndarray. The coordinate :math:`zeta`.
+            eta: 1D-ndarray. The coordinate :math:`\eta`.
     """
-    theta = np.pi * eta / 4.0
-    if zeta >= 0:
-        x = zeta * np.sin(theta)
-        y = zeta * np.cos(theta)
-    else:
-        x = -zeta * np.cos(theta)
-        y = -zeta * np.sin(theta)
+    zeta = np.asarray(zeta)
+    eta = np.asarray(eta)
 
-    return x, y
+    theta = np.pi * eta / 4.0
+    x = np.zeros(zeta.size)
+    y = np.zeros(zeta.size)
+
+    index = np.where(zeta >= 0)
+    x[index] = zeta[index] * np.sin(theta[index])
+    y[index] = zeta[index] * np.cos(theta[index])
+
+    index = np.where(zeta < 0)
+    x[index] = -zeta[index] * np.cos(theta[index])
+    y[index] = -zeta[index] * np.sin(theta[index])
+
+    return x.ravel(), y.ravel()
 
 
 def cal_zeta_eta_from_x_y_distribution(dimension, grid, supersampling):
@@ -104,9 +109,7 @@ def cal_zeta_eta_from_x_y_distribution(dimension, grid, supersampling):
 
     # y_offset = y_coordinates[0]
     # x_offset = x_coordinates[0]
-    zeta, eta = x_y_to_zeta_eta(x_mesh, y_mesh)
-
-    return zeta.ravel(), eta.ravel()
+    return x_y_to_zeta_eta(x_mesh, y_mesh)
 
 
 class LineShape(BaseModel):
@@ -115,18 +118,19 @@ class LineShape(BaseModel):
     def __init__(
         self,
         direct_dimension,
-        inverse_dimensions,
+        inverse_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
         rotor_angle="54.735 deg",
         rotor_frequency=None,
         number_of_sidebands=None,
     ):
-        super().__init__(direct_dimension, inverse_dimensions, 1, 2)
+        super().__init__(direct_dimension, inverse_dimension, 1, 2)
 
         kernel = self.__class__.__name__
-        _check_dimension_type(direct_dimension, "direct", "frequency", kernel)
-        _check_dimension_type(inverse_dimensions, "inverse", "frequency", kernel)
+        dim_types = "frequency"
+        _check_dimension_type(self.direct_dimension, "direct", dim_types, kernel)
+        _check_dimension_type(self.inverse_dimension, "inverse", dim_types, kernel)
 
         if rotor_frequency is None:
             rotor_frequency = str(self.direct_dimension.increment)
@@ -140,6 +144,8 @@ class LineShape(BaseModel):
                 "rotor_frequency": rotor_frequency,
             }
         )
+        larmor_frequency = self.parameters.larmor_frequency  # in Hz
+
         if number_of_sidebands is None:
             self.number_of_sidebands = self.direct_dimension.count
         else:
@@ -147,15 +153,19 @@ class LineShape(BaseModel):
 
         self.increment = self.direct_dimension.increment.to("Hz").value
         self.spectral_width = self.direct_dimension.count * self.increment
-        self.reference_offset = self.direct_dimension.coordinates_offset.to(
-            "Hz"
-        ).value - (self.increment * int(self.direct_dimension.count / 2.0))
+        self.reference_offset = self.direct_dimension.coordinates[0].to("Hz").value
+
+        if self.direct_dimension.origin_offset.value == 0:
+            self.direct_dimension.origin_offset = f"{larmor_frequency} Hz"
+        for dim in self.inverse_dimension:
+            if dim.origin_offset.value == 0:
+                dim.origin_offset = f"{larmor_frequency} Hz"
 
     def _get_zeta_eta(self, supersampling):
         """Return zeta and eta coordinates over x-y grid"""
 
         zeta, eta = cal_zeta_eta_from_x_y_distribution(
-            self.direct_dimension, self.inverse_dimensions, supersampling
+            self.direct_dimension, self.inverse_dimension, supersampling
         )
         return zeta, eta
 
@@ -169,7 +179,7 @@ class NuclearShieldingTensor(LineShape):
             direct_dimension: A Dimension object, or an equivalent dictionary
                     object. This dimension must represent the pure anisotropic
                     dimension.
-            inverse_dimensions: A list of two Dimension objects, or equivalent
+            inverse_dimension: A list of two Dimension objects, or equivalent
                     dictionary objects representing the `x`-`y` coordinate grid.
             isotope: The isotope symbol of the nuclei given as the atomic number
                     followed by the atomic symbol, for example, `1H`, `13C`, and
@@ -190,7 +200,7 @@ class NuclearShieldingTensor(LineShape):
     def __init__(
         self,
         direct_dimension,
-        inverse_dimensions,
+        inverse_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
         rotor_angle="54.735 deg",
@@ -199,7 +209,7 @@ class NuclearShieldingTensor(LineShape):
     ):
         super().__init__(
             direct_dimension,
-            inverse_dimensions,
+            inverse_dimension,
             isotope,
             magnetic_flux_density,
             rotor_angle,
@@ -243,7 +253,7 @@ class MAF(NuclearShieldingTensor):
             direct_dimension: A Dimension object, or an equivalent dictionary
                     object. This dimension must represent the pure anisotropic
                     dimension.
-            inverse_dimensions: A list of two Dimension objects, or equivalent
+            inverse_dimension: A list of two Dimension objects, or equivalent
                     dictionary objects representing the `x`-`y` coordinate grid.
             isotope: The isotope symbol of the nuclei given as the atomic number
                     followed by the atomic symbol, for example, `1H`, `13C`, and
@@ -260,14 +270,14 @@ class MAF(NuclearShieldingTensor):
     def __init__(
         self,
         direct_dimension,
-        inverse_dimensions,
+        inverse_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
     ):
 
         super().__init__(
             direct_dimension,
-            inverse_dimensions,
+            inverse_dimension,
             isotope,
             magnetic_flux_density,
             "90 deg",
@@ -286,7 +296,7 @@ class SpinningSidebands(NuclearShieldingTensor):
             direct_dimension: A Dimension object, or an equivalent dictionary
                     object. This dimension must represent the pure anisotropic
                     dimension.
-            inverse_dimensions: A list of two Dimension objects, or equivalent
+            inverse_dimension: A list of two Dimension objects, or equivalent
                     dictionary objects representing the `x`-`y` coordinate grid.
             isotope: The isotope symbol of the nuclei given as the atomic number
                     followed by the atomic symbol, for example, `1H`, `13C`, and
@@ -304,14 +314,14 @@ class SpinningSidebands(NuclearShieldingTensor):
     def __init__(
         self,
         direct_dimension,
-        inverse_dimensions,
+        inverse_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
     ):
 
         super().__init__(
             direct_dimension,
-            inverse_dimensions,
+            inverse_dimension,
             isotope,
             magnetic_flux_density,
             "54.735 deg",
@@ -324,7 +334,7 @@ class DAS(LineShape):
     def __init__(
         self,
         direct_dimension,
-        inverse_dimensions,
+        inverse_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
         rotor_angle="54.735 deg",
@@ -333,7 +343,7 @@ class DAS(LineShape):
     ):
         super().__init__(
             direct_dimension,
-            inverse_dimensions,
+            inverse_dimension,
             isotope,
             magnetic_flux_density,
             rotor_angle,

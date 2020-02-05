@@ -7,6 +7,52 @@ from sklearn.linear_model import Lasso
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 
+from mrinversion.linear_model.linear_inversion import find_optimum_singular_value
+from mrinversion.linear_model.linear_inversion import reduced_subspace_kernel_and_data
+
+
+class TSVDCompression:
+    """SVD compression.
+
+        Args:
+            K: The kernel.
+            s: The data.
+            r: An integer defining the number of singular values used in
+                compression.
+
+        Attributes:
+            truncation_index: The number of singular values retained,
+            compressed_K: The compressed kernel.
+            compressed_s: Tje compressed data.
+        """
+
+    def __init__(self, K, s, r=None):
+        self.U, self.S, self.VT = np.linalg.svd(K, full_matrices=False)
+        if r is None:
+            r = find_optimum_singular_value(self.S)
+
+        self.K = K
+        self.s = s
+        self.truncation_index = r
+        self.compress(r)
+
+    def compress(self, r):
+        """Compress the kernel and data up to first r singular values using SVD
+
+        Args:
+            r: An integer defining the number of singular values used in
+                compression.
+        """
+        r = self.truncation_index
+        (
+            self.compressed_K,
+            self.compressed_s,
+            _,  # projectedSignal,
+            __,  # guess_solution,
+        ) = reduced_subspace_kernel_and_data(
+            self.U[:, :r], self.S[:r], self.VT[:r, :], self.s
+        )
+
 
 def cv(l1, X, y, cv):
     """Return the cross-validation score as negative of mean square error."""
@@ -211,7 +257,7 @@ class GeneralL2Lasso:
         if s.ndim == 1:
             s = s[:, np.newaxis]
         if f_shape is None:
-            f_shape = K.shape[1]
+            f_shape = (K.shape[1],)
         prod = np.asarray(f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
@@ -241,7 +287,10 @@ class GeneralL2Lasso:
         )
         self.estimator.fit(Ks, ss)
         self.f = self.estimator.coef_
-        self.f.shape = (s.shape[1],) + f_shape
+        if s.shape[1] > 1:
+            self.f.shape = (s.shape[1],) + f_shape
+        else:
+            self.f.shape = f_shape
         self.n_iter = self.estimator.n_iter_
 
     def predict(self, K):
@@ -327,12 +376,7 @@ class SmoothLasso(GeneralL2Lasso):
     """
 
     def __init__(
-        self,
-        alpha=1e-3,
-        lambda1=1e-6,
-        max_iterations=10000,
-        tolerance=1e-5,
-        positive=True,
+        self, alpha, lambda1, max_iterations=10000, tolerance=1e-5, positive=True
     ):
         super().__init__(
             alpha=alpha,
@@ -407,6 +451,7 @@ class GeneralL2LassoCV:
         regularizer=None,
         randomize=False,
         times=2,
+        verbose=False,
     ):
 
         if alphas is None:
@@ -430,24 +475,25 @@ class GeneralL2LassoCV:
         self.f = None
         self.randomize = randomize
         self.times = times
+        self.verbose = verbose
 
     def fit(self, K, s, f_shape=None):
-        """
-            Solves the lasso variant problem with the give range of alphas
-            and lambdas and determine the optimum alpha and lambda hyperparameters
-            using k-fold cross-validation.
-            Args:
-                alphas: A list of alpha > 0 values.
-                lambdas: A list of lambda > 0 values.
-                regularizer: Regularization method. Options are ['lasso',
-                        'smooth lasso', and 'sparse ridge fusion']
-                folds: Integer, k, for k-fold cross-validation.
+        r"""
+        Fit the model using the coordinate descent method from scikit-learn for
+        all alpha anf lambda values using `n`-folds cross-validation.
+        The cross-validation metric is the mean squared error.
+
+        Args:
+            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
+            s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
+            f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
+                        (n1, n2, ..., nd)
         """
 
         if s.ndim == 1:
             s = s[:, np.newaxis]
         if f_shape is None:
-            f_shape = K.shape[1]
+            f_shape = (K.shape[1],)
         prod = np.asarray(f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
@@ -470,7 +516,6 @@ class GeneralL2LassoCV:
         alpha_ratio = np.ones(self.cv_alphas.size)
         alpha_ratio[1:] = np.sqrt(self.cv_alphas[1:] / self.cv_alphas[:-1])
 
-        # self.hyperparameter["alpha"] = self.cv_alphas[0]
         Ks, ss = _get_augmented_data(
             K=K,
             s=s,
@@ -500,16 +545,16 @@ class GeneralL2LassoCV:
             l1_array.append(deepcopy(l1))
             l1_array[-1].alpha = lambda_
 
-        i = 0
+        j = 0
         for alpha_ratio_ in alpha_ratio:
             Ks[start_index:] *= alpha_ratio_
             jobs = (
                 delayed(cv)(l1_array[i], Ks, ss, cv_indexes)
                 for i in range(self.cv_lambdas.size)
             )
-            self.cv_map[i] = Parallel(
+            self.cv_map[j] = Parallel(
                 n_jobs=-1,
-                verbose=1,
+                verbose=self.verbose,
                 **{
                     "backend": {
                         "threads": "threading",
@@ -518,58 +563,137 @@ class GeneralL2LassoCV:
                     }["threads"]
                 },
             )(jobs)
-            i += 1
+            j += 1
 
-        # cv_map contains negated mean square errors, therefore
-        #  add the variance.
-        self.cv_map += self.sigma ** 2
+        # cv_map contains negated mean square errors, therefore multiply by -1.
+        self.cv_map *= -1
+        # subtract the variance.
+        self.cv_map -= self.sigma ** 2
+
+        # After subtracting the variance, any negative values in the cv grid is a
+        # result of fitting noise. Take the absolute value of cv to avoid such
+        # models.
         self.cv_map = np.abs(self.cv_map)
-        # self.cv_optimum_hyperparamters(self.regularizer, folds)
 
+        # The argmin of the minimum value is the selected model as it has the least
+        # prediction error.
         index = np.unravel_index(self.cv_map.argmin(), self.cv_map.shape)
         self.hyperparameter["alpha"] = self.cv_alphas[index[0]]
         self.hyperparameter["lambda"] = self.cv_lambdas[index[1]]
 
-        # self.minimize(regularizer=regularizer)
+        # Calculate the solution using the complete data at the optimized lambda and
+        # alpha values
         self.opt = GeneralL2Lasso(
             alpha=self.hyperparameter["alpha"],
             lambda1=self.hyperparameter["lambda"],
-            # tsvd=True,
-            # tsvd_index=None,
             max_iterations=self.max_iterations,
             tolerance=self.tolerance,
             positive=self.positive,
             regularizer=self.regularizer,
         )
-
         self.opt.fit(K, s, f_shape)
         self.f = self.opt.estimator.coef_
 
     def predict(self, K):
+        """
+        Predict using the linear model.
+
+        Args:
+            K: The kernel.
+
+        Return:
+            y_predict: The predicted values.
+        """
         return self.opt.predict(K) * self.scale
-
-        #  print("optimum hyperparameters")
-        # print("SVD truncation =", self.hyperparameter["r"])
-        # print("α =", self.hyperparameter["alpha"])
-        # print("λ =", self.hyperparameter["lambda"])
-        # diff = s.ravel() - predict.ravel()
-        # data_size = s.size
-        # sigma = np.sqrt((diff ** 2).sum() / data_size) * s_max
-        # mean = diff.sum() * s_max / data_size
-
-        # print("non-zero features in f =", np.where(self.estimator.coef_ > 0)[0].size)
-        # print("residue statistics")
-        # print("mean, μ =", mean)
-        # print("standard deviation, σ =", sigma)
-
-        # self.statistic = {
-        #     "hyperparameter, SVD truncation": self.hyperparameter["r"],
-        #     "hyperparameter, α": self.hyperparameter["alpha"],
-        #     "hyperparameter, λ": self.hyperparameter["lambda"],
-        #     "residual mean": mean,
-        #     "residual standard deviation": sigma,
-        # }
 
     def cross_validation_error(self):
         """Return the cross-validation error metric."""
         return self.cv_map
+
+
+class SmoothLassoCV(GeneralL2LassoCV):
+    r"""
+        The linear model trained with the combined l1 and l2 priors as the
+        regularizer. The method minimizes the objective function,
+
+        .. math::
+            \| {\bf Kf - s} \|^2_2 + \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2
+                     + \lambda  \| {\bf f} \|_1 ,
+
+        where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
+        :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known signal
+        containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
+        is the desired solution. The parameters, :math:`\alpha` and :math:`\lambda`,
+        are the hyperparameters controlling the smoothness and sparsity of the
+        solution :math:`{\bf f}`.
+        The matrix :math:`{\bf J}_i` is given as
+
+        .. math::
+            {\bf J}_i = {\bf I}_{n_1} \otimes \cdots \otimes {\bf A}_{n_i}
+                        \otimes \cdots \otimes {\bf I}_{n_{d}},
+
+        where :math:`{\bf I}_{n_i} \in \mathbb{R}^{n_i \times n_i}` is the identity
+        matrix,
+
+        .. math::
+            {\bf A}_{n_i} = \left(\begin{array}{ccccc}
+                            1 & -1 & 0 & \cdots & \vdots \\
+                            0 & 1 & -1 & \cdots & \vdots \\
+                            \vdots & \vdots & \vdots & \vdots & 0 \\
+                            0 & \cdots & 0 & 1 & -1
+                        \end{array}\right) \in \mathbb{R}^{(n_i-1)\times n_i},
+
+        and the symbol :math:`\otimes` is the Kronecker product. The terms,
+        :math:`\left(n_1, n_2, \cdots, n_d\right)`, are the number of points along the
+        respective dimensions, with the constraint that :math:`\prod_{i=1}^{d}n_i = n`,
+        where :math:`d` is the total number of dimensions.
+
+        The cross-validation is carried out using a stratified splitting of the signal.
+
+        Args:
+            alphas: ndarray, a list of hyperparameter, :math:`\alpha`.
+            lambdas: ndarray, a list of hyperparameter, :math:`\lambda`.
+            folds: int, the number of folds used in cross-validation.The default is 10.
+            max_iterations: Interger, the maximum number of iterations allowed when
+                            solving the problem. The default value is 10000.
+            tolerance: Float, the tolerance at which the solution is
+                       considered converged. The default value is 1e-5.
+            positive: Boolean. If True, the amplitudes in the solution,
+                      :math:`{\bf f}` is all positive, else the solution may contain
+                      positive and negative amplitudes. The default is True.
+            sigma: float, the standard deviation of the noise in the signal. The
+                    default is 0.0
+        .. rubric:: Attribute documentation
+
+        Attributes:
+            f: A ndarray of shape (m_count, nd, ..., n1, n0). The solution,
+                        :math:`{\bf f} \in \mathbb{R}^{m_\text{count}
+                        \times n_d \times \cdots n_1 \times n_0}`.
+            n_iter: Integer, the number of iterations required to reach the
+                    specified tolerance.
+    """
+
+    def __init__(
+        self,
+        alphas=None,
+        lambdas=None,
+        folds=10,
+        max_iterations=10000,
+        tolerance=1e-5,
+        positive=True,
+        sigma=0.0,
+        randomize=False,
+        times=2,
+    ):
+        super().__init__(
+            alphas=alphas,
+            lambdas=lambdas,
+            folds=folds,
+            max_iterations=max_iterations,
+            tolerance=tolerance,
+            positive=positive,
+            sigma=sigma,
+            regularizer="smooth lasso",
+            randomize=randomize,
+            times=times,
+        )

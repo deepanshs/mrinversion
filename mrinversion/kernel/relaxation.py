@@ -1,40 +1,67 @@
 import numpy as np
 
-# from mrinversion.util import _check_dimension_type
+from mrinversion.kernel.base import BaseModel
+from mrinversion.util import supersampled_coordinates
 
 
-def T2(direct_dimension, inverse_dimension):
-    # _check_dimension_type(direct_dimension, inverse_dimension)
-    x = direct_dimension.coordinates
-    x_inverse = inverse_dimension.coordinates
-    return np.exp(np.tensordot(-x, (1 / x_inverse), 0))
+class T2(BaseModel):
+    r"""
+        A class for simulating the kernel of T2 decaying functions,
+
+        .. math::
+                y = \exp(-x/x_\text{inv}).
+
+        Args:
+            direct_dimension: A Dimension object, or an equivalent dictionary
+                    object. This dimension must represent the pure anisotropic
+                    dimension.
+            inverse_dimension: A list of two Dimension objects, or equivalent
+                    dictionary objects representing the `x`-`y` coordinate grid.
+    """
+
+    def __init__(self, direct_dimension, inverse_dimension):
+        super().__init__(direct_dimension, inverse_dimension, 1, 1)
+
+    def kernel(self, supersampling=1):
+        """
+        Return the kernel of T2 decaying functions.
+
+        Args:
+            supersampling: An integer. Each cell is supersampled by the factor
+                    `supersampling`.
+        Returns:
+            A numpy array.
+        """
+        x = self.direct_dimension.coordinates
+        x_inverse = supersampled_coordinates(
+            self.inverse_dimension, supersampling=supersampling
+        )
+        amp = np.exp(np.tensordot(-(1 / x_inverse), x, 0))
+        return self._averaged_kernel(amp, supersampling)
 
 
-def T2_old(x, nx=2, rangex=[0, 1], oversample=1, log_scale=True):
+class T1(BaseModel):
+    r"""
+        A class for simulating the kernel of T1 recovery functions,
 
-    if rangex[0] < 0 or rangex[1] < 0:
-        raise ValueError("Range cannot include negative values.")
+        .. math::
+                y = 1 - \exp(-x/x_\text{inv}).
 
-    if log_scale:
-        x_min = np.log10(rangex[0])
-        x_max = np.log10(rangex[1])
-    else:
-        x_min = rangex[0]
-        x_max = rangex[1]
+        Args:
+            direct_dimension: A Dimension object, or an equivalent dictionary
+                    object. This dimension must represent the pure anisotropic
+                    dimension.
+            inverse_dimension: A list of two Dimension objects, or equivalent
+                    dictionary objects representing the `x`-`y` coordinate grid.
+    """
 
-    m = x.size
-    xinv = ((np.arange(nx * oversample)) / (nx * oversample - 1)) * (x_max - x_min)
-    xinv += x_min
+    def __init__(self, direct_dimension, inverse_dimension):
+        super().__init__(direct_dimension, inverse_dimension, 1, 1)
 
-    if log_scale:
-        xinv = 10 ** (xinv)
-
-    # print (xinv)
-
-    k = np.exp(np.tensordot(-x, (1 / xinv), 0))
-    # print (K.shape)
-    k = k.ravel().reshape(m, nx, oversample).sum(axis=2)
-    # print (K.shape)
-    xinv = ((np.arange(nx)) / (nx - 1)) * (x_max - x_min) + x_min
-    # print ('log?', xinv)
-    return xinv, k
+    def kernel(self, supersampling=1):
+        x = self.direct_dimension.coordinates
+        x_inverse = supersampled_coordinates(
+            self.inverse_dimension, supersampling=supersampling
+        )
+        amp = 1 - np.exp(np.tensordot(-(1 / x_inverse), x, 0))
+        return self._averaged_kernel(amp, supersampling)
