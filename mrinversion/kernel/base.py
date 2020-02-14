@@ -11,57 +11,57 @@ __dimension_name__ = ("Dimension", "LinearDimension", "MonotonicDimension")
 class BaseModel:
     """Base kernel class."""
 
-    def __init__(self, direct_dimension, inverse_dimension, n_dir, n_inv):
+    def __init__(self, kernel_dimension, inverse_kernel_dimension, n_dir, n_inv):
         kernel = self.__class__.__name__
         message = (
             f"Exactly {n_inv} inverse dimension(s) is/are required for the "
             f"{kernel} kernel."
         )
-        if isinstance(inverse_dimension, list):
-            if len(inverse_dimension) != n_inv:
+        if isinstance(inverse_kernel_dimension, list):
+            if len(inverse_kernel_dimension) != n_inv:
                 raise ValueError(message)
             if n_inv == 1:
-                inverse_dimension = inverse_dimension[0]
+                inverse_kernel_dimension = inverse_kernel_dimension[0]
         else:
             if n_inv != 1:
                 raise ValueError(message)
 
-        inverse_dimension = _check_csdm_dimension(
-            inverse_dimension, "inverse_dimension"
+        inverse_kernel_dimension = _check_csdm_dimension(
+            inverse_kernel_dimension, "inverse_dimension"
         )
 
         message = (
             f"Exactly {n_dir} direct dimension(s) is/are required for the "
             f"{kernel} kernel."
         )
-        if isinstance(direct_dimension, list):
-            if len(direct_dimension) != n_dir:
+        if isinstance(kernel_dimension, list):
+            if len(kernel_dimension) != n_dir:
                 raise ValueError(message)
             if n_dir == 1:
-                direct_dimension = direct_dimension[0]
+                kernel_dimension = kernel_dimension[0]
         else:
             if n_dir != 1:
                 raise ValueError(message)
 
-        direct_dimension = _check_csdm_dimension(direct_dimension, "direct_dimension")
+        kernel_dimension = _check_csdm_dimension(kernel_dimension, "kernel_dimension")
 
-        self.direct_dimension = direct_dimension
-        self.inverse_dimension = inverse_dimension
+        self.kernel_dimension = kernel_dimension
+        self.inverse_kernel_dimension = inverse_kernel_dimension
 
     def _averaged_kernel(self, amp, supersampling):
         """Return the kernel by averaging over the supersampled grid cells."""
         shape = ()
-        inverse_dimension = self.inverse_dimension
-        if not isinstance(self.inverse_dimension, list):
-            inverse_dimension = [self.inverse_dimension]
+        inverse_kernel_dimension = self.inverse_kernel_dimension
+        if not isinstance(self.inverse_kernel_dimension, list):
+            inverse_kernel_dimension = [self.inverse_kernel_dimension]
 
-        for item in inverse_dimension:
+        for item in inverse_kernel_dimension:
             shape += (item.count, supersampling)
-        shape += (self.direct_dimension.count,)
+        shape += (self.kernel_dimension.count,)
 
         K = amp.reshape(shape)
 
-        inv_len = len(inverse_dimension)
+        inv_len = len(inverse_kernel_dimension)
         axes = tuple([2 * i + 1 for i in range(inv_len)])
         K = K.sum(axis=axes)
 
@@ -69,14 +69,14 @@ class BaseModel:
         K /= K[tuple(section)].sum()
 
         section = [slice(None, None, None) for _ in range(inv_len + 1)]
-        for i, item in enumerate(inverse_dimension):
+        for i, item in enumerate(inverse_kernel_dimension):
             if item.coordinates[0].value == 0:
                 section_ = deepcopy(section)
                 section_[i] = 0
                 K[tuple(section_)] /= 2.0
 
-        inv_size = np.asarray([item.count for item in inverse_dimension]).prod()
-        K = K.reshape(inv_size, self.direct_dimension.count).T
+        inv_size = np.asarray([item.count for item in inverse_kernel_dimension]).prod()
+        K = K.reshape(inv_size, self.kernel_dimension.count).T
 
         return K
 

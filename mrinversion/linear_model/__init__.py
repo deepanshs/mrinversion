@@ -7,51 +7,7 @@ from sklearn.linear_model import Lasso
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 
-from mrinversion.linear_model.linear_inversion import find_optimum_singular_value
-from mrinversion.linear_model.linear_inversion import reduced_subspace_kernel_and_data
-
-
-class TSVDCompression:
-    """SVD compression.
-
-        Args:
-            K: The kernel.
-            s: The data.
-            r: An integer defining the number of singular values used in
-                compression.
-
-        Attributes:
-            truncation_index: The number of singular values retained,
-            compressed_K: The compressed kernel.
-            compressed_s: Tje compressed data.
-        """
-
-    def __init__(self, K, s, r=None):
-        self.U, self.S, self.VT = np.linalg.svd(K, full_matrices=False)
-        if r is None:
-            r = find_optimum_singular_value(self.S)
-
-        self.K = K
-        self.s = s
-        self.truncation_index = r
-        self.compress(r)
-
-    def compress(self, r):
-        """Compress the kernel and data up to first r singular values using SVD
-
-        Args:
-            r: An integer defining the number of singular values used in
-                compression.
-        """
-        r = self.truncation_index
-        (
-            self.compressed_K,
-            self.compressed_s,
-            _,  # projectedSignal,
-            __,  # guess_solution,
-        ) = reduced_subspace_kernel_and_data(
-            self.U[:, :r], self.S[:r], self.VT[:r, :], self.s
-        )
+from mrinversion.linear_model.tsvd_compression import TSVDCompression  # noqa: F401
 
 
 def cv(l1, X, y, cv):
@@ -185,7 +141,7 @@ def _get_augmented_data(K, s, alpha, regularizer, f_shape=None):
 
     ss0, ss1 = s.shape
     s_ = np.zeros((ss0 + smooth_size, ss1))
-    s_[:ss0] = s
+    s_[:ss0] = s.real
 
     return np.asfortranarray(K_), np.asfortranarray(s_)
 
@@ -220,6 +176,8 @@ class GeneralL2Lasso:
             regularizer: String, a literal specifying the form of matrix
                          :math:`{\bf J}_i`. The allowed literals are `smooth lasso`
                          and `sparse ridge fusion`.
+            f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
+                            (n1, n2, ..., nd)
         Attributes:
 
     """
@@ -232,6 +190,7 @@ class GeneralL2Lasso:
         tolerance=1e-5,
         positive=True,
         regularizer=None,
+        inverse_dimension=None,
     ):
 
         self.hyperparameter = {"lambda": lambda1, "alpha": alpha}
@@ -239,39 +198,36 @@ class GeneralL2Lasso:
         self.tolerance = tolerance
         self.positive = positive
         self.regularizer = regularizer
-
+        self.inverse_dimension = inverse_dimension
+        self.f_shape = tuple([item.count for item in inverse_dimension])
         # attributes
         self.f = None
         self.n_iter = None
 
-    def fit(self, K, s, f_shape=None):
+    def fit(self, K, s):
         r"""
             Fit the model using the coordinate descent method from scikit-learn.
 
             Args:
                 K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
                 s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
-                f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
-                            (n1, n2, ..., nd)
         """
         if s.ndim == 1:
             s = s[:, np.newaxis]
-        if f_shape is None:
-            f_shape = (K.shape[1],)
-        prod = np.asarray(f_shape).prod()
+        prod = np.asarray(self.f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
                 "The product of the shape, `f_shape`, must be equal to the length of "
                 f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
             )
 
-        self.scale = s.max()
+        self.scale = s.max().real
         Ks, ss = _get_augmented_data(
             K=K,
             s=s / self.scale,
             alpha=self.hyperparameter["alpha"],
             regularizer=self.regularizer,
-            f_shape=f_shape,
+            f_shape=self.f_shape,
         )
 
         self.estimator = Lasso(
@@ -288,9 +244,9 @@ class GeneralL2Lasso:
         self.estimator.fit(Ks, ss)
         self.f = self.estimator.coef_
         if s.shape[1] > 1:
-            self.f.shape = (s.shape[1],) + f_shape
+            self.f.shape = (s.shape[1],) + self.f_shape
         else:
-            self.f.shape = f_shape
+            self.f.shape = self.f_shape
         self.n_iter = self.estimator.n_iter_
 
     def predict(self, K):
@@ -304,7 +260,13 @@ class GeneralL2Lasso:
             y_predict: The predicted values.
         """
         shape = self.estimator.coef_.shape
-        self.estimator.coef_.shape = (1, self.estimator.coef_.size)
+        if self.estimator.coef_.ndim == len(self.f_shape):
+            self.estimator.coef_.shape = (1, self.estimator.coef_.size)
+        else:
+            prod = 1
+            for i in self.f_shape:
+                prod *= i
+            self.estimator.coef_.shape = tuple(shape[:-2]) + (prod,)
         predict = self.estimator.predict(K) * self.scale
         self.estimator.coef_.shape = shape
         return predict
@@ -357,8 +319,10 @@ class SmoothLasso(GeneralL2Lasso):
         Args:
             alpha: Float, the hyperparameter, :math:`\alpha`.
             lambda1: Float, the hyperparameter, :math:`\lambda`.
+            inverse_dimension: A list of csdmpy Dimension objects representing the
+                        inverse space.
             max_iterations: Interger, the maximum number of iterations allowed when
-                            solving the problem. The default value is 10000.
+                        solving the problem. The default value is 10000.
             tolerance: Float, the tolerance at which the solution is
                        considered converged. The default value is 1e-5.
             positive: Boolean. If True, the amplitudes in the solution,
@@ -376,7 +340,13 @@ class SmoothLasso(GeneralL2Lasso):
     """
 
     def __init__(
-        self, alpha, lambda1, max_iterations=10000, tolerance=1e-5, positive=True
+        self,
+        alpha,
+        lambda1,
+        inverse_dimension,
+        max_iterations=10000,
+        tolerance=1e-5,
+        positive=True,
     ):
         super().__init__(
             alpha=alpha,
@@ -385,6 +355,7 @@ class SmoothLasso(GeneralL2Lasso):
             tolerance=tolerance,
             positive=positive,
             regularizer="smooth lasso",
+            inverse_dimension=inverse_dimension,
         )
 
 
@@ -408,6 +379,8 @@ class SparseRidgeFusion(GeneralL2Lasso):
         Args:
             kernel: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
             signal: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
+            inverse_dimension: A list of csdmpy Dimension objects representing the
+                        inverse space.
             max_iterations: An interger defining the maximum number of iterations used
                         in solving the LASSO problem. The default value is 10000.
             tolerance: A float defining the tolerance at which the solution is
@@ -420,12 +393,12 @@ class SparseRidgeFusion(GeneralL2Lasso):
 
     def __init__(
         self,
-        alpha=1e-3,
-        lambda1=1e-6,
+        alpha,
+        lambda1,
+        inverse_dimension,
         max_iterations=10000,
         tolerance=1e-5,
         positive=True,
-        f_shape=None,
     ):
         super().__init__(
             alpha=alpha,
@@ -433,7 +406,7 @@ class SparseRidgeFusion(GeneralL2Lasso):
             max_iterations=max_iterations,
             tolerance=tolerance,
             positive=positive,
-            f_shape=f_shape,
+            inverse_dimension=inverse_dimension,
             regularizer="sparse ridge fusion",
         )
 
@@ -452,6 +425,7 @@ class GeneralL2LassoCV:
         randomize=False,
         times=2,
         verbose=False,
+        inverse_dimension=None,
     ):
 
         if alphas is None:
@@ -476,8 +450,10 @@ class GeneralL2LassoCV:
         self.randomize = randomize
         self.times = times
         self.verbose = verbose
+        self.inverse_dimension = inverse_dimension
+        self.f_shape = tuple([item.count for item in inverse_dimension])
 
-    def fit(self, K, s, f_shape=None):
+    def fit(self, K, s):
         r"""
         Fit the model using the coordinate descent method from scikit-learn for
         all alpha anf lambda values using `n`-folds cross-validation.
@@ -486,28 +462,24 @@ class GeneralL2LassoCV:
         Args:
             K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
             s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
-            f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
-                        (n1, n2, ..., nd)
         """
 
         if s.ndim == 1:
             s = s[:, np.newaxis]
-        if f_shape is None:
-            f_shape = (K.shape[1],)
-        prod = np.asarray(f_shape).prod()
+        prod = np.asarray(self.f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
                 "The product of the shape, `f_shape`, must be equal to the length of "
                 f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
             )
 
-        self.scale = s.max()
+        self.scale = s.max().real
         s = s / self.scale
         cv_indexes = _get_cv_indexes(
             K,
             self.folds,
             self.regularizer,
-            f_shape=f_shape,
+            f_shape=self.f_shape,
             random=self.randomize,
             times=self.times,
         )
@@ -521,7 +493,7 @@ class GeneralL2LassoCV:
             s=s,
             alpha=self.cv_alphas[0],
             regularizer=self.regularizer,
-            f_shape=f_shape,
+            f_shape=self.f_shape,
         )
         start_index = K.shape[0]
 
@@ -590,8 +562,9 @@ class GeneralL2LassoCV:
             tolerance=self.tolerance,
             positive=self.positive,
             regularizer=self.regularizer,
+            inverse_dimension=self.inverse_dimension,
         )
-        self.opt.fit(K, s, f_shape)
+        self.opt.fit(K, s)
         self.f = self.opt.estimator.coef_
 
     def predict(self, K):
@@ -600,6 +573,7 @@ class GeneralL2LassoCV:
 
         Args:
             K: The kernel.
+            f_shape: The shape of the solution.
 
         Return:
             y_predict: The predicted values.
@@ -653,6 +627,8 @@ class SmoothLassoCV(GeneralL2LassoCV):
         Args:
             alphas: ndarray, a list of hyperparameter, :math:`\alpha`.
             lambdas: ndarray, a list of hyperparameter, :math:`\lambda`.
+            inverse_dimension: A list of csdmpy Dimension objects representing the
+                        inverse space.
             folds: int, the number of folds used in cross-validation.The default is 10.
             max_iterations: Interger, the maximum number of iterations allowed when
                             solving the problem. The default value is 10000.
@@ -675,8 +651,9 @@ class SmoothLassoCV(GeneralL2LassoCV):
 
     def __init__(
         self,
-        alphas=None,
-        lambdas=None,
+        alphas,
+        lambdas,
+        inverse_dimension,
         folds=10,
         max_iterations=10000,
         tolerance=1e-5,
@@ -688,6 +665,7 @@ class SmoothLassoCV(GeneralL2LassoCV):
         super().__init__(
             alphas=alphas,
             lambdas=lambdas,
+            inverse_dimension=inverse_dimension,
             folds=folds,
             max_iterations=max_iterations,
             tolerance=tolerance,

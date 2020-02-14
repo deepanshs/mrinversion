@@ -1,0 +1,6 @@
+
+Magic angle flipping
+--------------------
+
+The following are the examples of the statistical learning of nuclear shielding
+tensor from pure anisotropic NMR magic angle flipping spectrum.

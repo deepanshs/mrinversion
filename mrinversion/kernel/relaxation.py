@@ -12,15 +12,15 @@ class T2(BaseModel):
                 y = \exp(-x/x_\text{inv}).
 
         Args:
-            direct_dimension: A Dimension object, or an equivalent dictionary
+            kernel_dimension: A Dimension object, or an equivalent dictionary
                     object. This dimension must represent the pure anisotropic
                     dimension.
-            inverse_dimension: A list of two Dimension objects, or equivalent
+            inverse_kernel_dimension: A list of two Dimension objects, or equivalent
                     dictionary objects representing the `x`-`y` coordinate grid.
     """
 
-    def __init__(self, direct_dimension, inverse_dimension):
-        super().__init__(direct_dimension, inverse_dimension, 1, 1)
+    def __init__(self, kernel_dimension, inverse_kernel_dimension):
+        super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 1)
 
     def kernel(self, supersampling=1):
         """
@@ -32,9 +32,9 @@ class T2(BaseModel):
         Returns:
             A numpy array.
         """
-        x = self.direct_dimension.coordinates
+        x = self.kernel_dimension.coordinates
         x_inverse = supersampled_coordinates(
-            self.inverse_dimension, supersampling=supersampling
+            self.inverse_kernel_dimension, supersampling=supersampling
         )
         amp = np.exp(np.tensordot(-(1 / x_inverse), x, 0))
         return self._averaged_kernel(amp, supersampling)
@@ -48,20 +48,20 @@ class T1(BaseModel):
                 y = 1 - \exp(-x/x_\text{inv}).
 
         Args:
-            direct_dimension: A Dimension object, or an equivalent dictionary
+            kernel_dimension: A Dimension object, or an equivalent dictionary
                     object. This dimension must represent the pure anisotropic
                     dimension.
-            inverse_dimension: A list of two Dimension objects, or equivalent
+            inverse_kernel_dimension: A list of two Dimension objects, or equivalent
                     dictionary objects representing the `x`-`y` coordinate grid.
     """
 
-    def __init__(self, direct_dimension, inverse_dimension):
-        super().__init__(direct_dimension, inverse_dimension, 1, 1)
+    def __init__(self, kernel_dimension, inverse_kernel_dimension):
+        super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 1)
 
     def kernel(self, supersampling=1):
-        x = self.direct_dimension.coordinates
+        x = self.kernel_dimension.coordinates
         x_inverse = supersampled_coordinates(
-            self.inverse_dimension, supersampling=supersampling
+            self.inverse_kernel_dimension, supersampling=supersampling
         )
         amp = 1 - np.exp(np.tensordot(-(1 / x_inverse), x, 0))
         return self._averaged_kernel(amp, supersampling)

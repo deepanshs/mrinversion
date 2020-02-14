@@ -5,7 +5,7 @@ from mrinversion.kernel import NuclearShieldingTensor
 
 
 def test_number_of_dimensions_for_lineshape_kernel():
-    direct_dimensions = [
+    kernel_dimensions = [
         cp.Dimension(type="linear", count=96, increment="208.33 Hz", complex_fft=True)
     ]
 
@@ -17,7 +17,7 @@ def test_number_of_dimensions_for_lineshape_kernel():
     error = r"Exactly 2 inverse dimension\(s\) is/are required for the"
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingTensor(
-            direct_dimension=direct_dimensions,
+            anisotropic_dimension=kernel_dimensions,
             inverse_dimension=inverse_dimension[0],
             isotope="29Si",
             magnetic_flux_density="9.4 T",
@@ -28,7 +28,7 @@ def test_number_of_dimensions_for_lineshape_kernel():
 
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingTensor(
-            direct_dimension=direct_dimensions,
+            anisotropic_dimension=kernel_dimensions,
             inverse_dimension=[inverse_dimension[0]],
             isotope="29Si",
             magnetic_flux_density="9.4 T",
@@ -40,7 +40,7 @@ def test_number_of_dimensions_for_lineshape_kernel():
     error = r"Exactly 1 direct dimension\(s\) is/are required for the"
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingTensor(
-            direct_dimension=inverse_dimension,
+            anisotropic_dimension=inverse_dimension,
             inverse_dimension=inverse_dimension,
             isotope="29Si",
             magnetic_flux_density="9.4 T",
@@ -49,11 +49,11 @@ def test_number_of_dimensions_for_lineshape_kernel():
             number_of_sidebands=1,
         )
 
-    direct_dimension__ = {}
-    error = r"The value of the `direct_dimension` attribute must be one of "
+    kernel_dimension__ = {}
+    error = r"The value of the `kernel_dimension` attribute must be one of "
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingTensor(
-            direct_dimension=direct_dimension__,
+            anisotropic_dimension=kernel_dimension__,
             inverse_dimension=inverse_dimension,
             isotope="29Si",
             magnetic_flux_density="9.4 T",
@@ -66,7 +66,7 @@ def test_number_of_dimensions_for_lineshape_kernel():
     error = "The element at index 0 of the `inverse_dimension` list must be an"
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingTensor(
-            direct_dimension=direct_dimensions,
+            anisotropic_dimension=kernel_dimensions,
             inverse_dimension=inverse_dimension,
             isotope="29Si",
             magnetic_flux_density="9.4 T",
@@ -75,15 +75,15 @@ def test_number_of_dimensions_for_lineshape_kernel():
             number_of_sidebands=1,
         )
 
-    inverse_dimension__ = [
+    inverse_kernel_dimension__ = [
         {"type": "linear", "count": 10, "increment": "1 Hz"},
         "string",
     ]
     error = "The element at index 0 of the `inverse_dimension` list must be an"
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingTensor(
-            direct_dimension=direct_dimensions,
-            inverse_dimension=inverse_dimension__,
+            anisotropic_dimension=kernel_dimensions,
+            inverse_dimension=inverse_kernel_dimension__,
             isotope="29Si",
             magnetic_flux_density="9.4 T",
             rotor_angle="90 deg",
@@ -93,7 +93,7 @@ def test_number_of_dimensions_for_lineshape_kernel():
 
 
 def test_dimensionality_of_lineshape_kernel():
-    direct_dimensions = [
+    kernel_dimensions = [
         cp.Dimension(type="linear", count=96, increment="208.33 Hz", complex_fft=True)
     ]
 
@@ -105,7 +105,7 @@ def test_dimensionality_of_lineshape_kernel():
     error = r"dimension with quantity name `\['frequency'\]` is required for the"
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingTensor(
-            direct_dimension=direct_dimensions,
+            anisotropic_dimension=kernel_dimensions,
             inverse_dimension=inverse_dimension,
             isotope="29Si",
             magnetic_flux_density="9.4 T",
@@ -114,13 +114,13 @@ def test_dimensionality_of_lineshape_kernel():
             number_of_sidebands=1,
         )
 
-    direct_dimensions = cp.Dimension(
+    kernel_dimensions = cp.Dimension(
         type="linear", count=96, increment="208.33 ms", complex_fft=True
     )
     error = r"dimension with quantity name `\['frequency'\]` is required for the"
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingTensor(
-            direct_dimension=direct_dimensions,
+            anisotropic_dimension=kernel_dimensions,
             inverse_dimension=inverse_dimension,
             isotope="29Si",
             magnetic_flux_density="9.4 T",

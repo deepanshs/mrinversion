@@ -61,6 +61,17 @@ the NMR spectra.
 
 .. ----
 
+----
+
+    **View the example gallery**
+
+    .. only:: html
+
+        .. image:: https://img.shields.io/badge/View-Example%20Gallery-Purple?s=small
+            :target: auto_examples/index.html
+
+----
+
 .. toctree::
     :maxdepth: 2
     :caption: Table of Contents

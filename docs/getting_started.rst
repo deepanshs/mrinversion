@@ -8,8 +8,9 @@ We encourage the users to follow these guidelines to promote consistency,
 amongst others.
 
 We start by demonstrating the prediction of the nuclear shielding tensors from
-a pure nuclear shielding anisotropic spectra. In this section we show
-the shielding tensor prediction from a pure anisotropic sideband spectrum.
+a pure nuclear shielding anisotropic spectra. In this section, we show
+the shielding tensor prediction from a pure anisotropic spinning sideband
+spectrum.
 
 
 Import the dataset
@@ -67,12 +68,19 @@ and the plot depicting the sideband spectrum follows
             :scale: 75%
 
 
-Setting the direct and inverse-dimensions
-"""""""""""""""""""""""""""""""""""""""""
+Setting the kernel
+""""""""""""""""""
 
-In `Mrinversion`, the terms `direct-dimension` applies to all dimensions that
-are undergoing an active transformation, while the term `inverse-dimension`
-applies to the ones the data transforms onto.
+A kernel is a transformation matrix that transforms the single from one domain
+to another following
+
+.. math::
+
+    y = Kx
+
+In `Mrinversion`, we refer to these domains as `kernel-dimension`
+and `inverse-dimension`, respectively, where the kernel-dimension is
+the signal dimension that gets transformed on to the inverse-kernel-dimension.
 Note, the dimensionality of the inverse-dimension is not necessarily the
 inverse of the respective direct-dimension dimensionality. This relationship
 depends on the kernel transforming the direct-dimension to the
@@ -114,8 +122,8 @@ follows,
 
 .. doctest::
 
-    >>> direct_dimension = cp.LinearDimension(count=32, increment='625Hz', coordinates_offset='-10kHz')
-    >>> print(direct_dimension)
+    >>> kernel_dimension = cp.LinearDimension(count=32, increment='625Hz', coordinates_offset='-10kHz')
+    >>> print(kernel_dimension)
     LinearDimension([-10000.  -9375.  -8750.  -8125.  -7500.  -6875.  -6250.  -5625.  -5000.
       -4375.  -3750.  -3125.  -2500.  -1875.  -1250.   -625.      0.    625.
        1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
@@ -129,17 +137,17 @@ Dimension object,
 
     >>> import numpy as np
     >>> test_array = np.arange(32) * 625 - 10000 # as in Hz
-    >>> direct_dimension = cp.as_dimension(test_array)
-    >>> direct_dimension *= cp.ScalarQuantity('Hz')
-    >>> print(direct_dimension)
+    >>> kernel_dimension = cp.as_dimension(test_array)
+    >>> kernel_dimension *= cp.ScalarQuantity('Hz')
+    >>> print(kernel_dimension)
     LinearDimension([-10000.  -9375.  -8750.  -8125.  -7500.  -6875.  -6250.  -5625.  -5000.
       -4375.  -3750.  -3125.  -2500.  -1875.  -1250.   -625.      0.    625.
        1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
        6875.   7500.   8125.   8750.   9375.] Hz)
 
-The method ``cp.as_dimension()`` generates a dimensionless LinearDimension
-object from the Numpy array, ``test_array``. The dimensionality of the
-dimension object may then be changed by multiplying the object with the
+The ``cp.as_dimension()`` method generates a dimensionless LinearDimension
+object from the Numpy array, ``test_array``. The dimensionality of the newly
+created dimension object may then be changed by multiplying the object with the
 appropriate scalar quantity.
 
 
@@ -180,7 +188,7 @@ generate the kernel as follows,
 
     >>> from mrinversion.kernel import NuclearShieldingTensor
     >>> method = NuclearShieldingTensor(
-    ...                 direct_dimension=direct_dimension,
+    ...                 anisotropic_dimension=kernel_dimension,
     ...                 inverse_dimension=inverse_dimension,
     ...                 isotope='29Si',
     ...                 magnetic_flux_density='9.4 T',
@@ -247,6 +255,7 @@ reduces the computation time. To compress the kernel and the data, import the
 
     >>> from mrinversion.linear_model import TSVDCompression
     >>> new_system = TSVDCompression(K, responses)
+    compression factor = 1.032258064516129
     >>> compressed_K = new_system.compressed_K
     >>> compressed_s = new_system.compressed_s
 
@@ -286,7 +295,7 @@ Import the :class:`~mrinversion.linear_model.SmoothLasso` class and follow,
 .. doctest::
 
     >>> from mrinversion.linear_model import SmoothLasso
-    >>> s_lasso = SmoothLasso(alpha=0.1, lambda1=1e-04)
+    >>> s_lasso = SmoothLasso(alpha=0.1, lambda1=1e-04, inverse_dimension=inverse_dimension)
 
 Here, the variable ``s_lasso`` is an instance of the
 :class:`~mrinversion.linear_model.SmoothLasso` class. The required arguments
@@ -294,6 +303,10 @@ of this class are `alpha` and `lambda1`, corresponding to the hyperparameters
 :math:`\alpha` and :math:`\lambda`, respectively, in the above equation. At the
 moment we don't know the optimum value of the `alpha` and `lambda1` parameters.
 Let's start with a guess value.
+The argument `f_shape` is the shape of the solution given as the number
+of points along the inverse
+dimension at index 0, followed by points at index 1. In this example, this
+value is (25, 25).
 
 To solve the smooth lasso problem, use the
 :meth:`~mrinversion.linear_model.SmoothLasso.fit` method of the ``s_lasso``
@@ -301,16 +314,14 @@ instance as follows,
 
 .. doctest::
 
-    >>> s_lasso.fit(K=compressed_K, s=compressed_s, f_shape=(25, 25))
+    >>> s_lasso.fit(K=compressed_K, s=compressed_s)
 
-The three arguments of the :meth:`~mrinversion.linear_model.SmoothLasso.fit`
+The two arguments of the :meth:`~mrinversion.linear_model.SmoothLasso.fit`
 method are the kernel, `K`, the signal, `s`, and the shape of the solution `f`,
 `f_shape`. In the above example, we set the value of `K` as ``compressed_K``,
 and correspondingly the value of `s` as ``compressed_s``. You may also use the
 uncompressed values of the kernel and signal in this method.
-The shape of the solution is given as the number of points along the inverse
-dimension at index 0, followed by points at index 1. In this example, this
-value is (25, 25).
+
 
 The solution to the smooth lasso is accessed using the
 :attr:`~mrinversion.linear_model.SmoothLasso.f` attribute of the respective
@@ -324,7 +335,7 @@ The plot of the solution is
 
     >>> from mrinversion.plot import get_polar_grids
     ...
-    >>> # convert the inverse_dimension coordinates to pmm from Hz.
+    >>> # convert the `inverse_dimension` coordinates to pmm from Hz.
     >>> inverse_dimension[0].to('ppm', 'nmr_frequency_ratio')
     >>> inverse_dimension[1].to('ppm', 'nmr_frequency_ratio')
     >>> # get the x and the y coordinates.
@@ -410,8 +421,10 @@ Setup the smooth lasso cross-validation using
 
 .. doctest::
 
-    >>> s_lasso_cv = SmoothLassoCV(alphas=alphas, lambdas=lambdas, sigma=0.005, folds=10) # doctest: +SKIP
-    >>> s_lasso_cv.fit(K=compressed_K, s=compressed_s, f_shape=(25, 25)) # doctest: +SKIP
+    >>> s_lasso_cv = SmoothLassoCV(alphas=alphas, lambdas=lambdas,
+    ...                            inverse_dimension=inverse_dimension,
+    ...                            sigma=0.005, folds=10)
+    >>> s_lasso_cv.fit(K=compressed_K, s=compressed_s)
 
 The arguments of the :class:`~mrinversion.linear_model.SmoothLassoCV` is a list
 of the `alpha` and `lambda` values, along with the standard deviation of the
@@ -426,7 +439,7 @@ the class instance,
 
 .. doctest::
 
-    >>> s_lasso_cv.hyperparameter # doctest: +SKIP
+    >>> s_lasso_cv.hyperparameter
     {'alpha': 0.0006543189129712968, 'lambda': 1.438449888287663e-06}
 
 and the corresponding cross-validation error surface using the

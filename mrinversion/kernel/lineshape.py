@@ -1,4 +1,5 @@
 import numpy as np
+from astropy.units import Quantity
 from mrsimulator import Dimension as NMR_dimension
 from mrsimulator.tests.tests import _one_d_simulator
 
@@ -8,6 +9,50 @@ from mrinversion.util import supersampled_coordinates
 
 
 def x_y_to_zeta_eta(x, y):
+    r"""Convert the coordinates :math:`(x,y)` to :math:`(\zeta, \eta)` using the
+        following definition,
+
+        .. math::
+            \zeta = \sqrt(x^2 + y^2)
+            \eta = (4/\pi) \tan^{-1} |x/y|,
+
+        if :math:`|x| \le |y|`, otherwise,
+
+        .. math::
+            \zeta = -\sqrt(x^2 + y^2)
+            \eta = (4/\pi) \tan^{-1} |y/x|.
+
+        Args:
+            x: floats or Quantity object. The coordinate x.
+            y: floats or Quantity object. The coordinate y.
+
+        Return:
+            zeta: The coordinate :math:`zeta`.
+            eta: The coordinate :math:`\eta`.
+    """
+    x_unit = y_unit = 1
+    if isinstance(x, Quantity):
+        x_unit = x.unit
+        x = x.value
+    if isinstance(y, Quantity):
+        y_unit = y.unit
+        y = y.value
+    if x_unit != y_unit:
+        raise ValueError("x and y have different quantity types.")
+
+    zeta = np.sqrt(x ** 2 + y ** 2)  # + offset
+    eta = 1.0
+    if x > y:
+        zeta = -zeta
+        eta = (4.0 / np.pi) * np.arctan(y / x)
+
+    if x < y:
+        eta = (4.0 / np.pi) * np.arctan(x / y)
+
+    return zeta * x_unit, eta
+
+
+def _x_y_to_zeta_eta(x, y):
     r"""Convert the coordinates :math:`(x,y)` to :math:`(\zeta, \eta)` using the
         following definition,
 
@@ -109,7 +154,7 @@ def cal_zeta_eta_from_x_y_distribution(dimension, grid, supersampling):
 
     # y_offset = y_coordinates[0]
     # x_offset = x_coordinates[0]
-    return x_y_to_zeta_eta(x_mesh, y_mesh)
+    return _x_y_to_zeta_eta(x_mesh, y_mesh)
 
 
 class LineShape(BaseModel):
@@ -117,23 +162,25 @@ class LineShape(BaseModel):
 
     def __init__(
         self,
-        direct_dimension,
-        inverse_dimension,
+        kernel_dimension,
+        inverse_kernel_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
         rotor_angle="54.735 deg",
         rotor_frequency=None,
         number_of_sidebands=None,
     ):
-        super().__init__(direct_dimension, inverse_dimension, 1, 2)
+        super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 2)
 
         kernel = self.__class__.__name__
         dim_types = "frequency"
-        _check_dimension_type(self.direct_dimension, "direct", dim_types, kernel)
-        _check_dimension_type(self.inverse_dimension, "inverse", dim_types, kernel)
+        _check_dimension_type(self.kernel_dimension, "direct", dim_types, kernel)
+        _check_dimension_type(
+            self.inverse_kernel_dimension, "inverse", dim_types, kernel
+        )
 
         if rotor_frequency is None:
-            rotor_frequency = str(self.direct_dimension.increment)
+            rotor_frequency = str(self.kernel_dimension.increment)
 
         self.parameters = NMR_dimension.parse_dict_with_units(
             {
@@ -147,17 +194,17 @@ class LineShape(BaseModel):
         larmor_frequency = self.parameters.larmor_frequency  # in Hz
 
         if number_of_sidebands is None:
-            self.number_of_sidebands = self.direct_dimension.count
+            self.number_of_sidebands = self.kernel_dimension.count
         else:
             self.number_of_sidebands = number_of_sidebands
 
-        self.increment = self.direct_dimension.increment.to("Hz").value
-        self.spectral_width = self.direct_dimension.count * self.increment
-        self.reference_offset = self.direct_dimension.coordinates[0].to("Hz").value
+        self.increment = self.kernel_dimension.increment.to("Hz").value
+        self.spectral_width = self.kernel_dimension.count * self.increment
+        self.reference_offset = self.kernel_dimension.coordinates[0].to("Hz").value
 
-        if self.direct_dimension.origin_offset.value == 0:
-            self.direct_dimension.origin_offset = f"{larmor_frequency} Hz"
-        for dim in self.inverse_dimension:
+        if self.kernel_dimension.origin_offset.value == 0:
+            self.kernel_dimension.origin_offset = f"{larmor_frequency} Hz"
+        for dim in self.inverse_kernel_dimension:
             if dim.origin_offset.value == 0:
                 dim.origin_offset = f"{larmor_frequency} Hz"
 
@@ -165,7 +212,7 @@ class LineShape(BaseModel):
         """Return zeta and eta coordinates over x-y grid"""
 
         zeta, eta = cal_zeta_eta_from_x_y_distribution(
-            self.direct_dimension, self.inverse_dimension, supersampling
+            self.kernel_dimension, self.inverse_kernel_dimension, supersampling
         )
         return zeta, eta
 
@@ -176,7 +223,7 @@ class NuclearShieldingTensor(LineShape):
         line-shape kernel.
 
         Args:
-            direct_dimension: A Dimension object, or an equivalent dictionary
+            anisotropic_dimension: A Dimension object, or an equivalent dictionary
                     object. This dimension must represent the pure anisotropic
                     dimension.
             inverse_dimension: A list of two Dimension objects, or equivalent
@@ -199,7 +246,7 @@ class NuclearShieldingTensor(LineShape):
 
     def __init__(
         self,
-        direct_dimension,
+        anisotropic_dimension,
         inverse_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
@@ -208,7 +255,7 @@ class NuclearShieldingTensor(LineShape):
         number_of_sidebands=1,
     ):
         super().__init__(
-            direct_dimension,
+            anisotropic_dimension,
             inverse_dimension,
             isotope,
             magnetic_flux_density,
@@ -230,9 +277,9 @@ class NuclearShieldingTensor(LineShape):
 
         zeta, eta = self._get_zeta_eta(supersampling)
         amp = _one_d_simulator(
-            number_of_points=self.direct_dimension.count,
+            number_of_points=self.kernel_dimension.count,
             reference_offset=self.reference_offset,
-            increment=self.direct_dimension.increment.to("Hz").value,
+            increment=self.kernel_dimension.increment.to("Hz").value,
             isotropic_chemical_shift=np.zeros(zeta.size),
             shielding_anisotropy=zeta,
             shielding_asymmetry=eta,
@@ -250,7 +297,7 @@ class MAF(NuclearShieldingTensor):
         line-shape kernel resulting from the 2D MAF spectra.
 
         Args:
-            direct_dimension: A Dimension object, or an equivalent dictionary
+            anisotropic_dimension: A Dimension object, or an equivalent dictionary
                     object. This dimension must represent the pure anisotropic
                     dimension.
             inverse_dimension: A list of two Dimension objects, or equivalent
@@ -269,14 +316,14 @@ class MAF(NuclearShieldingTensor):
 
     def __init__(
         self,
-        direct_dimension,
+        anisotropic_dimension,
         inverse_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
     ):
 
         super().__init__(
-            direct_dimension,
+            anisotropic_dimension,
             inverse_dimension,
             isotope,
             magnetic_flux_density,
@@ -293,7 +340,7 @@ class SpinningSidebands(NuclearShieldingTensor):
         separation spectra.
 
         Args:
-            direct_dimension: A Dimension object, or an equivalent dictionary
+            anisotropic_dimension: A Dimension object, or an equivalent dictionary
                     object. This dimension must represent the pure anisotropic
                     dimension.
             inverse_dimension: A list of two Dimension objects, or equivalent
@@ -313,14 +360,14 @@ class SpinningSidebands(NuclearShieldingTensor):
 
     def __init__(
         self,
-        direct_dimension,
+        anisotropic_dimension,
         inverse_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
     ):
 
         super().__init__(
-            direct_dimension,
+            anisotropic_dimension,
             inverse_dimension,
             isotope,
             magnetic_flux_density,
@@ -333,8 +380,8 @@ class SpinningSidebands(NuclearShieldingTensor):
 class DAS(LineShape):
     def __init__(
         self,
-        direct_dimension,
-        inverse_dimension,
+        anisotropic_dimension,
+        inverse_kernel_dimension,
         isotope,
         magnetic_flux_density="9.4 T",
         rotor_angle="54.735 deg",
@@ -342,8 +389,8 @@ class DAS(LineShape):
         number_of_sidebands=None,
     ):
         super().__init__(
-            direct_dimension,
-            inverse_dimension,
+            anisotropic_dimension,
+            inverse_kernel_dimension,
             isotope,
             magnetic_flux_density,
             rotor_angle,
@@ -355,11 +402,11 @@ class DAS(LineShape):
     def kernel(self, supersampling):
         zeta, eta = self._get_zeta_eta(supersampling)
         amp = _one_d_simulator(
-            number_of_points=self.direct_dimension.count,
+            number_of_points=self.kernel_dimension.count,
             reference_offset=self.reference_offset,
             larmor_frequency=self.parameters.larmor_frequency,
             spin_quantum_number=self.parameters.spin,
-            increment=self.direct_dimension.increment.to("Hz").value,
+            increment=self.kernel_dimension.increment.to("Hz").value,
             isotropic_chemical_shift=np.zeros(zeta.size),
             quadrupolar_coupling_constant=zeta,
             quadrupole_asymmetry=eta,

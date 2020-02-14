@@ -12,7 +12,7 @@ from mrinversion.kernel import SpinningSidebands
 from mrinversion.kernel.lineshape import zeta_eta_to_x_y
 from mrinversion.linear_model import TSVDCompression
 
-direct_dimension = [
+anisotropic_dimension = [
     cp.Dimension(type="linear", count=96, increment="208.33 Hz", complex_fft=True)
 ]
 
@@ -62,7 +62,7 @@ def generate_shielding_kernel(zeta_, eta_, angle, freq, n_sidebands):
 
 def test_zeta_eta_from_x_y():
     ns_obj = NuclearShieldingTensor(
-        direct_dimension=direct_dimension,
+        anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
         isotope="29Si",
         magnetic_flux_density="9.4 T",
@@ -101,7 +101,7 @@ def test_x_y_from_zeta_eta():
 
 def test_MAF_lineshape_kernel():
     ns_obj = NuclearShieldingTensor(
-        direct_dimension=direct_dimension,
+        anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
         isotope="29Si",
         magnetic_flux_density="9.4 T",
@@ -115,7 +115,7 @@ def test_MAF_lineshape_kernel():
     assert np.allclose(K, sim_lineshape, rtol=1.0e-3, atol=1e-3)
 
     ns_obj = MAF(
-        direct_dimension=direct_dimension,
+        anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
         isotope="29Si",
         magnetic_flux_density="9.4 T",
@@ -132,7 +132,7 @@ def test_MAF_lineshape_kernel():
 
 def test_spinning_sidebands_kernel():
     ns_obj = NuclearShieldingTensor(
-        direct_dimension=direct_dimension,
+        anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
         isotope="29Si",
         magnetic_flux_density="9.4 T",
@@ -147,7 +147,7 @@ def test_spinning_sidebands_kernel():
     assert np.allclose(K, sim_lineshape, rtol=1.0e-3, atol=1e-3)
 
     ns_obj = SpinningSidebands(
-        direct_dimension=direct_dimension,
+        anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
         isotope="29Si",
         magnetic_flux_density="9.4 T",

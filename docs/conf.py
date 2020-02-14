@@ -94,7 +94,7 @@ sphinx_gallery_conf = {
     "remove_config_comments": True,
     "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
     "within_subsection_order": FileNameSortKey,
-    "subsection_order": ExplicitOrder(["../examples/plot_1D_MAF"]),
+    "subsection_order": ExplicitOrder(["../examples/MAF", "../examples/sideband"]),
     "reference_url": {
         # The module you locally document uses None
         "mrinversion": None,

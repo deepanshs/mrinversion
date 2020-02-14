@@ -157,16 +157,6 @@ def reduced_subspace_kernel_and_data(U, S, VT, signal, sigma=None):
     K_tilde = np.dot(diagS, VT)
     s_tilde = np.dot(U.T, signal)
 
-    # sigma_tilde = 0.0
-    # if sigma is not None:
-    #     vector = np.random.normal(loc=0.0, scale=sigma, size=signal.size)
-    #     vector.shape = signal.shape
-    #     vector_tilde = np.dot(U.T, vector)
-    #     print(sigma_tilde, vector_tilde.ravel().mean())
-    #     plt.plot(vector_tilde)
-    #     plt.plot(U.T.sum(axis=-1) * sigma, "r--")
-    #     plt.show()
-
     projectedSignal = np.dot(U, s_tilde)
     guess_solution = np.dot(np.dot(VT.T, np.diag(1 / S)), s_tilde)
 

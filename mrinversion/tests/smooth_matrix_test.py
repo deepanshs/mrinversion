@@ -18,7 +18,6 @@ def test01():
     ]
 
     assert indexes == index_test, "test01"
-    # print(indexes)
 
 
 def test02():
@@ -72,7 +71,6 @@ def test02():
         tr_ += lst[:15]
 
     assert indexes == index_test_2, "test02 - 2"
-    # print(index_test_2)
 
 
 def test03():
