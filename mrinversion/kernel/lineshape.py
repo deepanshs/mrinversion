@@ -174,7 +174,7 @@ class LineShape(BaseModel):
 
         kernel = self.__class__.__name__
         dim_types = "frequency"
-        _check_dimension_type(self.kernel_dimension, "direct", dim_types, kernel)
+        _check_dimension_type(self.kernel_dimension, "anisotropic", dim_types, kernel)
         _check_dimension_type(
             self.inverse_kernel_dimension, "inverse", dim_types, kernel
         )

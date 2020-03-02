@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+import csdmpy as cp
 import numpy as np
 from joblib import delayed
 from joblib import Parallel
@@ -199,7 +200,8 @@ class GeneralL2Lasso:
         self.positive = positive
         self.regularizer = regularizer
         self.inverse_dimension = inverse_dimension
-        self.f_shape = tuple([item.count for item in inverse_dimension])
+        self.f_shape = tuple([item.count for item in inverse_dimension])[::-1]
+
         # attributes
         self.f = None
         self.n_iter = None
@@ -210,10 +212,17 @@ class GeneralL2Lasso:
 
             Args:
                 K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
-                s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
+                s: A csdm object or a :math:`m \times m_\text{count}` signal
+                matrix, :math:`{\bf s}`.
         """
-        if s.ndim == 1:
-            s = s[:, np.newaxis]
+        if isinstance(s, cp.CSDM):
+            self.s = s
+            s_ = s.dependent_variables[0].components[0].T
+        else:
+            s_ = s
+
+        if s_.ndim == 1:
+            s_ = s_[:, np.newaxis]
         prod = np.asarray(self.f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
@@ -221,10 +230,10 @@ class GeneralL2Lasso:
                 f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
             )
 
-        self.scale = s.max().real
+        self.scale = s_.real.max()
         Ks, ss = _get_augmented_data(
             K=K,
-            s=s / self.scale,
+            s=s_ / self.scale,
             alpha=self.hyperparameter["alpha"],
             regularizer=self.regularizer,
             f_shape=self.f_shape,
@@ -242,12 +251,26 @@ class GeneralL2Lasso:
             positive=self.positive,
         )
         self.estimator.fit(Ks, ss)
-        self.f = self.estimator.coef_
-        if s.shape[1] > 1:
-            self.f.shape = (s.shape[1],) + self.f_shape
+        self.f = self.estimator.coef_.copy()
+        if s_.shape[1] > 1:
+            self.f.shape = (s_.shape[1],) + self.f_shape
+            self.f[:, :, 0] /= 2
+            self.f[:, 0, :] /= 2
         else:
             self.f.shape = self.f_shape
+            self.f[:, 0] /= 2
+            self.f[0, :] /= 2
+
+        self.f *= self.scale
         self.n_iter = self.estimator.n_iter_
+
+        if isinstance(s, cp.CSDM):
+            self.f = cp.as_csdm(self.f)
+
+            if len(s.dimensions) > 1:
+                self.f.dimensions[2] = s.dimensions[1]
+            self.f.dimensions[1] = self.inverse_dimension[1]
+            self.f.dimensions[0] = self.inverse_dimension[0]
 
     def predict(self, K):
         """
@@ -259,17 +282,52 @@ class GeneralL2Lasso:
         Return:
             y_predict: The predicted values.
         """
-        shape = self.estimator.coef_.shape
-        if self.estimator.coef_.ndim == len(self.f_shape):
-            self.estimator.coef_.shape = (1, self.estimator.coef_.size)
-        else:
-            prod = 1
-            for i in self.f_shape:
-                prod *= i
-            self.estimator.coef_.shape = tuple(shape[:-2]) + (prod,)
+        # shape = self.estimator.coef_.shape
+        # if self.estimator.coef_.ndim == len(self.f_shape):
+        #     self.estimator.coef_.shape = (1, self.estimator.coef_.size)
+        # else:
+        #     prod = 1
+        #     for i in self.f_shape:
+        #         prod *= i
+        #     self.estimator.coef_.shape = tuple(shape[:-2]) + (prod,)
         predict = self.estimator.predict(K) * self.scale
-        self.estimator.coef_.shape = shape
+        # self.estimator.coef_.shape = shape
+
+        # if isinstance(self.s, cp.CSDM):
+        #     predict_csdm = self.s.copy()
+        #     predict_csdm.dependent_variables[0].components[0] = predict
+        #     return predict_csdm
+
         return predict
+
+    def residuals(self, K, s):
+        r"""
+        Return the residue between the data and the prediced data(fit) as
+        `s - predict_s`, where `s` is the input data and `predict_s` is the predicted
+        data.
+
+        Args:
+            K: The kernel.
+            s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
+            :math:`{\bf s}`.
+
+        Return:
+            residue: A csdm object or a :math:`m \times m_\text{count}` residue matrix.
+        """
+        if isinstance(s, cp.CSDM):
+            s_ = s.dependent_variables[0].components[0].T
+        else:
+            s_ = s
+        predict = self.estimator.predict(K) * self.scale
+        residue = s_ - predict
+
+        if not isinstance(s, cp.CSDM):
+            return residue
+
+        residue = cp.as_csdm(residue.T)
+        residue.dimensions[1] = s.dimensions[1]
+        residue.dimensions[0] = s.dimensions[0]
+        return residue
 
     def score(self, K, s, sample_weights=None):
         """
@@ -451,7 +509,7 @@ class GeneralL2LassoCV:
         self.times = times
         self.verbose = verbose
         self.inverse_dimension = inverse_dimension
-        self.f_shape = tuple([item.count for item in inverse_dimension])
+        self.f_shape = tuple([item.count for item in inverse_dimension])[::-1]
 
     def fit(self, K, s):
         r"""
@@ -464,8 +522,14 @@ class GeneralL2LassoCV:
             s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
         """
 
-        if s.ndim == 1:
-            s = s[:, np.newaxis]
+        if isinstance(s, cp.CSDM):
+            self.s = s
+            s_ = s.dependent_variables[0].components[0].T
+        else:
+            s_ = s
+
+        if s_.ndim == 1:
+            s_ = s_[:, np.newaxis]
         prod = np.asarray(self.f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
@@ -473,8 +537,8 @@ class GeneralL2LassoCV:
                 f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
             )
 
-        self.scale = s.max().real
-        s = s / self.scale
+        self.scale = s_.max().real
+        s_ = s_ / self.scale
         cv_indexes = _get_cv_indexes(
             K,
             self.folds,
@@ -490,7 +554,7 @@ class GeneralL2LassoCV:
 
         Ks, ss = _get_augmented_data(
             K=K,
-            s=s,
+            s=s_,
             alpha=self.cv_alphas[0],
             regularizer=self.regularizer,
             f_shape=self.f_shape,
@@ -565,7 +629,14 @@ class GeneralL2LassoCV:
             inverse_dimension=self.inverse_dimension,
         )
         self.opt.fit(K, s)
-        self.f = self.opt.estimator.coef_
+        self.f = self.opt.f
+
+        # convert cv_map to csdm
+        self.cv_map = cp.as_csdm(self.cv_map.T)
+        d0 = cp.as_dimension(-np.log10(self.cv_alphas), label="-log(α)")
+        d1 = cp.as_dimension(-np.log10(self.cv_lambdas), label="-log(λ)")
+        self.cv_map.dimensions[0] = d0
+        self.cv_map.dimensions[1] = d1
 
     def predict(self, K):
         """
@@ -578,10 +649,27 @@ class GeneralL2LassoCV:
         Return:
             y_predict: The predicted values.
         """
-        return self.opt.predict(K) * self.scale
+        return self.opt.predict(K)
 
-    def cross_validation_error(self):
-        """Return the cross-validation error metric."""
+    def residuals(self, K, s):
+        r"""
+        Return the residue between the data and the prediced data(fit) as
+        `s - predict_s`, where `s` is the input data and `predict_s` is the predicted
+        data.
+
+        Args:
+            K: The kernel.
+            s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
+            :math:`{\bf s}`.
+
+        Return:
+            residue: A csdm object or a :math:`m \times m_\text{count}` residue matrix.
+        """
+        return self.opt.residuals(K, s)
+
+    @property
+    def cross_validation_curve(self):
+        """Return the cross-validation error metric curve."""
         return self.cv_map
 
 
@@ -661,6 +749,7 @@ class SmoothLassoCV(GeneralL2LassoCV):
         sigma=0.0,
         randomize=False,
         times=2,
+        verbose=False,
     ):
         super().__init__(
             alphas=alphas,
@@ -674,4 +763,5 @@ class SmoothLassoCV(GeneralL2LassoCV):
             regularizer="smooth lasso",
             randomize=randomize,
             times=times,
+            verbose=verbose,
         )

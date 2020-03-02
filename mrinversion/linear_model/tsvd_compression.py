@@ -1,3 +1,4 @@
+import csdmpy as cp
 import numpy as np
 
 from mrinversion.linear_model.linear_inversion import find_optimum_singular_value
@@ -36,14 +37,25 @@ class TSVDCompression:
             r: An integer defining the number of singular values used in
                 compression.
         """
+        if isinstance(self.s, cp.CSDM):
+            signal = self.s.dependent_variables[0].components[0].T
+        else:
+            signal = self.s
         r = self.truncation_index
         (
             self.compressed_K,
-            self.compressed_s,
+            compressed_signal,
             _,  # projectedSignal,
             __,  # guess_solution,
         ) = reduced_subspace_kernel_and_data(
-            self.U[:, :r], self.S[:r], self.VT[:r, :], self.s
+            self.U[:, :r], self.S[:r], self.VT[:r, :], signal
         )
-        factor = self.s.size / self.compressed_s.size
+        factor = signal.size / compressed_signal.size
         print(f"compression factor = {factor}")
+
+        if isinstance(self.s, cp.CSDM):
+            self.compressed_s = cp.as_csdm(compressed_signal.T)
+            if len(self.s.dimensions) > 1:
+                self.compressed_s.dimensions[1] = self.s.dimensions[1]
+        else:
+            self.compressed_s = compressed_signal

@@ -6,6 +6,12 @@
 Kernel
 ======
 
+
+.. currentmodule:: mrinversion.kernel
+
+.. autofunction:: x_y_to_zeta_eta
+
+
 Pure anisotropic Nuclear Shielding
 ----------------------------------
 

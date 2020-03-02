@@ -3,7 +3,7 @@
 The requirements for `mrinversion`
 ==================================
 
-The list of packages dependencies for `mrinversion` module:
+The list of package dependencies for the `mrinversion` module:
 
 - `numpy>=1.17 <https://www.numpy.org>`_
 - `csdmpy>=0.2 <https://csdmpy.readthedocs.io/en/latest/>`_

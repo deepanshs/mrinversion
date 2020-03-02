@@ -53,6 +53,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinx_copybutton",
     "sphinxjp.themes.basicstrap",
     "sphinx_gallery.gen_gallery",
     "sphinx.ext.intersphinx",
@@ -107,7 +108,6 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org", None),
     "numpy": ("https://numpy.org", None),
     "csdmpy": ("https://csdmpy.readthedocs.io/en/latest/", None),
-    # "csdmpy": ("https://github.com/DeepanshS/csdmpy", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.

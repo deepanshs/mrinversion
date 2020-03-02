@@ -55,7 +55,7 @@ class BaseModel:
         if not isinstance(self.inverse_kernel_dimension, list):
             inverse_kernel_dimension = [self.inverse_kernel_dimension]
 
-        for item in inverse_kernel_dimension:
+        for item in inverse_kernel_dimension[::-1]:
             shape += (item.count, supersampling)
         shape += (self.kernel_dimension.count,)
 
@@ -63,7 +63,7 @@ class BaseModel:
 
         inv_len = len(inverse_kernel_dimension)
         axes = tuple([2 * i + 1 for i in range(inv_len)])
-        K = K.sum(axis=axes)
+        K = K.mean(axis=axes)
 
         section = [*[0 for i in range(inv_len)], slice(None, None, None)]
         K /= K[tuple(section)].sum()

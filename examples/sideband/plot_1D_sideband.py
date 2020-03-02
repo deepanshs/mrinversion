@@ -244,20 +244,20 @@ print(s_lasso_cv.hyperparameter)
 #%%
 # and the corresponding cross-validation metric (mean square error, MSE), follows
 
-plt.figure(figsize=(4, 3))
-plt.contour(
-    -np.log10(lambdas), -np.log10(alphas), np.log10(s_lasso_cv.cv_map), levels=25
-)
-plt.scatter(
-    -np.log10(s_lasso_cv.hyperparameter["lambda"]),
-    -np.log10(s_lasso_cv.hyperparameter["alpha"]),
-    marker="x",
-    color="k",
-)
-plt.xlabel(r"$-\log~\lambda$")
-plt.ylabel(r"$-\log~\alpha$")
-plt.tight_layout()
-plt.show()
+# plt.figure(figsize=(4, 3))
+# plt.contour(
+#     -np.log10(lambdas), -np.log10(alphas), np.log10(s_lasso_cv.cv_map), levels=25
+# )
+# plt.scatter(
+#     -np.log10(s_lasso_cv.hyperparameter["lambda"]),
+#     -np.log10(s_lasso_cv.hyperparameter["alpha"]),
+#     marker="x",
+#     color="k",
+# )
+# plt.xlabel(r"$-\log~\lambda$")
+# plt.ylabel(r"$-\log~\alpha$")
+# plt.tight_layout()
+# plt.show()
 
 
 #%%

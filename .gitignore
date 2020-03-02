@@ -121,3 +121,6 @@ venv.bak/
 *.temp
 *.o
 __main__.py
+*.csdf
+*.pdf
+*.ipynb

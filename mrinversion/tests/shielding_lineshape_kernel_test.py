@@ -79,14 +79,15 @@ def test_zeta_eta_from_x_y():
     for y_ in y:
         for x_ in x:
             z = np.sqrt(x_ ** 2 + y_ ** 2)
-            if x_ <= y_:
+            if x_ < y_:
                 eta_.append(factor_ * np.arctan(x_ / y_))
                 zeta_.append(z)
-            else:
+            elif x_ > y_:
                 eta_.append(factor_ * np.arctan(y_ / x_))
                 zeta_.append(-z)
-            if x_ == y_ == 0:
-                eta_[-1] = 1
+            else:
+                zeta_.append(z)
+                eta_.append(1.0)
     zeta, eta = ns_obj._get_zeta_eta(supersampling=1)
 
     assert np.allclose(zeta, np.asarray(zeta_))

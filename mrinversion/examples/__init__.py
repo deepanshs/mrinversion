@@ -16,4 +16,10 @@ MAF03 = os.path.join(path, "bimodal/MAF_spectrum.csdf.temp")
 true_distribution03 = os.path.join(path, "bimodal/pdf_simulation.csdf.temp")
 
 
-exp1 = os.path.join(path, "Na2O4p7SiO2/Na2O.4.7SiO2.csdf.temp")
+exp1 = os.path.join(path, "exp/Na2O.4.7SiO2.csdf")
+exp2 = os.path.join(path, "exp/Rb2O.2.25SiO2.csdf")
+exp3 = os.path.join(path, "exp/Cs2O.4.72SiO2.csdf")
+exp4 = os.path.join(path, "exp/mat_790Hz_KMg0.5.4SiO2.csdf")
+exp5 = os.path.join(path, "exp/2Na2O.3SiO2.csdf")
+exp6 = os.path.join(path, "exp/pass_K1.5Mg0.25O.4SiO2.csdf")
+exp7 = os.path.join(path, "exp/MAF_K1.5M0.25_4SiO2.csdf")

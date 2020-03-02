@@ -9,8 +9,8 @@ amongst others.
 
 We start by demonstrating the prediction of the nuclear shielding tensors from
 a pure nuclear shielding anisotropic spectra. In this section, we show
-the shielding tensor prediction from a pure anisotropic spinning sideband
-spectrum.
+the shielding tensor prediction from a synthetic pure anisotropic spinning
+sideband spectrum.
 
 
 Import the dataset
@@ -28,9 +28,9 @@ file-format.
     >>> data_object = cp.load(examples.sideband02) # load the CSDM file with the csdmpy module
     >>> true_data_object = cp.load(examples.true_distribution02) # the true solution for comparison
 
-The variable ``data_object`` is the csdm object containing a one-dimension pure
-anisotropic spinning sideband spectrum. The coordinates and the corresponding
-responses from this dataset are
+The variable ``data_object`` is the `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
+object containing a one-dimension pure anisotropic spinning sideband spectrum.
+The coordinates and the corresponding responses from this dataset are
 
 .. doctest::
 
@@ -54,8 +54,8 @@ and the plot depicting the sideband spectrum follows
         on the right, the parameter ζ is the radial dimension, and η is the angular
         dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
         corresponds to the positive and negative values of ζ. The radial grid lines
-        are drawn at every 20 ppm increment of ζ, and the angular grid lines are drawn
-        at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the diagonal is
+        are drawn at every 20 ppm increments of ζ, and the angular grid lines are drawn
+        at every 0.2 increments of η. The `x` and `y`-axis are η = 0, and the diagonal is
         η = 1.
     :widths: 50 50
 
@@ -71,25 +71,29 @@ and the plot depicting the sideband spectrum follows
 Setting the kernel
 """"""""""""""""""
 
-A kernel is a transformation matrix that transforms the single from one domain
-to another following
+A kernel is a transformation matrix that transforms the single from domain to
+the range space following
 
 .. math::
 
-    y = Kx
+    s = Kf,
 
-In `Mrinversion`, we refer to these domains as `kernel-dimension`
-and `inverse-dimension`, respectively, where the kernel-dimension is
-the signal dimension that gets transformed on to the inverse-kernel-dimension.
-Note, the dimensionality of the inverse-dimension is not necessarily the
-inverse of the respective direct-dimension dimensionality. This relationship
-depends on the kernel transforming the direct-dimension to the
-inverse-dimension.
+where `K` is the transformation kernel, `s` is the observed signal in the range
+space, and `f` is the unknown which resides in the domain space, respectively.
 
-In this example, the direct dimension is the dimension where the pure
-anisotropic spinning sideband amplitudes are sampled.
-The inverse dimensions correspond to the two anisotropic
-parameters of the nuclear shielding tensor, :math:`\zeta`, and
+.. In `Mrinversion`, the range space is a sub-space of the signal, which is
+
+.. we describe the domain-space with the inverse dimensions, and
+.. the domain space is the part of the signal space where the data is sampled.
+.. Note, the dimensionality of the inverse-dimension is not necessarily the
+.. inverse of the respective direct-dimension dimensionality. This relationship
+.. depends on the kernel transforming the direct-dimension to the
+.. inverse-dimension.
+
+In this example, the range-space is the signal dimension where the pure
+anisotropic spinning sideband amplitudes are sampled. The domain-space
+corresponds to the two dimensions relating to the two anisotropic
+tensor parameters of the nuclear shielding tensor, :math:`\zeta`, and
 :math:`\eta`. We express these two tensor parameters on a piece-wise polar
 coordinate given as
 
@@ -109,21 +113,24 @@ coordinate given as
 
 where :math:`\theta=\pi\eta/4`.
 
-In `Mrinversion`, the direct and inverse dimensions are defined using the
+In `Mrinversion`, the range and domain space dimensions are defined using the
 `Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_ objects
 from the `csdmpy <https://csdmpy.readthedocs.io/en/latest/index.html>`_ package.
+For nuclear shielding tensor line-shape kernel, we refer the range space
+dimensions as the `anisotropic_dimension`, and the domain space dimensions as
+the `inverse_dimension`.
 
-**Direct-dimension**
+**Anisotropic dimension**
 
-Because this example dataset is imported as a CSDM object, the direct-dimension
+Because this example dataset is imported as a CSDM object, the `anisotropic_dimension`
 is already defined as a `Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_
-object. For illustration, however, we re-define the direct-dimension as
+object. For illustration, however, we re-define the `anisotropic_dimension` as
 follows,
 
 .. doctest::
 
-    >>> kernel_dimension = cp.LinearDimension(count=32, increment='625Hz', coordinates_offset='-10kHz')
-    >>> print(kernel_dimension)
+    >>> anisotropic_dimension = cp.LinearDimension(count=32, increment='625Hz', coordinates_offset='-10kHz')
+    >>> print(anisotropic_dimension)
     LinearDimension([-10000.  -9375.  -8750.  -8125.  -7500.  -6875.  -6250.  -5625.  -5000.
       -4375.  -3750.  -3125.  -2500.  -1875.  -1250.   -625.      0.    625.
        1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
@@ -137,21 +144,15 @@ Dimension object,
 
     >>> import numpy as np
     >>> test_array = np.arange(32) * 625 - 10000 # as in Hz
-    >>> kernel_dimension = cp.as_dimension(test_array)
-    >>> kernel_dimension *= cp.ScalarQuantity('Hz')
-    >>> print(kernel_dimension)
+    >>> anisotropic_dimension = cp.as_dimension(test_array, unit='Hz')
+    >>> print(anisotropic_dimension)
     LinearDimension([-10000.  -9375.  -8750.  -8125.  -7500.  -6875.  -6250.  -5625.  -5000.
       -4375.  -3750.  -3125.  -2500.  -1875.  -1250.   -625.      0.    625.
        1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
        6875.   7500.   8125.   8750.   9375.] Hz)
 
-The ``cp.as_dimension()`` method generates a dimensionless LinearDimension
-object from the Numpy array, ``test_array``. The dimensionality of the newly
-created dimension object may then be changed by multiplying the object with the
-appropriate scalar quantity.
 
-
-**Inverse-dimension**
+**Inverse dimension**
 
 Similarly, set up the two inverse dimensions. Here, the two inverse dimensions
 are
@@ -159,8 +160,8 @@ are
 .. doctest::
 
     >>> inverse_dimension = [
-    ...     cp.LinearDimension(count=25, increment='370 Hz'),  # the x-coordinates
-    ...     cp.LinearDimension(count=25, increment='370 Hz')   # the y-coordinates
+    ...     cp.LinearDimension(count=25, increment='370 Hz', label='x'),  # the x-coordinates
+    ...     cp.LinearDimension(count=25, increment='370 Hz', label='y')   # the y-coordinates
     ... ]
 
 sampled at every 370 Hz for 25 points. The inverse dimension at index 0 and 1
@@ -177,10 +178,6 @@ are the `x` and `y` dimensions, respectively.
 Setting the Kernel
 """"""""""""""""""
 
-The kernel is the transformation matrix that transforms the data sampled on the
-direct dimension grid to the data on the inverse dimension grid. In this
-example, the transformation kernel is the nuclear shielding tensor kernel.
-
 Import the :class:`~mrinversion.kernel.NuclearShieldingTensor` class and
 generate the kernel as follows,
 
@@ -188,7 +185,7 @@ generate the kernel as follows,
 
     >>> from mrinversion.kernel import NuclearShieldingTensor
     >>> method = NuclearShieldingTensor(
-    ...                 anisotropic_dimension=kernel_dimension,
+    ...                 anisotropic_dimension=anisotropic_dimension,
     ...                 inverse_dimension=inverse_dimension,
     ...                 isotope='29Si',
     ...                 magnetic_flux_density='9.4 T',
@@ -199,15 +196,16 @@ generate the kernel as follows,
 
 In the above code, the variable ``method`` is an instance of the
 :class:`~mrinversion.kernel.NuclearShieldingTensor` class. The two required
-arguments of this class are the direct and inverse dimension, which we defined
-previously. The optional arguments are the metadata that describes the
+arguments of this class are the `anisotropic_dimension` and
+`inverse_dimension`, as defined previously.
+The optional arguments are the metadata that describes the
 parameters at which the spectrum is acquired. In this example, these arguments
 describe a :math:`^{29}\text{Si}` pure anisotropic spinning-sideband spectrum
 acquired at 9.4 T magnetic flux density and spinning at the magic angle
 (:math:`54.735^\circ`) at 625 Hz.
 The value of the `rotor_frequency` argument is the effective anisotropic
 modulation frequency. For measurements like PASS [#f2]_, the anisotropic
-modulation frequency is the actual physical rotor frequency. For other
+modulation frequency is the physical rotor frequency. For other
 measurements like the extended chemical shift modulation sequences (XCS)
 [#f3]_, or its variants, the effective anisotropic modulation frequency is
 lower than the physical rotor frequency and should be set appropriately.
@@ -248,13 +246,13 @@ kernel K onto a smaller sub-space, called the `range space`, where the
 sub-space kernel is relatively well-defined. We refer to this sub-space
 kernel as the `compressed kernel`. Similarly, the measurement data on the
 sub-space is referred to as the `compressed signal`. The compression also
-reduces the computation time. To compress the kernel and the data, import the
-:class:`~mrinversion.linear_model.TSVDCompression` class and follow,
+reduces the time for furthur computation. To compress the kernel and the data,
+import the :class:`~mrinversion.linear_model.TSVDCompression` class and follow,
 
 .. doctest::
 
     >>> from mrinversion.linear_model import TSVDCompression
-    >>> new_system = TSVDCompression(K, responses)
+    >>> new_system = TSVDCompression(K, data_object)
     compression factor = 1.032258064516129
     >>> compressed_K = new_system.compressed_K
     >>> compressed_s = new_system.compressed_s
@@ -336,18 +334,18 @@ The plot of the solution is
     >>> from mrinversion.plot import get_polar_grids
     ...
     >>> # convert the `inverse_dimension` coordinates to pmm from Hz.
-    >>> inverse_dimension[0].to('ppm', 'nmr_frequency_ratio')
-    >>> inverse_dimension[1].to('ppm', 'nmr_frequency_ratio')
+    >>> f_sol.dimensions[0].to('ppm', 'nmr_frequency_ratio')
+    >>> f_sol.dimensions[1].to('ppm', 'nmr_frequency_ratio')
     >>> # get the x and the y coordinates.
-    >>> x = inverse_dimension[0].coordinates # the x coordinates
-    >>> y = inverse_dimension[1].coordinates # the y coordinates
+    >>> x = f_sol.dimensions[0].coordinates # the x coordinates
+    >>> y = f_sol.dimensions[1].coordinates # the y coordinates
     ...
     >>> levels = (np.arange(9)+1)/10
     >>> plt.contourf(x, y, f_sol/f_sol.max(), cmap='gist_ncar', levels=levels) # doctest: +SKIP
     >>> plt.xlim(0, 100) # doctest: +SKIP
     >>> plt.ylim(0, 100) # doctest: +SKIP
-    >>> plt.xlabel(inverse_dimension[0].axis_label) # doctest: +SKIP
-    >>> plt.ylabel(inverse_dimension[1].axis_label) # doctest: +SKIP
+    >>> plt.xlabel(f_sol.dimensions[0].axis_label) # doctest: +SKIP
+    >>> plt.ylabel(f_sol.dimensions[1].axis_label) # doctest: +SKIP
     ...
     >>> # The get_polar_grids method place a polar zeta-eta grid on the background.
     >>> get_polar_grids(plt.gca())
