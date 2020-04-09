@@ -27,10 +27,10 @@ rcParams["font.size"] = 9
 # data-object.
 import csdmpy as cp
 
-from mrinversion import examples
-
 # the 2D MAF dataset in csdm format
-data_object = cp.load(examples.exp3)
+data_object = cp.load(
+    "https://osu.box.com/shared/static/40dczkn6qwqyg0jtl8sr1jn89vmlwm0i.csdf"
+)
 
 #%%
 # The variable ``data_object`` is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
@@ -74,10 +74,8 @@ anisotropic_dimension = data_object_truncated.dimensions[0]
 # The two inverse dimensions correspond to the `x` and `y`-axis of the `x`-`y` grid.
 
 inverse_dimensions = [
-    # along the `x`-dimension.
-    cp.LinearDimension(count=25, increment="450 Hz", label="x"),
-    # along the `y`-dimension.
-    cp.LinearDimension(count=25, increment="450 Hz", label="y"),
+    cp.LinearDimension(count=25, increment="450 Hz", label="x"),  # along x-dimension
+    cp.LinearDimension(count=25, increment="450 Hz", label="y"),  # along y-dimension
 ]
 
 #%%
@@ -99,9 +97,9 @@ method = NuclearShieldingTensor(
 #%%
 # The above code generates an instance of the NuclearShieldingTensor class, which we
 # assigned to the variable ``method``.
-# The two required arguments of this class are the `anisotropic_dimension` and
-# `inverse_dimension`, as previously defined.
-# The value of the remaining optional attributes such as the isotope, magnetic flux
+# The required arguments of this class are the `anisotropic_dimension` and
+# `inverse_dimension`, as previously defined, and `isotope`.
+# The value of the remaining optional attributes such as the magnetic flux
 # density, rotor angle, and rotor frequency is set to match the conditions under which
 # the MAF spectrum was acquired. Note, for this particular MAF measurements, the rotor
 # angle was set to :math:`87.19^\circ` for the anisotropic dimension, not the usual
@@ -137,8 +135,8 @@ print(f"truncation_index = {new_system.truncation_index}")
 # shielding tensor distribution that best depicts the 2D MAF dataset.
 # Given, the time constraints for building this documentation, we skip this step
 # and evaluate the nuclear shielding tensor distribution at the pre-optimized α
-# and λ values, where the optimum values are :math:`\alpha = 0.0028` and
-# :math:`\lambda = 1.624\times 10^{-6}`.
+# and λ values, where the optimum values are :math:`\alpha = 5.62\times 10^{-7}` and
+# :math:`\lambda = 3.16\times 10^{-6}`.
 # The following commented code was used in determining the optimum α and λ values.
 
 #%%
@@ -146,23 +144,27 @@ import numpy as np
 
 # from mrinversion.linear_model import SmoothLassoCV
 
-# lambdas = 10 ** (-4.5 - 1.5 * (np.arange(20) / 19))
-# alphas = 10 ** (-1.5 - 2 * (np.arange(20) / 19))
+# lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
+# alphas = 10 ** (-4.5 - 3 * (np.arange(20) / 19))
 
-# s_lasso_cv = SmoothLassoCV(
+# s_lasso = SmoothLassoCV(
 #     alphas=alphas,
 #     lambdas=lambdas,
 #     sigma=0.003,
 #     folds=10,
 #     inverse_dimension=inverse_dimensions,
+#     verbose=1,
 # )
-# s_lasso_cv.fit(compressed_K, compressed_s)
+# s_lasso.fit(compressed_K, compressed_s)
 
-# print(s_lasso_cv.hyperparameter)
-# # {'alpha': 0.00280135676119887, 'lambda': 1.6237767391887209e-06}
+# print(s_lasso.hyperparameter)
+# # {'alpha': 5.62341325190349e-07, 'lambda': 3.162277660168379e-06}
 
 # # the solution.
-# f_sol = s_lasso_cv.f / s_lasso_cv.f.max()[0]
+# f_sol = s_lasso.f
+
+# # the cross-validation error curve
+# error_curve = s_lasso.cross_validation_curve
 
 #%%
 # If you use the above cross-validation, ``SmoothLassoCV`` method, you may skip the
@@ -172,7 +174,7 @@ from mrinversion.linear_model import SmoothLasso
 
 # guess alpha and lambda values.
 s_lasso = SmoothLasso(
-    alpha=0.0028, lambda1=1.624e-6, inverse_dimension=inverse_dimensions
+    alpha=5.62e-7, lambda1=3.16e-6, inverse_dimension=inverse_dimensions
 )
 s_lasso.fit(K=compressed_K, s=compressed_s)
 
@@ -335,7 +337,9 @@ plot(f_sol_iso, "--k", label="tensor projection")
 plot(Q4_region_iso, "r", label="Q4 isotropic shifts")
 plot(Q3_region_iso, "b", label="Q3 isotropic shifts")
 plt.xlabel("isotropic chemical shift / pmm")
+plt.gca().invert_xaxis()
 plt.legend()
+plt.tight_layout()
 plt.show()
 #%%
 # Notice the shape of the isotropic chemical shift distribution for the

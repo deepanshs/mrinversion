@@ -26,10 +26,10 @@ rcParams["font.size"] = 9
 # data-object.
 import csdmpy as cp
 
-from mrinversion import examples
-
 # the 2D MAF dataset in csdm format
-data_object = cp.load(examples.exp2)
+data_object = cp.load(
+    "https://osu.box.com/shared/static/0q19v1nvb349if6f4cy5p0yjlufw8p0a.csdf"
+)
 
 #%%
 # The variable ``data_object`` is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
@@ -53,13 +53,13 @@ print(data_object.shape)
 # before proceeding. Use the appropriate array indexing/slicing to select the signal
 # region.
 
-data_object_truncated = data_object[:, 240:285]
+data_object_truncated = data_object[:, 250:285]
 cp.plot(data_object_truncated, cmap="gist_ncar_r", reverse_axis=[True, True])
 
 #%%
 # In the above code, we truncate the isotropic chemical shift dimension to isotropic
 # chemical shift values between indexes 250 to 285, which corresponds to the following
-# coordinates.
+# isotropic shift coordinates.
 print(data_object_truncated.dimensions[1].coordinates)
 
 #%%
@@ -80,10 +80,8 @@ anisotropic_dimension = data_object_truncated.dimensions[0]
 #
 # The two inverse dimensions correspond to the `x` and `y`-axis of the `x`-`y` grid.
 inverse_dimensions = [
-    # along the `x`-dimension.
-    cp.LinearDimension(count=25, increment="400 Hz", label="x"),
-    # along the `y`-dimension.
-    cp.LinearDimension(count=25, increment="400 Hz", label="y"),
+    cp.LinearDimension(count=25, increment="400 Hz", label="x"),  # the `x`-dimension.
+    cp.LinearDimension(count=25, increment="400 Hz", label="y"),  # the `y`-dimension.
 ]
 
 #%%
@@ -106,10 +104,12 @@ method = NuclearShieldingTensor(
 
 #%%
 # The above code generates an instance of the NuclearShieldingTensor class, which we
-# assign to the variable ``method``.
-# The two required arguments of this class are the `anisotropic_dimension` and
-# `inverse_dimension`, as previously defined.
-# The value of the remaining optional attributes such as the isotope, magnetic flux
+# assign to the variable ``method``. The required arguments of this class are the
+# `anisotropic_dimension`, `inverse_dimension`, and isotope. We have already defined
+# the first two arguments in the previous sub-section. The value of the `isotope`
+# argument is the nuclei observed in the MAF experiment. In this example, this value
+# is '29Si'.
+# The value of the remaining attributes, such as the magnetic flux
 # density, rotor angle, and rotor frequency is set to match the conditions under which
 # the MAF spectrum was acquired. Note for the MAF measurements the rotor angle is
 # usually :math:`90^\circ` for the anisotropic dimension. Once the
@@ -142,12 +142,12 @@ print(f"truncation_index = {new_system.truncation_index}")
 # --------------------------
 #
 # Solve the smooth-lasso problem. Normally, one should use the statistical learning
-# method to solve the problem over a range of α and λ values, and determine a nuclear
+# method to solve the problem over a range of α and λ values and determine a nuclear
 # shielding tensor distribution that best depicts the 2D MAF dataset.
 # Given, the time constraints for building this documentation, we skip this step
 # and evaluate the nuclear shielding tensor distribution at the pre-optimized α
-# and λ values, where the optimum values are :math:`\alpha = 0.00248` and
-# :math:`\lambda = 1.833\times 10^{-6}`.
+# and λ values, where the optimum values are :math:`\alpha = 8.86\times 10^{-7}` and
+# :math:`\lambda = 3.79\times 10^{-6}`.
 # The following commented code was used in determining the optimum α and λ values.
 
 #%%
@@ -156,7 +156,7 @@ import numpy as np
 # from mrinversion.linear_model import SmoothLassoCV
 
 # lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
-# alphas = 10 ** (-1 - 4 * (np.arange(20) / 19)
+# alphas = 10 ** (-4 - 3 * (np.arange(20) / 19))
 
 # s_lasso = SmoothLassoCV(
 #     alphas=alphas,
@@ -169,10 +169,13 @@ import numpy as np
 # s_lasso.fit(compressed_K, compressed_s)
 
 # print(s_lasso.hyperparameter)
-# # {'alpha': 0.003359818286283781, 'lambda': 1.8329807108324375e-06}
+# # {'alpha': 8.858667904100833e-07, 'lambda': 3.7926901907322535e-06}
 
 # # the solution
 # f_sol = s_lasso.f
+
+# # the cross-validation error curve
+# error_curve = s_lasso.cross_validation_curve
 
 #%%
 # If you use the ``SmoothLassoCV`` method shown above to evaluate the optimum α and
@@ -181,7 +184,7 @@ import numpy as np
 from mrinversion.linear_model import SmoothLasso
 
 s_lasso = SmoothLasso(
-    alpha=0.0034, lambda1=1.833e-6, inverse_dimension=inverse_dimensions
+    alpha=8.86e-7, lambda1=3.79e-6, inverse_dimension=inverse_dimensions
 )
 s_lasso.fit(K=compressed_K, s=compressed_s)
 
@@ -238,7 +241,7 @@ f_sol /= f_sol.max()
 # The 3d plot of the solution
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
-plot_3d(ax, f_sol, x_lim=[0, 140], y_lim=[0, 140], z_lim=[-50, -150])
+plot_3d(ax, f_sol, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-50, -150])
 plt.tight_layout()
 plt.show()
 
@@ -247,10 +250,10 @@ plt.show()
 # sites and another for the :math:`\text{Q}^3` site.
 # Select the respective volumes by using the appropriate array indexing,
 
-Q4_region = f_sol[0:7, 0:7, 14:35]
+Q4_region = f_sol[0:7, 0:7, 4:25]
 Q4_region.description = "Q4 region"
 
-Q3_region = f_sol[0:8, 10:24, 21:40]
+Q3_region = f_sol[0:8, 10:24, 11:30]
 Q3_region.description = "Q3 region"
 #%%
 # The plot of the respective volumes is shown below.
@@ -273,8 +276,8 @@ ax = plt.gca(projection="3d")
 plot_3d(
     ax,
     Q4_region,
-    x_lim=[0, 140],
-    y_lim=[0, 140],
+    x_lim=[0, 150],
+    y_lim=[0, 150],
     z_lim=[-50, -150],
     max_2d=max_2d,
     max_1d=max_1d,
@@ -285,8 +288,8 @@ plot_3d(
 plot_3d(
     ax,
     Q3_region,
-    x_lim=[0, 140],
-    y_lim=[0, 140],
+    x_lim=[0, 150],
+    y_lim=[0, 150],
     z_lim=[-50, -150],
     max_2d=max_2d,
     max_1d=max_1d,
@@ -345,7 +348,9 @@ plot(f_sol_iso, "--k", label="tensor projection")
 plot(Q4_region_iso, "r", label="Q4 isotropic shifts")
 plot(Q3_region_iso, "b", label="Q3 isotropic shifts")
 plt.xlabel("isotropic chemical shift / pmm")
+plt.gca().invert_xaxis()
 plt.legend()
+plt.tight_layout()
 plt.show()
 
 #%%

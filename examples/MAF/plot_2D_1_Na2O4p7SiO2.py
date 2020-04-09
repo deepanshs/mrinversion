@@ -27,10 +27,10 @@ rcParams["font.size"] = 9
 # data-object.
 import csdmpy as cp
 
-from mrinversion import examples
-
 # the 2D MAF dataset in csdm format
-data_object = cp.load(examples.exp1)
+data_object = cp.load(
+    "https://osu.box.com/shared/static/8lnwmg0dr7y6egk40c2orpkmmugh9j7c.csdf"
+)
 
 
 #%%
@@ -143,8 +143,8 @@ print(f"truncation_index = {new_system.truncation_index}")
 # shielding tensor distribution that best depicts the 2D MAF dataset.
 # Given, the time constraints for building this documentation, we skip this step
 # and evaluate the nuclear shielding tensor distribution at the pre-optimized α
-# and λ values, where the optimum values are :math:`\alpha = 0.00248` and
-# :math:`\lambda = 1.833\times 10^{-6}`.
+# and λ values, where the optimum values are :math:`\alpha = 2.07\times 10^{-7}` and
+# :math:`\lambda = 7.85\times 10^{-6}`.
 # The following commented code was used in determining the optimum α and λ values.
 
 #%%
@@ -152,8 +152,8 @@ import numpy as np
 
 # from mrinversion.linear_model import SmoothLassoCV
 
-# lambdas = 10 ** (-5 - 2 * (np.arange(20) / 19))
-# alphas = 10 ** (-2.5 - 2 * (np.arange(20) / 19))
+# lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
+# alphas = 10 ** (-4 - 3 * (np.arange(20) / 19))
 
 # s_lasso = SmoothLassoCV(
 #     alphas=alphas,
@@ -167,7 +167,7 @@ import numpy as np
 # s_lasso.fit(compressed_K, compressed_s)
 
 # print(s_lasso.hyperparameter)
-# # {'alpha': 0.0004029611320200404, 'lambda': 3.7926901907322535e-06}
+# # {'alpha': 2.06913808111479e-07, 'lambda': 7.847599703514622e-06}
 
 # # the solution.
 # f_sol = s_lasso.f
@@ -182,7 +182,7 @@ from mrinversion.linear_model import SmoothLasso
 
 # guess alpha and lambda values.
 s_lasso = SmoothLasso(
-    alpha=4.03e-4, lambda1=3.793e-6, inverse_dimension=inverse_dimensions
+    alpha=2.07e-7, lambda1=7.85e-6, inverse_dimension=inverse_dimensions
 )
 s_lasso.fit(K=compressed_K, s=compressed_s)
 
@@ -344,7 +344,10 @@ plot(data_iso, "-k", label="MAF projection")
 plot(f_sol_iso, "--k", label="tensor projection")
 plot(Q4_region_iso, "r", label="Q4 isotropic shifts")
 plot(Q3_region_iso, "b", label="Q3 isotropic shifts")
+plt.xlabel("isotropic chemical shift / pmm")
+plt.gca().invert_xaxis()
 plt.legend()
+plt.tight_layout()
 plt.show()
 
 #%%

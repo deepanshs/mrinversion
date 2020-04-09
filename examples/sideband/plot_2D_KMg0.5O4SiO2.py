@@ -27,10 +27,10 @@ rcParams["font.size"] = 9
 # data-object.
 import csdmpy as cp
 
-from mrinversion import examples
-
 # the 2D MAT dataset in csdm format
-data_object = cp.load(examples.exp4)
+data_object = cp.load(
+    "https://osu.box.com/shared/static/6l1gqljd2odh5ctommhhoqcnx3iak59c.csdf"
+)
 
 #%%
 # The variable ``data_object`` is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
@@ -98,19 +98,22 @@ method = NuclearShieldingTensor(
 #%%
 # The above code generates an instance of the NuclearShieldingTensor class, which we
 # assigned to the variable ``method``.
-# The two required arguments of this class are the `anisotropic_dimension` and
-# `inverse_dimension`, as previously defined.
-# The value of the remaining optional attributes such as the isotope, magnetic flux
+# The required arguments of this class are the `anisotropic_dimension`,
+# `inverse_dimension`, and `isotope`. The value of the first two arguments are
+# defined in the previous sub-section.
+#
+# The value of the remaining optional attributes such as the magnetic flux
 # density, rotor angle, and rotor frequency is set to match the conditions under which
-# the MAT spectrum was acquired, which in this case corresponds to the magic-angle
-# spinning at a rotor frequency of 790 Hz.
+# the MAT spectrum was acquired, which in this case corresponds to acquisition at
+# the magic-angle and spinning at a rotor frequency of 790 Hz in a 9.4 T magnetic
+# flux density.
 #
 # The value of the `rotor_frequency` argument is the effective anisotropic
 # modulation frequency. In a MAT measurement, the anisotropic modulation frequency
-# is the physical rotor frequency. For other measurements like the extended chemical
-# shift modulation sequences (XCS) [#f3]_, or its variants, the effective anisotropic
-# modulation frequency is lower than the physical rotor frequency and should be set
-# appropriately.
+# is the same as the physical rotor frequency. For other measurements like the extended
+# chemical shift modulation sequences (XCS) [#f3]_, or its variants, the effective
+# anisotropic modulation frequency is lower than the physical rotor frequency and
+# should be set appropriately.
 #
 # The argument `number_of_sidebands` is the maximum number of computed
 # sidebands in the kernel. For most two-dimensional isotropic v.s pure
@@ -122,7 +125,7 @@ method = NuclearShieldingTensor(
 #
 # Once the NuclearShieldingTensor instance is created, use the kernel() method to
 # generate the spinning sideband lineshape kernel.
-K = method.kernel(supersampling=1)
+K = method.kernel(supersampling=5)
 print(K.shape)
 
 #%%
@@ -152,8 +155,8 @@ print(f"truncation_index = {new_system.truncation_index}")
 # shielding tensor distribution that best depicts the 2D MAT dataset.
 # Given, the time constraints for building this documentation, we skip this step
 # and evaluate the nuclear shielding tensor distribution at the pre-optimized α
-# and λ values, where the optimum values are :math:`\alpha = 0.0034` and
-# :math:`\lambda = 8.86\times 10^{-7}`.
+# and λ values, where the optimum values are :math:`\alpha = 3.79\times 10^{-6}` and
+# :math:`\lambda = 1.83\times 10^{-6}`.
 # The following commented code was used in determining the optimum α and λ values.
 
 #%%
@@ -161,8 +164,8 @@ import numpy as np
 
 # from mrinversion.linear_model import SmoothLassoCV
 
-# lambdas = 10 ** (-5 - 2 * (np.arange(20) / 19))
-# alphas = 10 ** (-1 - 2 * (np.arange(20) / 19))
+# lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
+# alphas = 10 ** (-4 - 3 * (np.arange(20) / 19))
 
 # s_lasso = SmoothLassoCV(
 #     alphas=alphas,
@@ -175,10 +178,13 @@ import numpy as np
 # s_lasso.fit(compressed_K, compressed_s)
 
 # print(s_lasso.hyperparameter)
-# # {'alpha': 0.003359818286283781, 'lambda': 8.858667904100833e-07}
+# # {'alpha': 3.7926901907322535e-06, 'lambda': 1.8329807108324375e-06}
 
 # # the solution.
-# f_sol = s_lasso.f / s_lasso.f.max()
+# f_sol = s_lasso.f
+
+# # the cross-validation error curve
+# error_curve = s_lasso.cross_validation_curve
 
 #%%
 # If you use the above cross-validation, ``SmoothLassoCV`` method, you may skip the
@@ -188,7 +194,7 @@ from mrinversion.linear_model import SmoothLasso
 
 # guess alpha and lambda values.
 s_lasso = SmoothLasso(
-    alpha=3.36e-3, lambda1=8.86e-7, inverse_dimension=inverse_dimensions
+    alpha=3.79e-6, lambda1=1.83e-6, inverse_dimension=inverse_dimensions
 )
 s_lasso.fit(K=compressed_K, s=compressed_s)
 
@@ -352,7 +358,9 @@ plot(f_sol_iso, "--k", label="tensor projection")
 plot(Q4_region_iso, "r", label="Q4 isotropic shifts")
 plot(Q3_region_iso, "b", label="Q3 isotropic shifts")
 plt.xlabel("isotropic chemical shift / pmm")
+plt.gca().invert_xaxis()
 plt.legend()
+plt.tight_layout()
 plt.show()
 #%%
 # Notice the shape of the isotropic chemical shift distribution for the

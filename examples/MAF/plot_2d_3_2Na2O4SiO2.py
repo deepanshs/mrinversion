@@ -27,10 +27,10 @@ rcParams["font.size"] = 9
 # data-object.
 import csdmpy as cp
 
-from mrinversion import examples
-
 # the 2D MAF dataset in csdm format
-data_object = cp.load(examples.exp5)
+data_object = cp.load(
+    "https://osu.box.com/shared/static/k405dsptwe1p43x8mfi1wc1geywrypzc.csdf"
+)
 
 #%%
 # The variable ``data_object`` is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
@@ -135,8 +135,8 @@ print(f"truncation_index = {new_system.truncation_index}")
 # shielding tensor distribution that best depicts the 2D MAF dataset.
 # Given, the time constraints for building this documentation, we skip this step
 # and evaluate the nuclear shielding tensor distribution at the pre-optimized α
-# and λ values, where the optimum values are :math:`\alpha = 0.0001` and
-# :math:`\lambda = 4.64\times 10^{-7}`.
+# and λ values, where the optimum values are :math:`\alpha = 2.2\times 10^{-8}` and
+# :math:`\lambda = 1.27\times 10^{-6}`.
 # The following commented code was used in determining the optimum α and λ values.
 
 #%%
@@ -144,23 +144,26 @@ import numpy as np
 
 # from mrinversion.linear_model import SmoothLassoCV
 
-# lambdas = 10 ** (-5.5 - 1.5 * (np.arange(10) / 9))
-# alphas = 10 ** (-2.5 - 3 * (np.arange(5) / 4))
+# lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
+# alphas = 10 ** (-4.5 - 5 * (np.arange(20) / 19))
 
-# s_lasso_cv = SmoothLassoCV(
+# s_lasso = SmoothLassoCV(
 #     alphas=alphas,
 #     lambdas=lambdas,
 #     sigma=0.003,
 #     folds=10,
 #     inverse_dimension=inverse_dimensions,
 # )
-# s_lasso_cv.fit(compressed_K, compressed_s)
+# s_lasso.fit(compressed_K, compressed_s)
 
-# print(s_lasso_cv.hyperparameter)
-# # {'alpha': 0.0001, 'lambda': 4.641588833612782e-07}
+# print(s_lasso.hyperparameter)
+# # 2.198392648862289e-08, 'lambda': 1.2742749857031348e-06}
 
 # # the solution.
-# f_sol = s_lasso_cv.f / s_lasso_cv.f.max()[0]
+# f_sol = s_lasso.f
+
+# # the cross-validation error curve
+# error_curve = s_lasso.cross_validation_curve
 
 #%%
 # If you use the above cross-validation, ``SmoothLassoCV`` method, you may skip the
@@ -170,7 +173,7 @@ from mrinversion.linear_model import SmoothLasso
 
 # guess alpha and lambda values.
 s_lasso = SmoothLasso(
-    alpha=0.0001, lambda1=4.64e-7, inverse_dimension=inverse_dimensions
+    alpha=2.198e-8, lambda1=1.27e-6, inverse_dimension=inverse_dimensions
 )
 s_lasso.fit(K=compressed_K, s=compressed_s)
 
@@ -225,7 +228,15 @@ f_sol /= f_sol.max()
 [item.to("ppm", "nmr_frequency_ratio") for item in f_sol.dimensions]
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
-plot_3d(ax, f_sol, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-60, -120])
+plot_3d(
+    ax,
+    f_sol,
+    theta_angle=20,
+    angle=-50,
+    x_lim=[0, 150],
+    y_lim=[0, 150],
+    z_lim=[-60, -120],
+)
 plt.tight_layout()
 plt.show()
 
@@ -244,7 +255,7 @@ Q2_region = f_sol[:10, 6:18, 36:52]
 Q2_region.description = "Q2 region"
 
 #%%
-# The plot of the respective volumes is shown below.
+# An approximate plot of the respective volumes is shown below.
 
 max_2d = [
     f_sol.sum(axis=0).max().value,
@@ -270,7 +281,7 @@ plot_3d(
     max_2d=max_2d,
     max_1d=max_1d,
     cmap=cm.Reds_r,
-    box=True,
+    box=False,
 )
 # plot for Q3 region
 plot_3d(
@@ -282,7 +293,7 @@ plot_3d(
     max_2d=max_2d,
     max_1d=max_1d,
     cmap=cm.Blues_r,
-    box=True,
+    box=False,
 )
 # plot for Q2 region
 plot_3d(
@@ -295,7 +306,7 @@ plot_3d(
     z_lim=[-60, -120],
     max_2d=max_2d,
     max_1d=max_1d,
-    cmap=cm.Greens_r,
+    cmap=cm.Oranges_r,
     box=False,
 )
 
@@ -307,10 +318,10 @@ plt.show()
 # References
 # ^^^^^^^^^^
 #
-# .. [#f1]  Alvarez, D. J., Sanders, K. J., Phyo, P. A., Baltisberger, J. H.,
-#       Grandinetti, P. J. Cluster formation of network-modifier cations in cesium
-#       silicate glasses, J. Chem. Phys. 148, 094502,  (2018).
-#       `doi:10.1063/1.5020986 <https://doi.org/10.1063/1.5020986>`_
+# .. [#f1]  P. Zhang, C. Dunlap, P. Florian, P. J. Grandinetti, I. Farnan, J. F. Stebbins,
+#       Silicon site distributions in an alkali silicate glass derived by two-dimensional
+#       29Si nuclear magnetic resonance, J. Non. Cryst. Solids 204 294–300 (1996).
+#       `doi:10.1016/S0022-3093(96)00601-1 <https://doi.org/doi:10.1016/S0022-3093(96)00601-1>`_.
 #
 # .. [#f2] Srivastava, D.J., Vosegaard, T., Massiot, D., Grandinetti, P.J. (2020) Core
 #       Scientific Dataset Model: A lightweight and portable model and file format

@@ -152,7 +152,8 @@ class GeneralL2Lasso:
         The Minimizer class solves the following equation,
 
         .. math::
-            {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \| {\bf Kf - s} \|^2_2 +
+            {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \frac{1}{m} \|
+                        {\bf Kf - s} \|^2_2 +
                         \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2 +
                         \lambda  \| {\bf f} \|_1 \right),
 
@@ -234,13 +235,15 @@ class GeneralL2Lasso:
         Ks, ss = _get_augmented_data(
             K=K,
             s=s_ / self.scale,
-            alpha=self.hyperparameter["alpha"],
+            alpha=s_.size * self.hyperparameter["alpha"],
             regularizer=self.regularizer,
             f_shape=self.f_shape,
         )
 
+        # The factor 0.5 for alpha in the Lasso problem is to compensate
+        # 1/(2 * n_sample) factor in OLS term
         self.estimator = Lasso(
-            alpha=self.hyperparameter["lambda"],
+            alpha=self.hyperparameter["lambda"] / 2.0,
             fit_intercept=False,
             copy_X=True,
             max_iter=self.max_iterations,
@@ -274,45 +277,32 @@ class GeneralL2Lasso:
 
     def predict(self, K):
         """
-        Predict using the linear model.
+            Predict using the linear model.
 
-        Args:
-            K: The kernel.
+            Args:
+                K: The kernel.
 
-        Return:
-            y_predict: The predicted values.
+            Return:
+                y_predict: The predicted values.
         """
-        # shape = self.estimator.coef_.shape
-        # if self.estimator.coef_.ndim == len(self.f_shape):
-        #     self.estimator.coef_.shape = (1, self.estimator.coef_.size)
-        # else:
-        #     prod = 1
-        #     for i in self.f_shape:
-        #         prod *= i
-        #     self.estimator.coef_.shape = tuple(shape[:-2]) + (prod,)
         predict = self.estimator.predict(K) * self.scale
-        # self.estimator.coef_.shape = shape
-
-        # if isinstance(self.s, cp.CSDM):
-        #     predict_csdm = self.s.copy()
-        #     predict_csdm.dependent_variables[0].components[0] = predict
-        #     return predict_csdm
 
         return predict
 
     def residuals(self, K, s):
         r"""
-        Return the residue between the data and the prediced data(fit) as
-        `s - predict_s`, where `s` is the input data and `predict_s` is the predicted
-        data.
+            Return the residue between the data and the prediced data(fit) as
+            `s - predict_s`, where `s` is the input data and `predict_s` is the
+            predicted data.
 
-        Args:
-            K: The kernel.
-            s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
-            :math:`{\bf s}`.
+            Args:
+                K: The kernel.
+                s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
+                :math:`{\bf s}`.
 
-        Return:
-            residue: A csdm object or a :math:`m \times m_\text{count}` residue matrix.
+            Return:
+                residue: A csdm object or a :math:`m \times m_\text{count}` residue
+                matrix.
         """
         if isinstance(s, cp.CSDM):
             s_ = s.dependent_variables[0].components[0].T
@@ -325,14 +315,13 @@ class GeneralL2Lasso:
             return residue
 
         residue = cp.as_csdm(residue.T)
-        residue.dimensions[1] = s.dimensions[1]
-        residue.dimensions[0] = s.dimensions[0]
+        residue._dimensions = s._dimensions
         return residue
 
     def score(self, K, s, sample_weights=None):
         """
-        Return the coefficient of determination, :math:`R^2`, of the prediction.
-        For more information, read scikit-learn documentation.
+            Return the coefficient of determination, :math:`R^2`, of the prediction.
+            For more information, read scikit-learn documentation.
         """
         return self.estimator.score(K, s / self.scale, sample_weights)
 
@@ -513,13 +502,13 @@ class GeneralL2LassoCV:
 
     def fit(self, K, s):
         r"""
-        Fit the model using the coordinate descent method from scikit-learn for
-        all alpha anf lambda values using `n`-folds cross-validation.
-        The cross-validation metric is the mean squared error.
+            Fit the model using the coordinate descent method from scikit-learn for
+            all alpha anf lambda values using `n`-folds cross-validation.
+            The cross-validation metric is the mean squared error.
 
-        Args:
-            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
-            s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
+            Args:
+                K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
+                s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
         """
 
         if isinstance(s, cp.CSDM):
@@ -555,14 +544,16 @@ class GeneralL2LassoCV:
         Ks, ss = _get_augmented_data(
             K=K,
             s=s_,
-            alpha=self.cv_alphas[0],
+            alpha=s_.size * self.cv_alphas[0],
             regularizer=self.regularizer,
             f_shape=self.f_shape,
         )
         start_index = K.shape[0]
 
+        # The factor 0.5 for alpha in the Lasso problem is to compensate
+        # 1/(2 * n_sample) factor in OLS term.
         l1 = Lasso(
-            alpha=self.cv_lambdas[0],
+            alpha=self.cv_lambdas[0] / 2.0,
             fit_intercept=False,
             normalize=True,
             precompute=True,
@@ -579,7 +570,7 @@ class GeneralL2LassoCV:
         l1_array = []
         for lambda_ in self.cv_lambdas:
             l1_array.append(deepcopy(l1))
-            l1_array[-1].alpha = lambda_
+            l1_array[-1].alpha = lambda_ / 2.0
 
         j = 0
         for alpha_ratio_ in alpha_ratio:
@@ -640,30 +631,31 @@ class GeneralL2LassoCV:
 
     def predict(self, K):
         """
-        Predict using the linear model.
+            Predict using the linear model.
 
-        Args:
-            K: The kernel.
-            f_shape: The shape of the solution.
+            Args:
+                K: The kernel.
+                f_shape: The shape of the solution.
 
-        Return:
-            y_predict: The predicted values.
+            Return:
+                y_predict: The predicted values.
         """
         return self.opt.predict(K)
 
     def residuals(self, K, s):
-        r"""
-        Return the residue between the data and the prediced data(fit) as
-        `s - predict_s`, where `s` is the input data and `predict_s` is the predicted
-        data.
+        """
+            Return the residue between the data and the prediced data(fit) as
+            `s - predict_s`, where `s` is the input data and `predict_s` is the
+            predicted data.
 
-        Args:
-            K: The kernel.
-            s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
-            :math:`{\bf s}`.
+            Args:
+                K: The kernel.
+                s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
+                :math:`{\bf s}`.
 
-        Return:
-            residue: A csdm object or a :math:`m \times m_\text{count}` residue matrix.
+            Return:
+                residue: A csdm object or a :math:`m \times m_\text{count}` residue
+                matrix.
         """
         return self.opt.residuals(K, s)
 
