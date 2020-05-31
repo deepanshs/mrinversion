@@ -106,7 +106,7 @@ sphinx_gallery_conf = {
 
 intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org", None),
-    "numpy": ("https://numpy.org", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
     "csdmpy": ("https://csdmpy.readthedocs.io/en/latest/", None),
 }
 

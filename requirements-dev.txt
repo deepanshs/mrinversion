@@ -9,3 +9,7 @@ codecov
 # doc build
 sphinxjp.themes.basicstrap
 sphinx>=2.1.2
+sphinx-gallery
+pillow
+matplotlib
+sphinx_copybutton
