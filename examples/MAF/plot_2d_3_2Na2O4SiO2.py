@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# coding: utf-8
+# -*- coding: utf-8 -*-
 """
 2D MAF of 2Na2O 3SiO2 glass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 """
 # sphinx_gallery_thumbnail_number = 5
-#%%
+# %%
 # The following example illustrates an application of the statistical learning method
 # applied to determine the distribution of the nuclear shielding tensor parameters from
 # a 2D magic-angle flipping (MAF) spectrum. In this example,
@@ -19,7 +19,7 @@ from pylab import rcParams
 rcParams["figure.figsize"] = 4, 3
 rcParams["font.size"] = 9
 
-#%%
+# %%
 # Import the dataset
 # ------------------
 #
@@ -31,20 +31,23 @@ import csdmpy as cp
 data_object = cp.load(
     "https://osu.box.com/shared/static/k405dsptwe1p43x8mfi1wc1geywrypzc.csdf"
 )
+# get the real part of the complex dataset
+data_object = data_object.real
 
-#%%
-# The variable ``data_object`` is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
+# %%
+# The variable ``data_object`` is a
+# `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
 # object that holds the 2D MAF dataset. The plot of the MAF dataset is
 cp.plot(data_object, cmap="gist_ncar_r", reverse_axis=[True, True])
 
-#%%
+# %%
 # There are two dimensions in this dataset. The dimension at index 0 is the
 # isotropic chemical shift dimension, while the dimension at index 1 is the pure
 # anisotropic dimension. The number of coordinates along the respective dimensions
 # is
 print(data_object.shape)
 
-#%%
+# %%
 # When using csdm objects with mrinversion, the dimension at index 0 must always be
 # the dimension undergoing the linear inversion, which in this example is the
 # pure anisotropic dimension. In the variable ``data_object``, the anisotropic dimension
@@ -57,7 +60,7 @@ print(data_object.shape)
 data_object_truncated = data_object[:, 220:280]
 cp.plot(data_object_truncated, cmap="gist_ncar_r", reverse_axis=[True, True])
 
-#%%
+# %%
 # Set the anisotropic and inverse-dimension
 # -----------------------------------------
 #
@@ -68,7 +71,7 @@ cp.plot(data_object_truncated, cmap="gist_ncar_r", reverse_axis=[True, True])
 
 anisotropic_dimension = data_object_truncated.dimensions[0]
 
-#%%
+# %%
 # **Inverse-dimension**
 #
 # The two inverse dimensions correspond to the `x` and `y`-axis of the `x`-`y` grid.
@@ -80,45 +83,45 @@ inverse_dimensions = [
     cp.LinearDimension(count=25, increment="500 Hz", label="y"),
 ]
 
-#%%
+# %%
 # Generate the line-shape kernel
 # ------------------------------
 
-from mrinversion.kernel import NuclearShieldingTensor
+from mrinversion.kernel import NuclearShieldingLineshape
 
-method = NuclearShieldingTensor(
+method = NuclearShieldingLineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimensions,
-    isotope="29Si",
+    channel="29Si",
     magnetic_flux_density="9.4 T",
     rotor_angle="90 deg",
     rotor_frequency="12 kHz",
     number_of_sidebands=4,
 )
 
-#%%
-# The above code generates an instance of the NuclearShieldingTensor class, which we
+# %%
+# The above code generates an instance of the NuclearShieldingLineshape class, which we
 # assigned to the variable ``method``.
 # The two required arguments of this class are the `anisotropic_dimension` and
 # `inverse_dimension`, as previously defined.
-# The value of the remaining optional attributes such as the isotope, magnetic flux
+# The value of the remaining optional attributes such as the channel, magnetic flux
 # density, rotor angle, and rotor frequency is set to match the conditions under which
 # the MAF spectrum was acquired. Once the
-# NuclearShieldingTensor instance is created, use the kernel() method to generate
+# NuclearShieldingLineshape instance is created, use the kernel() method to generate
 # the MAF lineshape kernel.
-K = method.kernel(supersampling=5)
+K = method.kernel(supersampling=1)
 print(K.shape)
 
-#%%
+# %%
 # The kernel ``K`` is a NumPy array of shape (128, 625), where the axis with 128 points
 # corresponds to the anisotropic dimension, and the axis with 625 points are the features
 # corresponding to the :math:`25\times 25` `x`-`y` coordinates.
 
-#%%
+# %%
 # Data Compression
 # ----------------
 
-#%%
+# %%
 from mrinversion.linear_model import TSVDCompression
 
 new_system = TSVDCompression(K, data_object_truncated)
@@ -126,7 +129,7 @@ compressed_K = new_system.compressed_K
 compressed_s = new_system.compressed_s
 
 print(f"truncation_index = {new_system.truncation_index}")
-#%%
+# %%
 # Set up the inverse problem
 # --------------------------
 #
@@ -139,8 +142,8 @@ print(f"truncation_index = {new_system.truncation_index}")
 # :math:`\lambda = 1.27\times 10^{-6}`.
 # The following commented code was used in determining the optimum α and λ values.
 
-#%%
-import numpy as np
+# %%
+# import numpy as np
 
 # from mrinversion.linear_model import SmoothLassoCV
 
@@ -165,7 +168,7 @@ import numpy as np
 # # the cross-validation error curve
 # error_curve = s_lasso.cross_validation_curve
 
-#%%
+# %%
 # If you use the above cross-validation, ``SmoothLassoCV`` method, you may skip the
 # following section of code.
 
@@ -180,7 +183,7 @@ s_lasso.fit(K=compressed_K, s=compressed_s)
 # # normalize the solution.
 f_sol = s_lasso.f
 
-#%%
+# %%
 # Here, ``f_sol`` is the solution corresponding to the optimized hyperparameters. To
 # calculate the residuals between the data and predicted data(fit), use the `residuals`
 # method, as follows,
@@ -194,11 +197,11 @@ cp.plot(
     reverse_axis=[True, True],
 )
 
-#%%
+# %%
 # The standard deviation of the residuals is
 residue.std()
 
-#%%
+# %%
 # **Serialize the solution**
 #
 # To serialize the solution to file, use the `save()` method of the CSDM object,
@@ -207,7 +210,7 @@ residue.std()
 f_sol.save("2Na2O.3SiO2_inverse.csdf")  # save the solution
 residue.save("2Na2O.3SiO2_residue.csdf")  # save the residuals
 
-#%%
+# %%
 # At this point, we have solved the inverse problem and obtained an optimum
 # distribution of the nuclear shielding tensors from the 2D MAF dataset. You may use
 # any data visualization and interpretation tool of choice for further analysis.
@@ -217,7 +220,6 @@ residue.save("2Na2O.3SiO2_residue.csdf")  # save the residuals
 # Data Visualization
 # ^^^^^^^^^^^^^^^^^^
 #
-from mpl_toolkits.mplot3d import Axes3D
 from mrinversion.plot import plot_3d
 from matplotlib import cm
 
@@ -240,7 +242,7 @@ plot_3d(
 plt.tight_layout()
 plt.show()
 
-#%%
+# %%
 # From the 3d plot, we observe two distinct volumes: one for the :math:`\text{Q}^4`
 # sites and another for the :math:`\text{Q}^3` sites. To select the respective
 # volumes, use the appropriate array indexing, as follows
@@ -254,7 +256,7 @@ Q3_region.description = "Q3 region"
 Q2_region = f_sol[:10, 6:18, 36:52]
 Q2_region.description = "Q2 region"
 
-#%%
+# %%
 # An approximate plot of the respective volumes is shown below.
 
 max_2d = [
@@ -314,14 +316,15 @@ ax.legend()
 plt.tight_layout()
 plt.show()
 
-#%%
+# %%
 # References
 # ^^^^^^^^^^
 #
 # .. [#f1]  P. Zhang, C. Dunlap, P. Florian, P. J. Grandinetti, I. Farnan, J. F. Stebbins,
 #       Silicon site distributions in an alkali silicate glass derived by two-dimensional
 #       29Si nuclear magnetic resonance, J. Non. Cryst. Solids 204 294–300 (1996).
-#       `doi:10.1016/S0022-3093(96)00601-1 <https://doi.org/doi:10.1016/S0022-3093(96)00601-1>`_.
+#       `doi:10.1016/S0022-3093(96)00601-1
+#       <https://doi.org/doi:10.1016/S0022-3093(96)00601-1>`_.
 #
 # .. [#f2] Srivastava, D.J., Vosegaard, T., Massiot, D., Grandinetti, P.J. (2020) Core
 #       Scientific Dataset Model: A lightweight and portable model and file format

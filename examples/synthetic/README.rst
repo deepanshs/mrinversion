@@ -1,0 +1,3 @@
+
+One-dimensional synthetic datasets
+----------------------------------

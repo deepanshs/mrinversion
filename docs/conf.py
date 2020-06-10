@@ -89,18 +89,26 @@ warnings.filterwarnings(
 #     ),
 # )
 
+# numfig config
+numfig = True
+numfig_secnum_depth = 1
+numfig_format = {"figure": "Figure %s", "table": "Table %s", "code-block": "Listing %s"}
+
+# math
+math_number_all = True
+
 # sphinx gallery config
 sphinx_gallery_conf = {
     "examples_dirs": "../examples",  # path to your example scripts
     "remove_config_comments": True,
     "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
     "within_subsection_order": FileNameSortKey,
-    "subsection_order": ExplicitOrder(["../examples/MAF", "../examples/sideband"]),
+    "subsection_order": ExplicitOrder(
+        ["../examples/synthetic", "../examples/MAF", "../examples/sideband"]
+    ),
     "reference_url": {
         # The module you locally document uses None
         "mrinversion": None,
-        # "matplotlib": "https://matplotlib.org",
-        # "numpy": "https://numpy.org",
     },
 }
 
@@ -167,9 +175,9 @@ html_theme_options = {
     # Fix navbar to top of screen. Defaults to true
     "nav_fixed_top": True,
     # Fix the width of the sidebar. Defaults to false
-    "nav_fixed": False,
+    "nav_fixed": True,
     # Set the width of the sidebar. Defaults to '900px'
-    "nav_width": "900px",
+    "nav_width": "300px",
     # Fix the width of the content area. Defaults to false
     "content_fixed": False,
     # Set the width of the content area. Defaults to '900px'
@@ -212,8 +220,17 @@ html_theme_options = {
     # "h6_size": "1.1em",
 }
 
+
 # Theme options
 # html_logo = "_static/csdmpy.png"
+html_style = "style.css"
+html_title = f"Mrinversion:doc v{__version__}"
+html_last_updated_fmt = ""
+# html_logo = "mrinversion"
+html_sidebars = {
+    "**": ["searchbox.html", "globaltoc.html"],
+    "using/windows": ["searchbox.html", "windowssidebar.html"],
+}
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -221,10 +238,11 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "Mrinversiondoc"
+htmlhelp_basename = "Mrinversion doc"
 
 # -- Options for LaTeX output ------------------------------------------------
 latex_engine = "xelatex"
@@ -296,4 +314,8 @@ epub_title = project
 # epub_uid = ''
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ["search.html"]
+epub_exclude_files = ["search.html", "_static/style.css"]
+
+
+def setup(app):
+    app.add_stylesheet("style.css")

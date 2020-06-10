@@ -7,4 +7,3 @@ API-Reference
 
     api/kernel
     api/linear_model
-

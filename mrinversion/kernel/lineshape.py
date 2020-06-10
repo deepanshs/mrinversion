@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from astropy.units import Quantity
-from mrsimulator import Dimension as NMR_dimension
-from mrsimulator.tests.tests import _one_d_simulator
+from mrsimulator import Simulator
+from mrsimulator import SpinSystem
+from mrsimulator.methods import BlochDecayCentralTransitionSpectrum
+from mrsimulator.methods import BlochDecaySpectrum
 
 from mrinversion.kernel.base import _check_dimension_type
 from mrinversion.kernel.base import BaseModel
@@ -164,7 +167,7 @@ class LineShape(BaseModel):
         self,
         kernel_dimension,
         inverse_kernel_dimension,
-        isotope,
+        channel,
         magnetic_flux_density="9.4 T",
         rotor_angle="54.735 deg",
         rotor_frequency=None,
@@ -179,34 +182,38 @@ class LineShape(BaseModel):
             self.inverse_kernel_dimension, "inverse", dim_types, kernel
         )
 
-        if rotor_frequency is None:
-            rotor_frequency = str(self.kernel_dimension.increment)
+        dim = self.kernel_dimension
 
-        self.parameters = NMR_dimension.parse_dict_with_units(
-            {
-                "isotope": isotope,
-                "magnetic_flux_density": magnetic_flux_density,
-                "rotor_angle": rotor_angle,
-                "spectral_width": "1e-6 Hz",
-                "rotor_frequency": rotor_frequency,
-            }
-        )
-        larmor_frequency = self.parameters.larmor_frequency  # in Hz
+        spectral_width = dim.increment * dim.count
+        reference_offset = dim.coordinates_offset
+        if dim.complex_fft is False:
+            reference_offset = dim.coordinates_offset + spectral_width / 2.0
+
+        spectral_dimensions = [
+            dict(
+                count=dim.count,
+                reference_offset=str(reference_offset),
+                spectral_width=str(spectral_width),
+            )
+        ]
+
+        if rotor_frequency is None:
+            rotor_frequency = str(dim.increment)
+
+        self.method_args = {
+            "channels": [channel],
+            "magnetic_flux_density": magnetic_flux_density,
+            "rotor_angle": rotor_angle,
+            "rotor_frequency": rotor_frequency,
+            "spectral_dimensions": spectral_dimensions,
+        }
 
         if number_of_sidebands is None:
-            self.number_of_sidebands = self.kernel_dimension.count
-        else:
-            self.number_of_sidebands = number_of_sidebands
+            number_of_sidebands = dim.count
 
-        self.increment = self.kernel_dimension.increment.to("Hz").value
-        self.spectral_width = self.kernel_dimension.count * self.increment
-        self.reference_offset = self.kernel_dimension.coordinates[0].to("Hz").value
-
-        if self.kernel_dimension.origin_offset.value == 0:
-            self.kernel_dimension.origin_offset = f"{larmor_frequency} Hz"
-        for dim in self.inverse_kernel_dimension:
-            if dim.origin_offset.value == 0:
-                dim.origin_offset = f"{larmor_frequency} Hz"
+        self.simulator = Simulator()
+        self.simulator.config.number_of_sidebands = number_of_sidebands
+        self.simulator.config.decompose_spectrum = "spin_system"
 
     def _get_zeta_eta(self, supersampling):
         """Return zeta and eta coordinates over x-y grid"""
@@ -217,7 +224,7 @@ class LineShape(BaseModel):
         return zeta, eta
 
 
-class NuclearShieldingTensor(LineShape):
+class NuclearShieldingLineshape(LineShape):
     """
         A generalized class for simulating the pure anisotropic NMR nuclear shielding
         line-shape kernel.
@@ -228,10 +235,10 @@ class NuclearShieldingTensor(LineShape):
                     dimension.
             inverse_dimension: A list of two Dimension objects, or equivalent
                     dictionary objects representing the `x`-`y` coordinate grid.
-            isotope: The isotope symbol of the nuclei given as the atomic number
-                    followed by the atomic symbol, for example, `1H`, `13C`, and
-                    `29Si`. This nucleus must correspond to the recorded frequency
-                    resonances.
+            channel: The channel is an isotope symbol of the nuclei given as the atomic
+                number followed by the atomic symbol, for example, `1H`, `13C`, and
+                `29Si`. This nucleus must correspond to the recorded frequency
+                resonances.
             magnetic_flux_density: The magnetic flux density of the external static
                     magnetic field. The default value is 9.4 T.
             rotor_angle: The angle of the sample holder (rotor) relative to the
@@ -248,7 +255,7 @@ class NuclearShieldingTensor(LineShape):
         self,
         anisotropic_dimension,
         inverse_dimension,
-        isotope,
+        channel,
         magnetic_flux_density="9.4 T",
         rotor_angle="54.735 deg",
         rotor_frequency="14 kHz",
@@ -257,7 +264,7 @@ class NuclearShieldingTensor(LineShape):
         super().__init__(
             anisotropic_dimension,
             inverse_dimension,
-            isotope,
+            channel,
             magnetic_flux_density,
             rotor_angle,
             rotor_frequency,
@@ -275,23 +282,38 @@ class NuclearShieldingTensor(LineShape):
             A numpy array containing the line-shape kernel.
         """
 
+        method = BlochDecaySpectrum.parse_dict_with_units(self.method_args)
+        isotope = self.method_args["channels"][0]
         zeta, eta = self._get_zeta_eta(supersampling)
-        amp = _one_d_simulator(
-            number_of_points=self.kernel_dimension.count,
-            reference_offset=self.reference_offset,
-            increment=self.kernel_dimension.increment.to("Hz").value,
-            isotropic_chemical_shift=np.zeros(zeta.size),
-            shielding_anisotropy=zeta,
-            shielding_asymmetry=eta,
-            number_of_sidebands=self.number_of_sidebands,
-            rotor_angle_in_rad=self.parameters.rotor_angle,
-            sample_rotation_frequency_in_Hz=self.parameters.rotor_frequency,
-        )[1]
+        # convert zeta to ppm
+        B0 = method.spectral_dimensions[0].events[0].magnetic_flux_density  # in T
+        gamma = method.channels[0].gyromagnetic_ratio  # in MHz/T
+        larmor_frequency = -gamma * B0  # in MHZ
+        zeta /= larmor_frequency  # zeta in ppm
+        spin_systems = [
+            SpinSystem(
+                sites=[dict(isotope=isotope, shielding_symmetric=dict(zeta=z, eta=e))]
+            )
+            for z, e in zip(zeta, eta)
+        ]
+
+        dim = method.spectral_dimensions[0]
+        if dim.origin_offset == 0:
+            dim.origin_offset = larmor_frequency * 1e6  # in Hz
+        for dim_i in self.inverse_kernel_dimension:
+            if dim_i.origin_offset.value == 0:
+                dim_i.origin_offset = f"{larmor_frequency} MHz"
+
+        self.simulator.spin_systems = spin_systems
+        self.simulator.methods = [method]
+        self.simulator.run(pack_as_csdm=False)
+
+        amp = self.simulator.methods[0].simulation
 
         return self._averaged_kernel(amp, supersampling)
 
 
-class MAF(NuclearShieldingTensor):
+class MAF(NuclearShieldingLineshape):
     r"""
         A specialized class for simulating the pure anisotropic NMR nuclear shielding
         line-shape kernel resulting from the 2D MAF spectra.
@@ -302,7 +324,7 @@ class MAF(NuclearShieldingTensor):
                     dimension.
             inverse_dimension: A list of two Dimension objects, or equivalent
                     dictionary objects representing the `x`-`y` coordinate grid.
-            isotope: The isotope symbol of the nuclei given as the atomic number
+            channel: The isotope symbol of the nuclei given as the atomic number
                     followed by the atomic symbol, for example, `1H`, `13C`, and
                     `29Si`. This nucleus must correspond to the recorded frequency
                     resonances.
@@ -318,14 +340,14 @@ class MAF(NuclearShieldingTensor):
         self,
         anisotropic_dimension,
         inverse_dimension,
-        isotope,
+        channel,
         magnetic_flux_density="9.4 T",
     ):
 
         super().__init__(
             anisotropic_dimension,
             inverse_dimension,
-            isotope,
+            channel,
             magnetic_flux_density,
             "90 deg",
             "200 GHz",
@@ -333,7 +355,7 @@ class MAF(NuclearShieldingTensor):
         )
 
 
-class SpinningSidebands(NuclearShieldingTensor):
+class SpinningSidebands(NuclearShieldingLineshape):
     r"""
         A specialized class for simulating the pure anisotropic spinning sideband
         amplitudes of the nuclear shielding resonances resulting from a 2D sideband
@@ -345,7 +367,7 @@ class SpinningSidebands(NuclearShieldingTensor):
                     dimension.
             inverse_dimension: A list of two Dimension objects, or equivalent
                     dictionary objects representing the `x`-`y` coordinate grid.
-            isotope: The isotope symbol of the nuclei given as the atomic number
+            channel: The isotope symbol of the nuclei given as the atomic number
                     followed by the atomic symbol, for example, `1H`, `13C`, and
                     `29Si`. This nucleus must correspond to the recorded frequency
                     resonances.
@@ -362,14 +384,14 @@ class SpinningSidebands(NuclearShieldingTensor):
         self,
         anisotropic_dimension,
         inverse_dimension,
-        isotope,
+        channel,
         magnetic_flux_density="9.4 T",
     ):
 
         super().__init__(
             anisotropic_dimension,
             inverse_dimension,
-            isotope,
+            channel,
             magnetic_flux_density,
             "54.735 deg",
             None,
@@ -382,7 +404,7 @@ class DAS(LineShape):
         self,
         anisotropic_dimension,
         inverse_kernel_dimension,
-        isotope,
+        channel,
         magnetic_flux_density="9.4 T",
         rotor_angle="54.735 deg",
         rotor_frequency="600 Hz",
@@ -391,29 +413,29 @@ class DAS(LineShape):
         super().__init__(
             anisotropic_dimension,
             inverse_kernel_dimension,
-            isotope,
+            channel,
             magnetic_flux_density,
             rotor_angle,
             rotor_frequency,
             number_of_sidebands,
-            "DAS",
+            # "DAS",
         )
 
     def kernel(self, supersampling):
-        zeta, eta = self._get_zeta_eta(supersampling)
-        amp = _one_d_simulator(
-            number_of_points=self.kernel_dimension.count,
-            reference_offset=self.reference_offset,
-            larmor_frequency=self.parameters.larmor_frequency,
-            spin_quantum_number=self.parameters.spin,
-            increment=self.kernel_dimension.increment.to("Hz").value,
-            isotropic_chemical_shift=np.zeros(zeta.size),
-            quadrupolar_coupling_constant=zeta,
-            quadrupole_asymmetry=eta,
-            number_of_sidebands=1,
-            remove_second_order_quad_isotropic=0,
-            rotor_angle_in_rad=self.parameters.rotor_angle,
-            sample_rotation_frequency_in_Hz=self.parameters.rotor_frequency,
-        )[1]
+        method = BlochDecayCentralTransitionSpectrum.parse_dict_with_units(
+            self.method_args
+        )
+        isotope = self.method_args["channels"][0]
+        Cq, eta = self._get_zeta_eta(supersampling)
+        spin_systems = [
+            SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
+            for cq_, e in zip(Cq, eta)
+        ]
+
+        self.simulator.spin_systems = spin_systems
+        self.simulator.methods = [method]
+        self.simulator.run(pack_as_csdm=False)
+
+        amp = self.simulator.methods[0].simulation
 
         return self._averaged_kernel(amp, supersampling)

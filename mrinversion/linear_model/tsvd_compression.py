@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import csdmpy as cp
 import numpy as np
 

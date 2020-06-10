@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 # # Table of Contents
 #
 # 1. [Linear Algebra and least square problem on the subspace](#section2)<br />

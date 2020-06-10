@@ -20,7 +20,7 @@ Generalized Class
 
 .. currentmodule:: mrinversion.kernel
 
-.. autoclass:: NuclearShieldingTensor
+.. autoclass:: NuclearShieldingLineshape
    :show-inheritance:
 
    .. automethod:: kernel

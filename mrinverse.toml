@@ -1,22 +1,8 @@
-[tool.black]
-line-length = 79
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+[build-system]
+requires = ["setuptools", "wheel"]
 
 [flake8]
-ignore = E203, E266, E501, W503, F403, F401
-max-line-length = 79
+ignore = "E203, E266, E501, W503, F403, F401"
+max-line-length = 90
 max-complexity = 18
-select = B,C,E,F,W,T4,B9
+select = "B,C,E,F,W,T4,B9"

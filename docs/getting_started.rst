@@ -1,32 +1,39 @@
 
-==========================================
-Getting started with `Mrinversion` package
-==========================================
+============================================
+Getting started with ``mrinversion`` package
+============================================
 
-We have put together a set of guidelines for using the `Mrinversion` package.
-We encourage the users to follow these guidelines to promote consistency,
-amongst others.
+We have put together a set of guidelines for using the `mrinversion` package.
+We encourage our users to follow these guidelines to promote consistency.
 
-We start by demonstrating the prediction of the nuclear shielding tensors from
-a pure nuclear shielding anisotropic spectra. In this section, we show
-the shielding tensor prediction from a synthetic pure anisotropic spinning
-sideband spectrum.
+Considering the NMR audience, what better example to start with than frequently
+measured spinning sideband spectrum. For illustrative purposes, we use a synthetic
+one-dimensional purely anisotropic sideband spectrum. You may consider this as a
+cross-section of your 2D MAT/PASS dataset.
 
+Okay, let's start with the prediction of the nuclear shielding tensor parameters
+from this spectrum.
 
 Import the dataset
-""""""""""""""""""
+------------------
 
-The first step is getting the sideband spectrum. You may use any format to
-import your dataset, as long as the data is represented as a NumPy ndarray
-array. Here, we use a sample synthetic dataset, stored in the CSDM [#f1]_
-file-format.
+The first step is getting the sideband spectrum. In this example, we get the data
+from a CSDM [#f1]_ compliant file-format.
+
+.. note::
+
+    The CSDM file-format is supported by most NMR software, such as, SIMPSON, DMFIT, RMN.
+    A python package supporting CSDM file-format, csdmpy, is also available.
 
 .. doctest::
 
-    >>> from mrinversion import examples
     >>> import csdmpy as cp
-    >>> data_object = cp.load(examples.sideband02) # load the CSDM file with the csdmpy module
-    >>> true_data_object = cp.load(examples.true_distribution02) # the true solution for comparison
+
+    >>> filename = "https://osu.box.com/shared/static/xnlhecn8ifzcwx09f83gsh27rhc5i5l6.csdf"
+    >>> data_object = cp.load(filename) # load the CSDM file with the csdmpy module
+
+    >>> datafile = "https://osu.box.com/shared/static/lufeus68orw1izrg8juthcqvp7w0cpzk.csdf"
+    >>> true_data_object = cp.load(datafile) # the true solution for comparison
 
 The variable ``data_object`` is the `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
 object containing a one-dimension pure anisotropic spinning sideband spectrum.
@@ -69,17 +76,17 @@ and the plot depicting the sideband spectrum follows
 
 
 Setting the kernel
-""""""""""""""""""
+------------------
 
 A kernel is a transformation matrix that transforms the single from domain to
 the range space following
 
 .. math::
 
-    s = Kf,
+    {\bf s = Kf},
 
-where `K` is the transformation kernel, `s` is the observed signal in the range
-space, and `f` is the unknown which resides in the domain space, respectively.
+where :math:`\bf K` is the transformation kernel, :math:`\bf s` is the observed signal,
+and :math:`\bf f` is the unknown which resides in the domain space, respectively.
 
 .. In `Mrinversion`, the range space is a sub-space of the signal, which is
 
@@ -120,10 +127,12 @@ For nuclear shielding tensor line-shape kernel, we refer the range space
 dimensions as the `anisotropic_dimension`, and the domain space dimensions as
 the `inverse_dimension`.
 
-**Anisotropic dimension**
+Anisotropic dimension
+'''''''''''''''''''''
 
 Because this example dataset is imported as a CSDM object, the `anisotropic_dimension`
-is already defined as a `Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_
+is already defined as a
+`CSDM Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_
 object. For illustration, however, we re-define the `anisotropic_dimension` as
 follows,
 
@@ -136,23 +145,26 @@ follows,
        1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
        6875.   7500.   8125.   8750.   9375.] Hz)
 
-The `LinearDimension` object is a subtype of the Dimension class and generates
-equally spaced coordinates. You may also use the NumPy array to create a
-Dimension object,
+.. The `LinearDimension` object is a subtype of the Dimension class and generates
+.. equally spaced coordinates.
 
-.. doctest::
+.. You may also use the NumPy array to create a
+.. Dimension object,
 
-    >>> import numpy as np
-    >>> test_array = np.arange(32) * 625 - 10000 # as in Hz
-    >>> anisotropic_dimension = cp.as_dimension(test_array, unit='Hz')
-    >>> print(anisotropic_dimension)
-    LinearDimension([-10000.  -9375.  -8750.  -8125.  -7500.  -6875.  -6250.  -5625.  -5000.
-      -4375.  -3750.  -3125.  -2500.  -1875.  -1250.   -625.      0.    625.
-       1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
-       6875.   7500.   8125.   8750.   9375.] Hz)
+.. .. doctest::
+
+..     >>> import numpy as np
+..     >>> test_array = np.arange(32) * 625 - 10000 # as in Hz
+..     >>> anisotropic_dimension = cp.as_dimension(test_array, unit='Hz')
+..     >>> print(anisotropic_dimension)
+..     LinearDimension([-10000.  -9375.  -8750.  -8125.  -7500.  -6875.  -6250.  -5625.  -5000.
+..       -4375.  -3750.  -3125.  -2500.  -1875.  -1250.   -625.      0.    625.
+..        1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
+..        6875.   7500.   8125.   8750.   9375.] Hz)
 
 
-**Inverse dimension**
+Inverse dimension
+'''''''''''''''''
 
 Similarly, set up the two inverse dimensions. Here, the two inverse dimensions
 are
@@ -167,78 +179,75 @@ are
 sampled at every 370 Hz for 25 points. The inverse dimension at index 0 and 1
 are the `x` and `y` dimensions, respectively.
 
-.. doctest::
+.. .. doctest::
 
-    >>> print(inverse_dimension[0])
-    LinearDimension([   0.  370.  740. 1110. 1480. 1850. 2220. 2590. 2960. 3330. 3700. 4070.
-     4440. 4810. 5180. 5550. 5920. 6290. 6660. 7030. 7400. 7770. 8140. 8510.
-     8880.] Hz)
+..     >>> print(inverse_dimension[0])
+..     LinearDimension([   0.  370.  740. 1110. 1480. 1850. 2220. 2590. 2960. 3330. 3700. 4070.
+..      4440. 4810. 5180. 5550. 5920. 6290. 6660. 7030. 7400. 7770. 8140. 8510.
+..      8880.] Hz)
 
 
 Setting the Kernel
-""""""""""""""""""
+------------------
 
-Import the :class:`~mrinversion.kernel.NuclearShieldingTensor` class and
+Import the :class:`~mrinversion.kernel.NuclearShieldingLineshape` class and
 generate the kernel as follows,
 
 .. doctest::
 
-    >>> from mrinversion.kernel import NuclearShieldingTensor
-    >>> method = NuclearShieldingTensor(
+    >>> from mrinversion.kernel import NuclearShieldingLineshape
+    >>> lineshapes = NuclearShieldingLineshape(
     ...                 anisotropic_dimension=anisotropic_dimension,
     ...                 inverse_dimension=inverse_dimension,
-    ...                 isotope='29Si',
+    ...                 channel='29Si',
     ...                 magnetic_flux_density='9.4 T',
     ...                 rotor_angle='54.735 deg',
     ...                 rotor_frequency='625 Hz',
     ...                 number_of_sidebands=32
     ...             )
 
-In the above code, the variable ``method`` is an instance of the
-:class:`~mrinversion.kernel.NuclearShieldingTensor` class. The two required
-arguments of this class are the `anisotropic_dimension` and
-`inverse_dimension`, as defined previously.
-The optional arguments are the metadata that describes the
-parameters at which the spectrum is acquired. In this example, these arguments
-describe a :math:`^{29}\text{Si}` pure anisotropic spinning-sideband spectrum
-acquired at 9.4 T magnetic flux density and spinning at the magic angle
-(:math:`54.735^\circ`) at 625 Hz.
-The value of the `rotor_frequency` argument is the effective anisotropic
-modulation frequency. For measurements like PASS [#f2]_, the anisotropic
-modulation frequency is the physical rotor frequency. For other
-measurements like the extended chemical shift modulation sequences (XCS)
-[#f3]_, or its variants, the effective anisotropic modulation frequency is
-lower than the physical rotor frequency and should be set appropriately.
+In the above code, the variable ``lineshapes`` is an instance of the
+:class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The two required arguments
+of this class are the `anisotropic_dimension` and `inverse_dimension`, as defined
+previously. The optional arguments are the metadata that describes the environment
+under which the spectrum is acquired. In this example, these arguments describe a
+:math:`^{29}\text{Si}` pure anisotropic spinning-sideband spectrum acquired at 9.4 T
+magnetic flux density and spinning at the magic angle (:math:`54.735^\circ`) at 625 Hz.
+The value of the `rotor_frequency` argument is the effective anisotropic modulation
+frequency. For measurements like PASS [#f2]_, the anisotropic modulation frequency is
+the physical rotor frequency. For other measurements like the extended chemical shift
+modulation sequences (XCS) [#f3]_, or its variants, the effective anisotropic modulation
+frequency is lower than the physical rotor frequency and should be set appropriately.
 
-The argument `number_of_sidebands` is the maximum number of computed
-sidebands in the kernel. For most two-dimensional isotropic v.s pure
-anisotropic spinning-sideband correlation measurements, the sampling along the
-sideband dimension is the rotor or the effective anisotropic modulation
-frequency. Therefore, the value of the `number_of_sidebands` argument is
-usually the number of points along the sideband dimension.
-In this example, this value is 32.
+The argument `number_of_sidebands` is the maximum number of sidebands that will be
+computed per line-shape within the kernel. For most two-dimensional isotropic v.s. pure
+anisotropic spinning-sideband correlation measurements, the sampling along the sideband
+dimension is the rotor or the effective anisotropic modulation frequency. Therefore, the
+value of the `number_of_sidebands` argument is usually the number of points along the
+sideband dimension. In this example, this value is 32.
 
 Once the instance is created, used the
-:meth:`~mrinversion.kernel.NuclearShieldingTensor.kernel` method of the
+:meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the
 instance to generate the spinning sideband kernel, as follows,
 
 .. doctest::
 
-    >>> K = method.kernel(supersampling=1)
+    >>> K = lineshapes.kernel(supersampling=1)
     >>> print(K.shape)
     (32, 625)
 
-Here, ``K`` is the :math:`32\times 625` kernel, where the 32 is the number of
-samples (sideband amplitudes), and 625 is the number of features on the
-:math:`25 \times 25` `x`-`y` grid. The argument `supersampling` is
-the supersampling factor. In a supersampling scheme, each grid cell is averaged
-over a :math:`n\times n` sub-grid, where :math:`n` is the supersampling factor.
-A supersampling factor of 1 is equivalent to no sub-grid averaging.
+Here, ``K`` is the :math:`32\times 625` kernel, where the 32 is the number of samples
+(sideband amplitudes), and 625 is the number of features (line-shapes) on the
+:math:`25 \times 25` `x`-`y` grid. The argument `supersampling` is the supersampling
+factor. In a supersampling scheme, each grid cell is averaged over a :math:`n\times n`
+sub-grid, where :math:`n` is the supersampling factor. A supersampling factor of 1 is
+equivalent to no sub-grid averaging.
 
 
 Data compression (optional)
-"""""""""""""""""""""""""""
-Often, when the kernel, K, is ill-conditioned, the solution becomes unstable in
+---------------------------
+
+Often when the kernel, K, is ill-conditioned, the solution becomes unstable in
 the presence of the measurement noise. An ill-conditioned kernel is the one
 whose singular values quickly decay to zero. In such cases, we employ the
 truncated singular value decomposition method to approximately represent the
@@ -246,7 +255,7 @@ kernel K onto a smaller sub-space, called the `range space`, where the
 sub-space kernel is relatively well-defined. We refer to this sub-space
 kernel as the `compressed kernel`. Similarly, the measurement data on the
 sub-space is referred to as the `compressed signal`. The compression also
-reduces the time for furthur computation. To compress the kernel and the data,
+reduces the time for further computation. To compress the kernel and the data,
 import the :class:`~mrinversion.linear_model.TSVDCompression` class and follow,
 
 .. doctest::
@@ -258,22 +267,22 @@ import the :class:`~mrinversion.linear_model.TSVDCompression` class and follow,
     >>> compressed_s = new_system.compressed_s
 
 Here, the variable ``new_system`` is an instance of the
-:class:`~mrinversion.linear_model.TSVDCompression` class. If no truncation
-index is provided as the argument when initializing the ``TSVDCompression``
-class, an optimum truncation index is chosen using the maximum entropy method,
-which is the default behavior. The
-attributes :attr:`~mrinversion.linear_model.TSVDCompression.compressed_K` and
-:attr:`~mrinversion.linear_model.TSVDCompression.compressed_s` holds the
-compressed kernel and signal, respectively, whose shapes
+:class:`~mrinversion.linear_model.TSVDCompression` class. If no truncation index is
+provided as the argument, when initializing the ``TSVDCompression`` class, an optimum
+truncation index is chosen using the maximum entropy method, which is the default
+behavior. The attributes :attr:`~mrinversion.linear_model.TSVDCompression.compressed_K`
+and :attr:`~mrinversion.linear_model.TSVDCompression.compressed_s` holds the
+compressed kernel and signal, respectively. The shape of the original signal `v.s.` the
+compressed signal is
 
 .. doctest::
 
-    >>> print(compressed_K.shape, compressed_s.shape)
-    (31, 625) (31,)
+    >>> print(data_object.shape, compressed_s.shape)
+    (32,) (31,)
 
 
 Setting up the inverse problem
-""""""""""""""""""""""""""""""
+------------------------------
 
 When setting up the inversion, we solved the smooth LASSO [#f4]_ problem of
 form
@@ -332,6 +341,7 @@ The solution to the smooth lasso is accessed using the
 The plot of the solution is
 
     >>> from mrinversion.plot import get_polar_grids
+    >>> import numpy as np
     ...
     >>> # convert the `inverse_dimension` coordinates to pmm from Hz.
     >>> f_sol.dimensions[0].to('ppm', 'nmr_frequency_ratio')
@@ -387,7 +397,7 @@ compressed data.
 
 
 Statistical learning of tensors
-"""""""""""""""""""""""""""""""
+-------------------------------
 
 The linear model trained with the combined l1 and l2 priors,
 such as the smooth LASSO estimator used here, the solution depends on the
@@ -405,15 +415,15 @@ The following :class:`~mrinversion.linear_model.SmoothLassoCV` class
 
 is designed to solve the smooth-lasso problem for a range of :math:`\alpha`
 and :math:`\lambda` values and determine the best solution using the `n`-fold
-cross-validation. Here, we search the best model on a :math:`20 \times 20`
+cross-validation. Here, we search the best model on a :math:`10 \times 10`
 :math:`\alpha`-:math:`\lambda` grid, using a 10-fold cross-validation
 statistical learning method. The :math:`\lambda` and :math:`\alpha` values are
 sampled uniformly on a logarithmic scale as,
 
 .. doctest::
 
-    >>> lambdas = 10 ** (-5 - 2 * (np.arange(20) / 19))
-    >>> alphas = 10 ** (-1.5 - 2 * (np.arange(20) / 19))
+    >>> lambdas = 10 ** (-5 - 2 * (np.arange(10) / 9))
+    >>> alphas = 10 ** (-1.5 - 2 * (np.arange(10) / 9))
 
 Setup the smooth lasso cross-validation using
 
@@ -438,7 +448,7 @@ the class instance,
 .. doctest::
 
     >>> s_lasso_cv.hyperparameter
-    {'alpha': 0.0006543189129712968, 'lambda': 1.438449888287663e-06}
+    {'alpha': 0.00031622776601683794, 'lambda': 1e-05}
 
 and the corresponding cross-validation error surface using the
 :attr:`~mrinversion.linear_model.SmoothLassoCV.cv_map` attribute.

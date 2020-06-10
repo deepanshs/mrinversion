@@ -1,4 +1,4 @@
-# import platform
+# -*- coding: utf-8 -*-
 from os.path import abspath
 from os.path import dirname
 from os.path import join
@@ -48,26 +48,3 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
 )
-
-
-# setup(
-#     name=NAME,
-#     version=about["__version__"],
-#     description=DESCRIPTION,
-#     long_description=long_description,
-#     author=AUTHOR,
-#     author_email=EMAIL,
-#     python_requires=REQUIRES_PYTHON,
-#     url=URL,
-#     packages=find_packages(),
-#     install_requires=REQUIRED,
-#     extras_require=EXTRAS,
-#     cmdclass=cmdclass,
-#     ext_modules=ext,
-#     classifiers=[
-#         # Trove classifiers
-#         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-#         "License :: OSI Approved :: BSD License",
-#         "Programming Language :: Python :: 3",
-#     ],
-# )

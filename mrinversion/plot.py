@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from itertools import combinations
 from itertools import product
 
@@ -17,7 +18,7 @@ def get_polar_grids(ax, ticks=None, offset=0):
     else:
         x = np.asarray(ticks)
 
-    l = 0.3
+    lw = 0.3
     t1 = plt.Polygon([[0, 0], [0, x[-1]], [x[-1], x[-1]]], color="r", alpha=0.05)
     t2 = plt.Polygon([[0, 0], [x[-1], 0], [x[-1], x[-1]]], color="b", alpha=0.05)
 
@@ -32,7 +33,7 @@ def get_polar_grids(ax, ticks=None, offset=0):
                     fill=False,
                     color="k",
                     linestyle="--",
-                    linewidth=l,
+                    linewidth=lw,
                     alpha=0.5,
                 )
             )
@@ -40,10 +41,10 @@ def get_polar_grids(ax, ticks=None, offset=0):
     angle1 = np.tan(np.pi * np.asarray([0, 0.2, 0.4, 0.6, 0.8]) / 4.0)
     angle2 = np.tan(np.pi * np.asarray([0.8, 0.6, 0.4, 0.2, 0]) / 4.0)
     for ang_ in angle1:
-        ax.plot(x, ((x - offset) * ang_) + offset, "k--", alpha=0.5, linewidth=l)
+        ax.plot(x, ((x - offset) * ang_) + offset, "k--", alpha=0.5, linewidth=lw)
     for ang_ in angle2:
-        ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=l)
-    ax.plot(x, x, "k", alpha=0.5, linewidth=2 * l)
+        ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=lw)
+    ax.plot(x, x, "k", alpha=0.5, linewidth=2 * lw)
     ax.set_xlim(limx)
     ax.set_ylim(limy)
 
@@ -69,7 +70,7 @@ def plot_3d(
     if max_1d is None:
         max_1d = [None, None, None]
 
-    l = linewidth
+    lw = linewidth
 
     f = csdm_object.dependent_variables[0].components[0].T
     label = csdm_object.description
@@ -127,7 +128,7 @@ def plot_3d(
     dist_ = dist / max_2d[2]
     levels = (np.arange(20) + 1) / 20
     ax.contour(
-        x1, y1, dist_, zdir="z", offset=offz_n, cmap=clr, levels=levels, linewidths=l
+        x1, y1, dist_, zdir="z", offset=offz_n, cmap=clr, levels=levels, linewidths=lw
     )
 
     # 2D x-z contour projection
@@ -138,7 +139,7 @@ def plot_3d(
         max_2d[1] = dist.max()
     dist_ = dist / max_2d[1]
     ax.contour(
-        x1, dist_, y1, zdir="y", offset=offy, cmap=clr, levels=levels, linewidths=l
+        x1, dist_, y1, zdir="y", offset=offy, cmap=clr, levels=levels, linewidths=lw
     )
 
     # 1D x-axis projection
@@ -146,14 +147,14 @@ def plot_3d(
     if max_1d[0] is None:
         max_1d[0] = proj_x.max()
     proj_x /= max_1d[0]
-    ax.plot(a, sign * 14 * proj_x + offz, offy, zdir="y", c=ck, linewidth=l)
+    ax.plot(a, sign * 14 * proj_x + offz, offy, zdir="y", c=ck, linewidth=lw)
 
     # 1D z-axis projection
     proj_z = dist.sum(axis=0)
     if max_1d[2] is None:
         max_1d[2] = proj_z.max()
     proj_z /= max_1d[2]
-    ax.plot(-20 * proj_z + offy_n, c, offx, zdir="x", c=ck, linewidth=l)
+    ax.plot(-20 * proj_z + offy_n, c, offx, zdir="x", c=ck, linewidth=lw)
     ax.set_xlim(z_lim)
 
     # 2D y-z contour projection
@@ -163,7 +164,7 @@ def plot_3d(
         max_2d[0] = dist.max()
     dist_ = dist / max_2d[0]
     ax.contour(
-        dist_, x1, y1, zdir="x", offset=offx, cmap=clr, levels=levels, linewidths=l
+        dist_, x1, y1, zdir="x", offset=offx, cmap=clr, levels=levels, linewidths=lw
     )
 
     # 1D y-axis projection
@@ -172,7 +173,7 @@ def plot_3d(
         max_1d[1] = proj_y.max()
     proj_y /= max_1d[1]
     ax.plot(
-        b, sign * 14 * proj_y + offz, offx, zdir="x", c=ck, linewidth=l, label=label
+        b, sign * 14 * proj_y + offz, offx, zdir="x", c=ck, linewidth=lw, label=label
     )
 
     ax.set_xlim(x_lim)
@@ -198,7 +199,7 @@ def plot_3d(
     dc = c[1] - c[0]
     r3 = [z_lim[-1] - dc / 2, z_lim[0] + dc / 2]
 
-    l_box = l
+    l_box = lw
     for s, e in combinations(np.array(list(product(r1, r2, r3))), 2):
         if np.sum(np.abs(s - e)) == r1[1] - r1[0]:
             ax.plot3D(*zip(s, e), color="gray", linewidth=l_box)

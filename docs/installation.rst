@@ -9,13 +9,13 @@ Installing `Mrinversion` package
 .. Matplotlib which are useful packages for handling scientific datasets.
 
 
-**Using PIP**:
+The `Mrinversion` package utilizes the `Mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
+package for generating the NMR line-shapes. For linux and mac users, type the following
+in the terminal to install the `Mrinversion` package.
 
-PIP is a package manager for Python packages and is included with
-python version 3.4 and higher.
-
-.. code-block::
+.. code-block:: bash
 
     $ pip install mrinversion
 
-.. include:: requirement.rst
+For windows user, first install the `Mrsimulator <file:///Users/deepansh/Research/NMRgit/MRSimulator/MRsimulator/docs/_build/html/installation.html#on-local-machine-using-pip>`_
+package and then install the `Mrinversion` package using the above command.

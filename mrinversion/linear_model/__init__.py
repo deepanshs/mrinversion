@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from copy import deepcopy
 
 import csdmpy as cp
@@ -122,11 +123,15 @@ def _get_augmented_data(K, s, alpha, regularizer, f_shape=None):
     if regularizer == "sparse ridge fusion":
 
         def Ai_sparse_ridge_fusion(i):
-            return (
-                -1 * np.eye(i)
-                + 2 * np.diag(np.ones(i - 1), k=-1)
-                - 1 * np.diag(np.ones(i - 2), k=-2)
-            )[2:]
+            A_temp = -1 * np.eye(i)
+            A_temp += 2 * np.diag(np.ones(i - 1), k=-1)
+            A_temp += -1 * np.diag(np.ones(i - 2), k=-2)
+            return A_temp[2:]
+            # return (
+            #     -1 * np.eye(i)
+            #     + 2 * np.diag(np.ones(i - 1), k=-1)
+            #     - 1 * np.diag(np.ones(i - 2), k=-2)
+            # )[2:]
 
         J = generate_J_i(Ai_sparse_ridge_fusion, alpha, f_shape)
 
@@ -209,12 +214,13 @@ class GeneralL2Lasso:
 
     def fit(self, K, s):
         r"""
-            Fit the model using the coordinate descent method from scikit-learn.
+        Fit the model using the coordinate descent method from scikit-learn.
 
-            Args:
-                K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
-                s: A csdm object or a :math:`m \times m_\text{count}` signal
-                matrix, :math:`{\bf s}`.
+        Args:
+            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
+                shape (m, n).
+            s: A csdm object or an equivalent numpy array holding the signal,
+                :math:`{\bf s}`, as a :math:`m \times m_\text{count}` matrix.
         """
         if isinstance(s, cp.CSDM):
             self.s = s
@@ -242,7 +248,7 @@ class GeneralL2Lasso:
 
         # The factor 0.5 for alpha in the Lasso problem is to compensate
         # 1/(2 * n_sample) factor in OLS term
-        self.estimator = Lasso(
+        estimator = Lasso(
             alpha=self.hyperparameter["lambda"] / 2.0,
             fit_intercept=False,
             copy_X=True,
@@ -253,37 +259,41 @@ class GeneralL2Lasso:
             selection="random",
             positive=self.positive,
         )
-        self.estimator.fit(Ks, ss)
-        self.f = self.estimator.coef_.copy()
+        estimator.fit(Ks, ss)
+        f = estimator.coef_.copy()
         if s_.shape[1] > 1:
-            self.f.shape = (s_.shape[1],) + self.f_shape
-            self.f[:, :, 0] /= 2
-            self.f[:, 0, :] /= 2
+            f.shape = (s_.shape[1],) + self.f_shape
+            f[:, :, 0] /= 2
+            f[:, 0, :] /= 2
         else:
-            self.f.shape = self.f_shape
-            self.f[:, 0] /= 2
-            self.f[0, :] /= 2
+            f.shape = self.f_shape
+            f[:, 0] /= 2
+            f[0, :] /= 2
 
-        self.f *= self.scale
-        self.n_iter = self.estimator.n_iter_
+        f *= self.scale
 
         if isinstance(s, cp.CSDM):
-            self.f = cp.as_csdm(self.f)
+            f = cp.as_csdm(f)
 
             if len(s.dimensions) > 1:
-                self.f.dimensions[2] = s.dimensions[1]
-            self.f.dimensions[1] = self.inverse_dimension[1]
-            self.f.dimensions[0] = self.inverse_dimension[0]
+                f.dimensions[2] = s.dimensions[1]
+            f.dimensions[1] = self.inverse_dimension[1]
+            f.dimensions[0] = self.inverse_dimension[0]
+
+        self.estimator = estimator
+        self.f = f
+        self.n_iter = estimator.n_iter_
 
     def predict(self, K):
-        """
-            Predict using the linear model.
+        r"""
+        Predict the signal using the linear model.
 
-            Args:
-                K: The kernel.
+        Args:
+            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
+                shape (m, n).
 
-            Return:
-                y_predict: The predicted values.
+        Return:
+            A numpy array of shape (m, m_count) with the predicted values.
         """
         predict = self.estimator.predict(K) * self.scale
 
@@ -291,18 +301,23 @@ class GeneralL2Lasso:
 
     def residuals(self, K, s):
         r"""
-            Return the residue between the data and the prediced data(fit) as
-            `s - predict_s`, where `s` is the input data and `predict_s` is the
-            predicted data.
+        Return the residual as the difference the data and the prediced data(fit),
+        following
 
-            Args:
-                K: The kernel.
-                s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
+        .. math::
+            \text{residuals} = {\bf s - Kf^*}
+
+        where :math:`{\bf f^*}` is the optimum solution.
+
+        Args:
+            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
+                shape (m, n).
+            s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
                 :math:`{\bf s}`.
 
-            Return:
-                residue: A csdm object or a :math:`m \times m_\text{count}` residue
-                matrix.
+        Return:
+            If `s` is a csdm object, returns a csdm object with the residuals. If `s`
+            is a numpy array, return a :math:`m \times m_\text{count}` residue matrix.
         """
         if isinstance(s, cp.CSDM):
             s_ = s.dependent_variables[0].components[0].T
@@ -320,70 +335,67 @@ class GeneralL2Lasso:
 
     def score(self, K, s, sample_weights=None):
         """
-            Return the coefficient of determination, :math:`R^2`, of the prediction.
-            For more information, read scikit-learn documentation.
+        Return the coefficient of determination, :math:`R^2`, of the prediction.
+        For more information, read scikit-learn documentation.
         """
         return self.estimator.score(K, s / self.scale, sample_weights)
 
 
 class SmoothLasso(GeneralL2Lasso):
     r"""
-        The linear model trained with the combined l1 and l2 priors as the
-        regularizer. The method minimizes the objective function,
+    The linear model trained with the combined l1 and l2 priors as the regularizer.
+    The method minimizes the objective function,
 
-        .. math::
-            \| {\bf Kf - s} \|^2_2 + \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2
-                     + \lambda  \| {\bf f} \|_1 ,
+    .. math::
+        \| {\bf Kf - s} \|^2_2 + \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2
+                    + \lambda  \| {\bf f} \|_1 ,
 
-        where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
-        :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known signal
-        containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
-        is the desired solution. The parameters, :math:`\alpha` and :math:`\lambda`,
-        are the hyperparameters controlling the smoothness and sparsity of the
-        solution :math:`{\bf f}`.
-        The matrix :math:`{\bf J}_i` is given as
+    where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
+    :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known (measured)
+    signal, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
+    is the desired solution. The parameters, :math:`\alpha` and :math:`\lambda`,
+    are the hyperparameters controlling the smoothness and sparsity of the
+    solution :math:`{\bf f}`. The matrix :math:`{\bf J}_i` is given as
 
-        .. math::
-            {\bf J}_i = {\bf I}_{n_1} \otimes \cdots \otimes {\bf A}_{n_i}
-                        \otimes \cdots \otimes {\bf I}_{n_{d}},
+    .. math::
+        {\bf J}_i = {\bf I}_{n_1} \otimes \cdots \otimes {\bf A}_{n_i}
+                    \otimes \cdots \otimes {\bf I}_{n_{d}},
 
-        where :math:`{\bf I}_{n_i} \in \mathbb{R}^{n_i \times n_i}` is the identity
-        matrix,
+    where :math:`{\bf I}_{n_i} \in \mathbb{R}^{n_i \times n_i}` is the identity matrix,
 
-        .. math::
-            {\bf A}_{n_i} = \left(\begin{array}{ccccc}
-                            1 & -1 & 0 & \cdots & \vdots \\
-                            0 & 1 & -1 & \cdots & \vdots \\
-                            \vdots & \vdots & \vdots & \vdots & 0 \\
-                            0 & \cdots & 0 & 1 & -1
-                        \end{array}\right) \in \mathbb{R}^{(n_i-1)\times n_i},
+    .. math::
+        {\bf A}_{n_i} = \left(\begin{array}{ccccc}
+                        1 & -1 & 0 & \cdots & \vdots \\
+                        0 & 1 & -1 & \cdots & \vdots \\
+                        \vdots & \vdots & \vdots & \vdots & 0 \\
+                        0 & \cdots & 0 & 1 & -1
+                    \end{array}\right) \in \mathbb{R}^{(n_i-1)\times n_i},
 
-        and the symbol :math:`\otimes` is the Kronecker product. The terms,
-        :math:`\left(n_1, n_2, \cdots, n_d\right)`, are the number of points along the
-        respective dimensions, with the constraint that :math:`\prod_{i=1}^{d}n_i = n`,
-        where :math:`d` is the total number of dimensions.
+    and the symbol :math:`\otimes` is the Kronecker product. The terms,
+    :math:`\left(n_1, n_2, \cdots, n_d\right)`, are the number of points along the
+    respective dimensions, with the constraint that :math:`\prod_{i=1}^{d}n_i = n`,
+    where :math:`d` is the total number of dimensions.
 
-        Args:
-            alpha: Float, the hyperparameter, :math:`\alpha`.
-            lambda1: Float, the hyperparameter, :math:`\lambda`.
-            inverse_dimension: A list of csdmpy Dimension objects representing the
-                        inverse space.
-            max_iterations: Interger, the maximum number of iterations allowed when
-                        solving the problem. The default value is 10000.
-            tolerance: Float, the tolerance at which the solution is
-                       considered converged. The default value is 1e-5.
-            positive: Boolean. If True, the amplitudes in the solution,
-                      :math:`{\bf f}` is all positive, else the solution may contain
-                      positive and negative amplitudes. The default is True.
+    Args:
+        float alpha: The hyperparameter, :math:`\alpha`.
+        float lambda1: The hyperparameter, :math:`\lambda`.
+        list inverse_dimension: A list of csdmpy Dimension objects representing the
+            inverse space.
+        int max_iterations: The maximum number of iterations allowed when
+            solving the problem. The default value is 10000.
+        float tolerance: The tolerance at which the solution is considered
+            converged. The default value is 1e-5.
+        bool positive: If True, the amplitudes in the solution, :math:`{\bf f}`
+            are all positive, else the solution may contain positive and negative
+            amplitudes. The default is True.
 
-        .. rubric:: Attribute documentation
+    .. rubric:: Attribute documentation
 
-        Attributes:
-            f: A ndarray of shape (m_count, nd, ..., n1, n0). The solution,
-                        :math:`{\bf f} \in \mathbb{R}^{m_\text{count}
-                        \times n_d \times \cdots n_1 \times n_0}`.
-            n_iter: Integer, the number of iterations required to reach the
-                    specified tolerance.
+    Attributes:
+        f: A ndarray of shape (`m_count`, `nd`, ..., `n1`, `n0`) representing the
+            solution, :math:`{\bf f} \in \mathbb{R}^{m_\text{count} \times n_d \times
+            \cdots n_1 \times n_0}`.
+        n_iter: The number of iterations required to reach the specified tolerance.
     """
 
     def __init__(
@@ -408,34 +420,34 @@ class SmoothLasso(GeneralL2Lasso):
 
 class SparseRidgeFusion(GeneralL2Lasso):
     r"""
-        Linear model trained with l1-l2 prior regularization of form,
+    Linear model trained with l1-l2 prior regularization of form,
 
-        .. math::
-            {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \| {\bf Kf - s} \|^2_2 +
-                        \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2 +
-                        \lambda  \| {\bf f} \|_1 \right),
+    .. math::
+        {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \| {\bf Kf - s} \|^2_2 +
+                    \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2 +
+                    \lambda  \| {\bf f} \|_1 \right),
 
-        where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
-        :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known signal
-        containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
-        is the desired solution matrix.
+    where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
+    :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known signal
+    containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
+    is the desired solution matrix.
 
 
-        Based on the regularization literal, the above problem is constraint
+    Based on the regularization literal, the above problem is constraint
 
-        Args:
-            kernel: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
-            signal: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
-            inverse_dimension: A list of csdmpy Dimension objects representing the
-                        inverse space.
-            max_iterations: An interger defining the maximum number of iterations used
-                        in solving the LASSO problem. The default value is 10000.
-            tolerance: A float defining the tolerance at which the solution is
-                        considered converged. The default value is 1e-5.
-            positive: A boolean. If True, the amplitudes in the solution,
-                        :math:`{\bf f}` is all positive, else the solution contains
-                        both positive and negative amplitudes. the default is True.
-            sigma: The noise standard deviation. The default is 0.0
+    Args:
+        kernel: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
+        signal: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
+        inverse_dimension: A list of csdmpy Dimension objects representing the
+            inverse space.
+        max_iterations: An interger defining the maximum number of iterations used
+            in solving the LASSO problem. The default value is 10000.
+        tolerance: A float defining the tolerance at which the solution is
+            considered converged. The default value is 1e-5.
+        positive: A boolean. If True, the amplitudes in the solution,
+            :math:`{\bf f}` is all positive, else the solution contains
+            both positive and negative amplitudes. the default is True.
+        sigma: The noise standard deviation. The default is 0.0
     """
 
     def __init__(
@@ -502,13 +514,15 @@ class GeneralL2LassoCV:
 
     def fit(self, K, s):
         r"""
-            Fit the model using the coordinate descent method from scikit-learn for
-            all alpha anf lambda values using `n`-folds cross-validation.
-            The cross-validation metric is the mean squared error.
+        Fit the model using the coordinate descent method from scikit-learn for
+        all alpha anf lambda values using the `n`-folds cross-validation technique.
+        The cross-validation metric is the mean squared error.
 
-            Args:
-                K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`.
-                s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
+        Args:
+            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
+                shape (m, n).
+            s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}` as a
+                csdm object or a numpy array or shape (m, m_count).
         """
 
         if isinstance(s, cp.CSDM):
@@ -630,34 +644,45 @@ class GeneralL2LassoCV:
         self.cv_map.dimensions[1] = d1
 
     def predict(self, K):
-        """
-            Predict using the linear model.
+        r"""
+        Predict the signal using the linear model.
 
-            Args:
-                K: The kernel.
-                f_shape: The shape of the solution.
+        Args:
+            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
+                shape (m, n).
 
-            Return:
-                y_predict: The predicted values.
+        Return:
+            A numpy array of shape (m, m_count) with the predicted values.
         """
         return self.opt.predict(K)
 
     def residuals(self, K, s):
-        """
-            Return the residue between the data and the prediced data(fit) as
-            `s - predict_s`, where `s` is the input data and `predict_s` is the
-            predicted data.
+        r"""
+        Return the residual as the difference the data and the prediced data(fit),
+        following
 
-            Args:
-                K: The kernel.
-                s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
+        .. math::
+            \text{residuals} = {\bf s - Kf^*}
+
+        where :math:`{\bf f^*}` is the optimum solution.
+
+        Args:
+            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
+                shape (m, n).
+            s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
                 :math:`{\bf s}`.
-
-            Return:
-                residue: A csdm object or a :math:`m \times m_\text{count}` residue
-                matrix.
+        Return:
+            If `s` is a csdm object, returns a csdm object with the residuals. If `s`
+            is a numpy array, return a :math:`m \times m_\text{count}` residue matrix.
         """
         return self.opt.residuals(K, s)
+
+    def score(self, K, s, sample_weights=None):
+        """
+        Return the coefficient of determination, :math:`R^2`, of the prediction.
+        For more information, read scikit-learn documentation.
+        """
+        return self.opt.score(K, s, sample_weights)
 
     @property
     def cross_validation_curve(self):
