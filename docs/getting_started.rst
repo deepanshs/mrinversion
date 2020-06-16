@@ -469,8 +469,8 @@ the class instance,
     :context: close-figs
     :include-source:
 
-    >>> s_lasso_cv.hyperparameter
-    {'alpha': 1.6681005372000593e-05, 'lambda': 7.742636826811277e-06}
+    >>> alpha = s_lasso_cv.hyperparameter['alpha']
+    >>> lambda_1 = s_lasso_cv.hyperparameter['lambda']
 
 and the corresponding cross-validation error surface using the
 :attr:`~mrinversion.linear_model.SmoothLassoCV.cv_map` attribute.
