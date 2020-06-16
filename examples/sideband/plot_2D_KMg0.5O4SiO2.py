@@ -7,10 +7,9 @@
 # sphinx_gallery_thumbnail_number = 5
 # %%
 # The following example illustrates an application of the statistical learning method
-# applied in determining the distribution of the nuclear shielding tensor parameters from
-# a 2D magic-angle turning (MAT) spectrum. In this example,
-# we use the 2D MAT spectrum [#f1]_ of :math:`\text{KMg}_{0.5}\text{O}\cdot4\text{SiO}_2`
-# glass.
+# applied in determining the distribution of the nuclear shielding tensor parameters
+# from a 2D magic-angle turning (MAT) spectrum. In this example, we use the 2D MAT
+# spectrum [#f1]_ of :math:`\text{KMg}_{0.5}\text{O}\cdot4\text{SiO}_2` glass.
 #
 # Setup for the matplotlib figure.
 import matplotlib.pyplot as plt

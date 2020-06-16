@@ -5,11 +5,12 @@
 =============================
 """
 # sphinx_gallery_thumbnail_number = 5
-# Setup for the matplotlib figure.
+# Setup for matplotlib figure.
 import matplotlib.pyplot as plt
+import numpy as np
 from pylab import rcParams
 
-rcParams["figure.figsize"] = 4, 3
+rcParams["figure.figsize"] = 4.5, 3.5
 rcParams["font.size"] = 9
 
 # %%
@@ -38,7 +39,12 @@ data_object = data_object.real
 # The variable ``data_object`` is a
 # `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
 # object that holds the 2D MAF dataset. The plot of the 2D MAF dataset is
-cp.plot(data_object, cmap="gist_ncar_r", reverse_axis=[True, True])
+ax = plt.subplot(projection="csdm")
+ax.imshow(data_object, cmap="gist_ncar_r", aspect="auto")
+ax.invert_xaxis()
+ax.invert_yaxis()
+plt.tight_layout()
+plt.show()
 
 # %%
 # There are two dimensions in this dataset. The dimension at index 0, the horizontal
@@ -66,9 +72,14 @@ print(data_object.shape)
 # from the noise vectors. Therefore, for optimum performance, it is best to truncate
 # the dataset to the desired region before proceeding. Use the appropriate array
 # indexing/slicing to select the signal region.
-
 data_object_truncated = data_object[:, 250:285]
-cp.plot(data_object_truncated, cmap="gist_ncar_r", reverse_axis=[True, True])
+
+ax = plt.subplot(projection="csdm")
+ax.imshow(data_object_truncated, cmap="gist_ncar_r", aspect="auto")
+ax.invert_xaxis()
+ax.invert_yaxis()
+plt.tight_layout()
+plt.show()
 
 # %%
 # In the above code, we truncate the isotropic chemical shift dimension to isotropic
@@ -112,7 +123,6 @@ inverse_dimensions = [
 #
 # For MAF datasets, the line-shape kernel corresponds to the pure nuclear shielding
 # anisotropy line-shapes.
-
 from mrinversion.kernel import NuclearShieldingLineshape
 
 lineshape = NuclearShieldingLineshape(
@@ -176,7 +186,6 @@ print(f"truncation_index = {new_system.truncation_index}")
 
 # %%
 
-# import numpy as np
 # from mrinversion.linear_model import SmoothLassoCV
 
 # # set up the pre-defined range of alpha and lambda values
@@ -227,15 +236,20 @@ f_sol = s_lasso.f
 # Here, ``f_sol`` is the solution corresponding to the optimized hyperparameters. To
 # calculate the residuals between the data and predicted data(fit), use the
 # :meth:`~mrinversion.linear_model.SmoothLasso.residuals` method, as follows,
-
 residue = s_lasso.residuals(K, data_object_truncated.real)
-cp.plot(
+
+ax = plt.subplot(projection="csdm")
+ax.imshow(
     residue,
     cmap="gist_ncar_r",
     vmax=data_object_truncated.real.max(),
     vmin=data_object_truncated.real.min(),
-    reverse_axis=[True, True],
+    aspect="auto",
 )
+ax.invert_xaxis()
+ax.invert_yaxis()
+plt.tight_layout()
+plt.show()
 
 # %%
 # The standard deviation of the residuals is close to the standard deviation of the
@@ -247,7 +261,6 @@ residue.std()
 #
 # To serialize the solution data to a file, use the `save()` method of the CSDM object,
 # for example,
-
 f_sol.save("Rb2O.2.25SiO2_inverse.csdf")  # save the solution
 residue.save("Rb2O.2.25SiO2_residue.csdf")  # save the residuals
 
@@ -261,7 +274,6 @@ residue.save("Rb2O.2.25SiO2_residue.csdf")  # save the residuals
 # Data Visualization
 # ^^^^^^^^^^^^^^^^^^
 #
-# from mpl_toolkits.mplot3d import Axes3D
 from mrinversion.plot import plot_3d
 from matplotlib import cm
 
@@ -422,7 +434,6 @@ print("\tstandard deviation\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*st
 # `x`, `y`, and the isotropic chemical shifts. To convert the `x` and `y` statistics
 # to commonly used :math:`\zeta` and :math:`\eta` statistics, use the
 # :func:`~mrinversion.kernel.x_y_to_zeta_eta` function.
-import numpy as np
 from mrinversion.kernel import x_y_to_zeta_eta
 
 mean_ζη_Q3 = x_y_to_zeta_eta(*mean_Q3[0:2])

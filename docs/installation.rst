@@ -1,21 +1,76 @@
 
 
-Installing `Mrinversion` package
-================================
+============
+Installation
+============
 
-.. We recommend installing `anaconda <https://www.anaconda.com/distribution/>`_
-.. distribution for python version 3.6 or higher. The anaconda distribution
-.. ships with numerous packages and modules including Numpy, Scipy, and
-.. Matplotlib which are useful packages for handling scientific datasets.
+Requirements
+------------
 
+``mrinversion`` has the following strict requirements:
 
-The `Mrinversion` package utilizes the `Mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
-package for generating the NMR line-shapes. For linux and mac users, type the following
-in the terminal to install the `Mrinversion` package.
+- `Python <https://www.python.org>`_ 3.6 or later
+- `Numpy <https://numpy.org>`_ 1.17 or later
+
+See :ref:`requirements` for a full list of requirements.
+
+Make sure you have the required version of python by typing the following in the
+terminal,
+
+.. code-block:: shell
+
+      $ python --version
+
+For `Mac` users, python version 3 may be installed under the name `python3`. You may replace
+`python` for `python3` in the above command and all subsequent python statements.
+
+Installing ``mrinversion``
+--------------------------
+
+On Local machine (Using pip)
+''''''''''''''''''''''''''''
+
+The ``mrinversion`` package utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/latest/>`_
+package for generating the NMR line-shapes.
+
+For **linux** and **mac** users, type the following in the terminal to install the
+package.
 
 .. code-block:: bash
 
     $ pip install mrinversion
 
-For windows user, first install the `Mrsimulator <file:///Users/deepansh/Research/NMRgit/MRSimulator/MRsimulator/docs/_build/html/installation.html#on-local-machine-using-pip>`_
-package and then install the `Mrinversion` package using the above command.
+For **windows** user, first `install <https://mrsimulator.readthedocs.io/en/latest/installation.html#on-local-machine-using-pip>`_
+the mrsimulator package and then install the mrinversion package using the above command.
+
+If you get a ``PermissionError``, it usually means that you do not have the required
+administrative access to install new packages to your Python installation. In this
+case, you may consider adding the ``--user`` option, at the end of the statement, to
+install the package into your home directory. You can read more about how to do this in
+the `pip documentation <https://pip.pypa.io/en/stable/user_guide/#user-installs>`_.
+
+.. code-block:: bash
+
+    $ pip install mrinversion --user
+
+Upgrading to a newer version
+""""""""""""""""""""""""""""
+
+To upgrade, type the following in the terminal/Prompt
+
+.. code-block:: bash
+
+    $ pip install mrinversion -U
+
+On Google Colab Notebook
+''''''''''''''''''''''''
+
+Colaboratory is a Google research project. It is a Jupyter notebook environment that
+runs entirely in the cloud. Launch a new notebook on
+`Colab <http://colab.research.google.com>`_. To install the mrinversion package, type
+
+.. code-block:: shell
+
+    !pip install mrinversion
+
+in the first cell, and execute. All done! You may now start using the library.

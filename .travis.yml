@@ -1,0 +1,31 @@
+dist: xenial
+language: python
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+
+sudo: false
+cache: pip
+
+# safelist
+branches:
+  only:
+    - master
+
+before_install:
+  - sudo apt-get install libopenblas-dev libfftw3-dev -y
+  - pip install "numpy>=1.17" cython
+  - pip install git+https://github.com/DeepanshS/mrsimulator.git
+  - pip install --upgrade pip
+  - pip install -r requirements-dev.txt
+
+install:
+  - python setup.py develop
+
+# command to run tests
+script:
+  - pytest --cov=./
+
+after_success:
+  - codecov

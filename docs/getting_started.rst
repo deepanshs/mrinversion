@@ -25,13 +25,18 @@ from a CSDM [#f1]_ compliant file-format.
     The CSDM file-format is supported by most NMR software, such as, SIMPSON, DMFIT, RMN.
     A python package supporting CSDM file-format, csdmpy, is also available.
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> import csdmpy as cp
-
+    ...
+    >>> # the spinning sideband data file as a CSDM object.
     >>> filename = "https://osu.box.com/shared/static/xnlhecn8ifzcwx09f83gsh27rhc5i5l6.csdf"
     >>> data_object = cp.load(filename) # load the CSDM file with the csdmpy module
-
+    ...
+    >>> # the true probability distribution dataset as a CSDM object.
     >>> datafile = "https://osu.box.com/shared/static/lufeus68orw1izrg8juthcqvp7w0cpzk.csdf"
     >>> true_data_object = cp.load(datafile) # the true solution for comparison
 
@@ -39,40 +44,59 @@ The variable ``data_object`` is the `CSDM <https://csdmpy.readthedocs.io/en/late
 object containing a one-dimension pure anisotropic spinning sideband spectrum.
 The coordinates and the corresponding responses from this dataset are
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
-    >>> coordinates = data_object.dimensions[0].coordinates
+    >>> # convert the dimension from `Hz` to `ppm`.
+    >>> data_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
+    >>> coordinates = data_object.dimensions[0].coordinates.value
     >>> responses = data_object.dependent_variables[0].components[0]
 
 and the plot depicting the sideband spectrum follows
 
-.. doctest::
+.. plot::
+    :format: python
+    :context: close-figs
+    :include-source:
 
     >>> import matplotlib.pyplot as plt
-    >>> line = plt.stem(coordinates, responses, markerfmt=' ', use_line_collection=True) # doctest: +SKIP
+    >>> from mrinversion.plot import get_polar_grids
+    >>> import numpy as np
+    ...
+    >>> _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={'projection': 'csdm'})
+    >>> line = ax[0].stem(coordinates, responses, markerfmt=' ', use_line_collection=True)
     >>> plt.setp(line, color="black", linewidth=2) # doctest: +SKIP
-    >>> plt.gca().invert_xaxis() # doctest: +SKIP
-    >>> plt.xlabel(data_object.dimensions[0].axis_label) # doctest: +SKIP
+    >>> ax[0].invert_xaxis() # doctest: +SKIP
+    ...
+    ...
+    >>> def twoD_plot(ax, csdm_object, title=''):
+    ...     # convert the dimension from `Hz` to `ppm`.
+    ...     csdm_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
+    ...     csdm_object.dimensions[1].to('ppm', 'nmr_frequency_ratio')
+    ...
+    ...     levels = (np.arange(9)+1)/10
+    ...     ax.contourf(csdm_object, cmap='gist_ncar', levels=levels)
+    ...     ax.grid(None)
+    ...     ax.set_title(title)
+    ...     ax.set_aspect("equal")
+    ...
+    ...     # The get_polar_grids method place a polar zeta-eta grid on the background.
+    ...     get_polar_grids(ax)
+    ...
+    >>> twoD_plot(ax[1], true_data_object, title='True distribution') # doctest: +SKIP
+    >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
-    >>> cp.plot(true_data_object) # doctest: +SKIP
 
-.. list-table:: The figure on the left is the synthetic spinning sideband dataset for
-        the nuclear shielding tensor distribution shown on the right. In the figure
-        on the right, the parameter ζ is the radial dimension, and η is the angular
-        dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
-        corresponds to the positive and negative values of ζ. The radial grid lines
-        are drawn at every 20 ppm increments of ζ, and the angular grid lines are drawn
-        at every 0.2 increments of η. The `x` and `y`-axis are η = 0, and the diagonal is
-        η = 1.
-    :widths: 50 50
-
-    * - .. figure:: _static/example_sideband_02_r.*
-            :figclass: figure-polaroid
-            :scale: 75%
-
-      - .. figure:: _static/sol1_original_r.*
-            :figclass: figure-polaroid
-            :scale: 75%
+The figure on the left is the synthetic spinning sideband dataset for
+the nuclear shielding tensor distribution shown on the right. In the figure
+on the right, the parameter ζ is the radial dimension, and η is the angular
+dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
+corresponds to the positive and negative values of ζ. The radial grid lines
+are drawn at every 20 ppm increments of ζ, and the angular grid lines are drawn
+at every 0.2 increments of η. The `x` and `y`-axis are η = 0, and the diagonal is
+η = 1.
 
 
 Setting the kernel
@@ -122,7 +146,7 @@ where :math:`\theta=\pi\eta/4`.
 
 In `Mrinversion`, the range and domain space dimensions are defined using the
 `Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_ objects
-from the `csdmpy <https://csdmpy.readthedocs.io/en/latest/index.html>`_ package.
+from the `csdmpy <https://csdmpy.readthedocs.io/en/latest/>`_ package.
 For nuclear shielding tensor line-shape kernel, we refer the range space
 dimensions as the `anisotropic_dimension`, and the domain space dimensions as
 the `inverse_dimension`.
@@ -136,7 +160,10 @@ is already defined as a
 object. For illustration, however, we re-define the `anisotropic_dimension` as
 follows,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> anisotropic_dimension = cp.LinearDimension(count=32, increment='625Hz', coordinates_offset='-10kHz')
     >>> print(anisotropic_dimension)
@@ -145,23 +172,6 @@ follows,
        1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
        6875.   7500.   8125.   8750.   9375.] Hz)
 
-.. The `LinearDimension` object is a subtype of the Dimension class and generates
-.. equally spaced coordinates.
-
-.. You may also use the NumPy array to create a
-.. Dimension object,
-
-.. .. doctest::
-
-..     >>> import numpy as np
-..     >>> test_array = np.arange(32) * 625 - 10000 # as in Hz
-..     >>> anisotropic_dimension = cp.as_dimension(test_array, unit='Hz')
-..     >>> print(anisotropic_dimension)
-..     LinearDimension([-10000.  -9375.  -8750.  -8125.  -7500.  -6875.  -6250.  -5625.  -5000.
-..       -4375.  -3750.  -3125.  -2500.  -1875.  -1250.   -625.      0.    625.
-..        1250.   1875.   2500.   3125.   3750.   4375.   5000.   5625.   6250.
-..        6875.   7500.   8125.   8750.   9375.] Hz)
-
 
 Inverse dimension
 '''''''''''''''''
@@ -169,7 +179,10 @@ Inverse dimension
 Similarly, set up the two inverse dimensions. Here, the two inverse dimensions
 are
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> inverse_dimension = [
     ...     cp.LinearDimension(count=25, increment='370 Hz', label='x'),  # the x-coordinates
@@ -179,13 +192,6 @@ are
 sampled at every 370 Hz for 25 points. The inverse dimension at index 0 and 1
 are the `x` and `y` dimensions, respectively.
 
-.. .. doctest::
-
-..     >>> print(inverse_dimension[0])
-..     LinearDimension([   0.  370.  740. 1110. 1480. 1850. 2220. 2590. 2960. 3330. 3700. 4070.
-..      4440. 4810. 5180. 5550. 5920. 6290. 6660. 7030. 7400. 7770. 8140. 8510.
-..      8880.] Hz)
-
 
 Setting the Kernel
 ------------------
@@ -193,7 +199,10 @@ Setting the Kernel
 Import the :class:`~mrinversion.kernel.NuclearShieldingLineshape` class and
 generate the kernel as follows,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> from mrinversion.kernel import NuclearShieldingLineshape
     >>> lineshapes = NuclearShieldingLineshape(
@@ -230,7 +239,10 @@ Once the instance is created, used the
 :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the
 instance to generate the spinning sideband kernel, as follows,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> K = lineshapes.kernel(supersampling=1)
     >>> print(K.shape)
@@ -258,7 +270,10 @@ sub-space is referred to as the `compressed signal`. The compression also
 reduces the time for further computation. To compress the kernel and the data,
 import the :class:`~mrinversion.linear_model.TSVDCompression` class and follow,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> from mrinversion.linear_model import TSVDCompression
     >>> new_system = TSVDCompression(K, data_object)
@@ -275,7 +290,10 @@ and :attr:`~mrinversion.linear_model.TSVDCompression.compressed_s` holds the
 compressed kernel and signal, respectively. The shape of the original signal `v.s.` the
 compressed signal is
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> print(data_object.shape, compressed_s.shape)
     (32,) (31,)
@@ -299,10 +317,13 @@ for the :class:`~mrinversion.linear_model.SmoothLasso` class for details.
 
 Import the :class:`~mrinversion.linear_model.SmoothLasso` class and follow,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> from mrinversion.linear_model import SmoothLasso
-    >>> s_lasso = SmoothLasso(alpha=0.1, lambda1=1e-04, inverse_dimension=inverse_dimension)
+    >>> s_lasso = SmoothLasso(alpha=0.01, lambda1=1e-04, inverse_dimension=inverse_dimension)
 
 Here, the variable ``s_lasso`` is an instance of the
 :class:`~mrinversion.linear_model.SmoothLasso` class. The required arguments
@@ -319,7 +340,10 @@ To solve the smooth lasso problem, use the
 :meth:`~mrinversion.linear_model.SmoothLasso.fit` method of the ``s_lasso``
 instance as follows,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> s_lasso.fit(K=compressed_K, s=compressed_s)
 
@@ -334,60 +358,46 @@ The solution to the smooth lasso is accessed using the
 :attr:`~mrinversion.linear_model.SmoothLasso.f` attribute of the respective
 ``s_lasso`` object.
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> f_sol = s_lasso.f
 
 The plot of the solution is
 
-    >>> from mrinversion.plot import get_polar_grids
-    >>> import numpy as np
-    ...
-    >>> # convert the `inverse_dimension` coordinates to pmm from Hz.
-    >>> f_sol.dimensions[0].to('ppm', 'nmr_frequency_ratio')
-    >>> f_sol.dimensions[1].to('ppm', 'nmr_frequency_ratio')
-    >>> # get the x and the y coordinates.
-    >>> x = f_sol.dimensions[0].coordinates # the x coordinates
-    >>> y = f_sol.dimensions[1].coordinates # the y coordinates
-    ...
-    >>> levels = (np.arange(9)+1)/10
-    >>> plt.contourf(x, y, f_sol/f_sol.max(), cmap='gist_ncar', levels=levels) # doctest: +SKIP
-    >>> plt.xlim(0, 100) # doctest: +SKIP
-    >>> plt.ylim(0, 100) # doctest: +SKIP
-    >>> plt.xlabel(f_sol.dimensions[0].axis_label) # doctest: +SKIP
-    >>> plt.ylabel(f_sol.dimensions[1].axis_label) # doctest: +SKIP
-    ...
-    >>> # The get_polar_grids method place a polar zeta-eta grid on the background.
-    >>> get_polar_grids(plt.gca())
-    ...
-    >>> plt.gca().set_aspect('equal') # doctest: +SKIP
+.. plot::
+    :format: python
+    :context: close-figs
+    :include-source:
+
+    >>> _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={'projection': 'csdm'}) # doctest: +SKIP
+    >>> twoD_plot(ax[0], f_sol/f_sol.max(), title='Guess distribution') # doctest: +SKIP
+    >>> twoD_plot(ax[1], true_data_object, title='True distribution') # doctest: +SKIP
+    >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
-.. list-table:: The figure on the left is the solution to the nuclear shielding
-            tensor distribution derived from the inversion of the spinning
-            sideband dataset. The figure on the right is the true nuclear
-            shielding tensor distribution. The ζ and η coordinates are depicted
-            as piecewise polar, where ζ is the radial dimension, and η is the angular
-            dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
-            corresponds to the positive and negative values of ζ.  The radial grid lines
-            are drawn at every 20 ppm increment of ζ, and the angular grid lines are
-            drawn at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the
-            diagonal is η = 1.
-    :widths: 50 50
+The figure on the left is the solution to the nuclear shielding
+tensor distribution derived from the inversion of the spinning
+sideband dataset. The figure on the right is the true nuclear
+shielding tensor distribution. The ζ and η coordinates are depicted
+as piecewise polar, where ζ is the radial dimension, and η is the angular
+dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
+corresponds to the positive and negative values of ζ.  The radial grid lines
+are drawn at every 20 ppm increment of ζ, and the angular grid lines are
+drawn at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the
+diagonal is η = 1.
 
-    * - .. figure:: _static/sol1_r.*
-            :figclass: figure-polaroid
-            :scale: 75%
-
-      - .. figure:: _static/sol1_original_r.*
-            :figclass: figure-polaroid
-            :scale: 75%
 
 You may also evaluate the spectrum predicted from the solution using the
 :meth:`~mrinversion.linear_model.SmoothLasso.predict` method of the object as
 follows,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> predicted_signal = s_lasso.predict(K)
 
@@ -409,7 +419,10 @@ model, such as the `n`-fold cross-validation.
 
 The following :class:`~mrinversion.linear_model.SmoothLassoCV` class
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> from mrinversion.linear_model import SmoothLassoCV
 
@@ -420,14 +433,20 @@ cross-validation. Here, we search the best model on a :math:`10 \times 10`
 statistical learning method. The :math:`\lambda` and :math:`\alpha` values are
 sampled uniformly on a logarithmic scale as,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
-    >>> lambdas = 10 ** (-5 - 2 * (np.arange(10) / 9))
-    >>> alphas = 10 ** (-1.5 - 2 * (np.arange(10) / 9))
+    >>> lambdas = 10 ** (-4 - 2 * (np.arange(10) / 9))
+    >>> alphas = 10 ** (-3 - 2 * (np.arange(10) / 9))
 
 Setup the smooth lasso cross-validation using
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> s_lasso_cv = SmoothLassoCV(alphas=alphas, lambdas=lambdas,
     ...                            inverse_dimension=inverse_dimension,
@@ -445,59 +464,71 @@ The optimized hyperparameters may be accessed using the
 :attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameters` attribute of
 the class instance,
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
     >>> s_lasso_cv.hyperparameter
-    {'alpha': 0.00031622776601683794, 'lambda': 1e-05}
+    {'alpha': 1.6681005372000593e-05, 'lambda': 7.742636826811277e-06}
 
 and the corresponding cross-validation error surface using the
 :attr:`~mrinversion.linear_model.SmoothLassoCV.cv_map` attribute.
 
-.. doctest::
+.. plot::
+    :format: python
+    :context: close-figs
+    :include-source:
 
-    >>> plt.contour(-np.log10(lambdas), -np.log10(alphas), np.log10(s_lasso_cv.cv_map), levels=25) # doctest: +SKIP
-    >>> plt.scatter(-np.log10(s_lasso_cv.hyperparameter['lambda']),
-    ...             -np.log10(s_lasso_cv.hyperparameter['alpha']), marker='x', color='k') # doctest: +SKIP
-    >>> plt.xlabel(r"$-\log~\lambda$") # doctest: +SKIP
-    >>> plt.ylabel(r"$-\log~\alpha$") # doctest: +SKIP
+    >>> plt.figure(figsize=(5, 3.5)) # doctest: +SKIP
+    >>> ax = plt.subplot(projection='csdm') # doctest: +SKIP
+    >>> ax.contour(np.log10(s_lasso_cv.cv_map), levels=25) # doctest: +SKIP
+    >>> ax.scatter(-np.log10(s_lasso_cv.hyperparameter['alpha']),
+    ...         -np.log10(s_lasso_cv.hyperparameter['lambda']),
+    ...         marker='x', color='k') # doctest: +SKIP
+    >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
-.. figure:: _static/sol1_cv_map_r.*
-    :figclass: figure-polaroid
-    :scale: 75%
-
-    The ten-folds cross-validation prediction error surface as
-    a function of hyperparameters :math:`\alpha` and :math:`\beta`.
+The ten-folds cross-validation prediction error surface as
+a function of hyperparameters :math:`\alpha` and :math:`\beta`.
 
 The best model selection from the cross-validation method may be accessed using
 the :attr:`~mrinversion.linear_model.SmoothLassoCV.f` attribute.
 
-.. doctest::
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
 
-    >>> f_sol_cv = s_lasso_cv.f  # best model selected using the 10-fold cross-validation # doctest: +SKIP
+    >>> f_sol_cv = s_lasso_cv.f  # best model selected using the 10-fold cross-validation
 
-.. list-table:: The figure on the left is the best model selected by the 10-folds
-        cross-validation method. The figure on the right is the true model of the
-        nuclear shielding tensor distribution. The ζ and η coordinates are depicted
-        as piecewise polar, where ζ is the radial dimension, and η is the angular
-        dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
-        corresponds to the positive and negative values of ζ.  The radial grid lines
-        are drawn at every 20 ppm increment of ζ, and the angular grid lines are
-        drawn at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the
-        diagonal is η = 1.
-    :widths: 50 50
+The probability distribution of the selected model
 
-    * - .. figure:: _static/sol1_cv_r.*
-            :figclass: figure-polaroid
-            :scale: 75%
+.. plot::
+    :format: python
+    :context: close-figs
+    :include-source:
 
-      - .. figure:: _static/sol1_original_r.*
-            :figclass: figure-polaroid
-            :scale: 75%
+    >>> _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={'projection': 'csdm'}) # doctest: +SKIP
+    >>> twoD_plot(ax[0], f_sol_cv/f_sol_cv.max(), title='Optimum distribution') # doctest: +SKIP
+    >>> twoD_plot(ax[1], true_data_object, title='True distribution') # doctest: +SKIP
+    >>> plt.tight_layout() # doctest: +SKIP
+    >>> plt.show() # doctest: +SKIP
+
+The figure on the left is the best model selected by the 10-folds
+cross-validation method. The figure on the right is the true model of the
+nuclear shielding tensor distribution. The ζ and η coordinates are depicted
+as piecewise polar, where ζ is the radial dimension, and η is the angular
+dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
+corresponds to the positive and negative values of ζ.  The radial grid lines
+are drawn at every 20 ppm increment of ζ, and the angular grid lines are
+drawn at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the
+diagonal is η = 1.
+
 
 .. seealso::
 
-    `csdmpy <https://csdmpy.readthedocs.io/en/stable/>`_,
+    `csdmpy <https://csdmpy.readthedocs.io/en/latest/>`_,
     `Quantity <http://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity>`_,
     `numpy array <https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.ndarray.html>`_,
     `Matplotlib library <https://matplotlib.org>`_

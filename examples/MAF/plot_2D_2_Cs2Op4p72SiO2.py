@@ -114,8 +114,8 @@ print(K.shape)
 
 # %%
 # The kernel ``K`` is a NumPy array of shape (128, 625), where the axis with 128 points
-# corresponds to the anisotropic dimension, and the axis with 625 points are the features
-# corresponding to the :math:`25\times 25` `x`-`y` coordinates.
+# corresponds to the anisotropic dimension, and the axis with 625 points are the
+# features corresponding to the :math:`25\times 25` `x`-`y` coordinates.
 
 # %%
 # Data Compression

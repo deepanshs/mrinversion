@@ -114,8 +114,8 @@ print(K.shape)
 
 # %%
 # The kernel ``K`` is a NumPy array of shape (128, 625), where the axis with 128 points
-# corresponds to the anisotropic dimension, and the axis with 625 points are the features
-# corresponding to the :math:`25\times 25` `x`-`y` coordinates.
+# corresponds to the anisotropic dimension, and the axis with 625 points are the
+# features corresponding to the :math:`25\times 25` `x`-`y` coordinates.
 
 # %%
 # Data Compression
@@ -320,10 +320,10 @@ plt.show()
 # References
 # ^^^^^^^^^^
 #
-# .. [#f1]  P. Zhang, C. Dunlap, P. Florian, P. J. Grandinetti, I. Farnan, J. F. Stebbins,
-#       Silicon site distributions in an alkali silicate glass derived by two-dimensional
-#       29Si nuclear magnetic resonance, J. Non. Cryst. Solids 204 294–300 (1996).
-#       `doi:10.1016/S0022-3093(96)00601-1
+# .. [#f1] P. Zhang, C. Dunlap, P. Florian, P. J. Grandinetti, I. Farnan, J. F.
+#       Stebbins, Silicon site distributions in an alkali silicate glass derived by
+#       two-dimensional 29Si nuclear magnetic resonance, J. Non. Cryst. Solids 204
+#       294–300 (1996). `doi:10.1016/S0022-3093(96)00601-1
 #       <https://doi.org/doi:10.1016/S0022-3093(96)00601-1>`_.
 #
 # .. [#f2] Srivastava, D.J., Vosegaard, T., Massiot, D., Grandinetti, P.J. (2020) Core

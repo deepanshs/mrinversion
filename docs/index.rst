@@ -16,40 +16,47 @@ Welcome to Mrinversion documentation!
             :target: https://pypi.python.org/pypi/mrinversion
             :alt: PyPI version
 
+          .. image:: https://img.shields.io/pypi/pyversions/mrsimulator
+            :alt: PyPI - Python Version
+
       * - Build Status
-        - .. image:: https://travis-ci.org/DeepanshS/mrinversion.svg?branch=master&logo=travis&color=white
-              :target: https://travis-ci.org/DeepanshS/mrinversion
-              :alt: Build Status
+        - .. image:: https://img.shields.io/travis/deepanshs/mrinversion?logo=travis
+            :target: https://travis-ci.org/DeepanshS/mrinversion
+            :alt: Build Status
+
+          .. image:: https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI%20(pip)?logo=GitHub
+            :target: https://github.com/DeepanshS/mrinversion/actions
+            :alt: GitHub Workflow Status
 
           .. image:: https://readthedocs.org/projects/mrinversion/badge/?version=stable
-              :target: https://mrinversion.readthedocs.io/en/stable/?badge=stable
-              :alt: Documentation Status
+            :target: https://mrinversion.readthedocs.io/en/stable/?badge=stable
+            :alt: Documentation Status
 
       * - License
         - .. image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
-              :target: https://opensource.org/licenses/BSD-3-Clause
-              :alt: License
+            :target: https://opensource.org/licenses/BSD-3-Clause
+            :alt: License
 
       * - Metrics
-        - .. image:: https://img.shields.io/lgtm/grade/python/g/DeepanshS/mrinversion.svg?logo=lgtm&logoWidth=18
-              :target: https://lgtm.com/projects/g/DeepanshS/mrinversion/context:python
-              :alt: Language grade: Python
+        - .. image:: https://img.shields.io/lgtm/grade/python/g/DeepanshS/mrinversion.svg?logo=lgtm
+            :target: https://lgtm.com/projects/g/DeepanshS/mrinversion/context:python
+            :alt: Language grade: Python
 
           .. image:: https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg
-              :target: https://codecov.io/gh/DeepanshS/mrinversion
+            :target: https://codecov.io/gh/DeepanshS/mrinversion
 
-          .. image:: https://img.shields.io/lgtm/alerts/g/DeepanshS/mrinversion.svg?logo=lgtm&logoWidth=18
-              :target: https://lgtm.com/projects/g/DeepanshS/mrinversion/alerts/
-              :alt: Total alerts
+          .. image:: https://img.shields.io/lgtm/alerts/g/DeepanshS/mrinversion.svg?logo=lgtm
+            :target: https://lgtm.com/projects/g/DeepanshS/mrinversion/alerts/
+            :alt: Total alerts
 
       * - GitHub
-        - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?style=flat&logo=github
-              :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
-              :alt: GitHub contributors
+        - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?logo=github
+            :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
+            :alt: GitHub contributors
 
           .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
-              :target: https://github.com/DeepanshS/mrinversion/issues
-              :alt: GitHub issues
+            :target: https://github.com/DeepanshS/mrinversion/issues
+            :alt: GitHub issues
 
 ----
 

@@ -5,19 +5,19 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 """
 # sphinx_gallery_thumbnail_number = 5
-# %%
-# The following example illustrates an application of the statistical learning method
-# applied in determining the distribution of the nuclear shielding tensor parameters from
-# a 2D magic-angle flipping (MAF) spectrum. In this example,
-# we use the 2D MAF spectrum [#f1]_ of :math:`\text{Na}_2\text{O}\cdot4.7\text{SiO}_2`
-# glass.
-#
 # Setup for matplotlib figure.
 import matplotlib.pyplot as plt
+import numpy as np
 from pylab import rcParams
 
-rcParams["figure.figsize"] = 4, 3
+rcParams["figure.figsize"] = 4.5, 3.5
 rcParams["font.size"] = 9
+
+# %%
+# The following example illustrates an application of the statistical learning method
+# applied in determining the distribution of the nuclear shielding tensor parameters
+# from a 2D magic-angle flipping (MAF) spectrum. In this example, we use the 2D MAF
+# spectrum [#f1]_ of :math:`\text{Na}_2\text{O}\cdot4.7\text{SiO}_2` glass.
 
 # %%
 # Import the dataset
@@ -38,7 +38,12 @@ data_object = data_object.real
 # The variable ``data_object`` is a
 # `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
 # object that holds the 2D MAF dataset. The plot of the MAF dataset is
-cp.plot(data_object, cmap="gist_ncar_r", reverse_axis=[True, True])
+ax = plt.subplot(projection="csdm")
+ax.imshow(data_object, cmap="gist_ncar_r", aspect="auto")
+ax.invert_xaxis()
+ax.invert_yaxis()
+plt.tight_layout()
+plt.show()
 
 # %%
 # There are two dimensions in this dataset. The dimension at index 0 is the
@@ -58,9 +63,14 @@ print(data_object.shape)
 # frequency grid. It is, therefore, best to truncate the dataset to the desired region
 # before proceeding. Use the appropriate array indexing/slicing to select the signal
 # region.
-
 data_object_truncated = data_object.T[:, 155:180]
-cp.plot(data_object_truncated, cmap="gist_ncar_r", reverse_axis=[True, True])
+
+ax = plt.subplot(projection="csdm")
+ax.imshow(data_object_truncated, cmap="gist_ncar_r", aspect="auto")
+ax.invert_xaxis()
+ax.invert_yaxis()
+plt.tight_layout()
+plt.show()
 
 # %%
 # In the above code, we first transpose the dataset and then truncate the isotropic
@@ -73,7 +83,6 @@ cp.plot(data_object_truncated, cmap="gist_ncar_r", reverse_axis=[True, True])
 # **The anisotropic-dimension**
 #
 # The anisotropic dimension of the 2D MAF dataset should always be the dimension at 0.
-
 anisotropic_dimension = data_object_truncated.dimensions[0]
 
 # %%
@@ -82,16 +91,13 @@ anisotropic_dimension = data_object_truncated.dimensions[0]
 # The two inverse dimensions correspond to the `x` and `y`-axis of the `x`-`y` grid.
 
 inverse_dimensions = [
-    # along the `x`-dimension.
-    cp.LinearDimension(count=25, increment="400 Hz", label="x"),
-    # along the `y`-dimension.
-    cp.LinearDimension(count=25, increment="400 Hz", label="y"),
+    cp.LinearDimension(count=25, increment="400 Hz", label="x"),  # the `x`-dimension.
+    cp.LinearDimension(count=25, increment="400 Hz", label="y"),  # the `y`-dimension.
 ]
 
 # %%
 # Generate the line-shape kernel
 # ------------------------------
-
 from mrinversion.kernel import NuclearShieldingLineshape
 
 method = NuclearShieldingLineshape(
@@ -121,14 +127,13 @@ print(K.shape)
 
 # %%
 # The kernel ``K`` is a NumPy array of shape (128, 625), where the axis with 128 points
-# corresponds to the anisotropic dimension, and the axis with 625 points are the features
-# corresponding to the :math:`25\times 25` `x`-`y` coordinates.
+# corresponds to the anisotropic dimension, and the axis with 625 points are the
+# features corresponding to the :math:`25\times 25` `x`-`y` coordinates.
 
 # %%
 # Data Compression
 # ----------------
-
-# %%
+#
 from mrinversion.linear_model import TSVDCompression
 
 new_system = TSVDCompression(K, data_object_truncated)
@@ -150,7 +155,6 @@ print(f"truncation_index = {new_system.truncation_index}")
 # The following commented code was used in determining the optimum α and λ values.
 
 # %%
-import numpy as np
 
 # from mrinversion.linear_model import SmoothLassoCV
 
@@ -195,26 +199,30 @@ f_sol = s_lasso.f
 # Here, ``f_sol`` is the solution corresponding to the optimized hyperparameters. To
 # calculate the residuals between the data and predicted data(fit), use the
 # :meth:`~mrinversion.linear_model.SmoothLasso.residuals` method, as follows,
-
 residue = s_lasso.residuals(K, data_object_truncated.real)
-cp.plot(
+
+ax = plt.subplot(projection="csdm")
+ax.imshow(
     residue,
     cmap="gist_ncar_r",
     vmax=data_object_truncated.real.max(),
     vmin=data_object_truncated.real.min(),
-    reverse_axis=[True, True],
+    aspect="auto",
 )
+ax.invert_xaxis()
+ax.invert_yaxis()
+plt.tight_layout()
+plt.show()
 
 # %%
 # The mean and standard deviation of the residuals are
-print(residue.mean(), residue.std())
+residue.mean(), residue.std()
 
 # %%
 # **Serialize the solution**
 #
 # To serialize the solution to file, use the `save()` method of the CSDM object,
 # for example,
-
 f_sol.save("Na2O.4.7SiO2_inverse.csdf")  # save the solution
 residue.save("Na2O.4.7SiO2_residue.csdf")  # save the residuals
 

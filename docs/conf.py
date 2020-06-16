@@ -48,6 +48,7 @@ needs_sphinx = "2.0"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "matplotlib.sphinxext.plot_directive",
     "sphinx.ext.doctest",
     "sphinx.ext.mathjax",
     "sphinx.ext.autosummary",
@@ -61,6 +62,21 @@ extensions = [
 
 autosummary_generate = True
 
+# ---------------------------------------------------------------------------- #
+#                               Plot directive config                          #
+# ---------------------------------------------------------------------------- #
+plot_html_show_source_link = False
+plot_rcparams = {
+    "font.size": 10,
+    "font.weight": "light",
+    "font.family": "sans-serif",
+    "font.sans-serif": "Helvetica",
+}
+
+# ---------------------------------------------------------------------------- #
+#                               Sphinx Gallery config                          #
+# ---------------------------------------------------------------------------- #
+
 # filter sphinx matplotlib warning
 warnings.filterwarnings(
     "ignore",
@@ -68,26 +84,6 @@ warnings.filterwarnings(
     message="Matplotlib is currently using agg, which is a"
     " non-GUI backend, so cannot show the figure.",
 )
-# warnings.filterwarnings(
-#     "ignore",
-#     category=UserWarning,
-#     message=(
-#         "The physical quantity name, 'plane angle', is not "
-#         "defined in the astropy.units package. Continuing "
-#         "with 'plane angle' as the physical quantity name "
-#         "for unit deg."
-#     ),
-# )
-# warnings.filterwarnings(
-#     "ignore",
-#     category=UserWarning,
-#     message=(
-#         "The physical quantity name, 'electric field strength', is not "
-#         "defined in the astropy.units package. Continuing "
-#         "with 'electric field strength' as the physical quantity name "
-#         "for unit N / C."
-#     ),
-# )
 
 # numfig config
 numfig = True
@@ -116,7 +112,10 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "csdmpy": ("https://csdmpy.readthedocs.io/en/latest/", None),
+    "astropy": ("https://docs.astropy.org/en/stable/", None),
 }
+
+# ---------------------------------------------------------------------------- #
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -247,6 +246,8 @@ htmlhelp_basename = "Mrinversion doc"
 # -- Options for LaTeX output ------------------------------------------------
 latex_engine = "xelatex"
 # latex_logo = "_static/csdmpy.png"
+latex_show_pagerefs = True
+
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
@@ -254,31 +255,46 @@ latex_elements = {
     # The font size ('10pt', '11pt' or '12pt').
     #
     "pointsize": "9pt",
-    "fontenc": "\\usepackage[utf8]{inputenc}",
+    "fontenc": r"\usepackage[utf8]{inputenc}",
+    "geometry": r"\usepackage[vmargin=2.5cm, hmargin=2cm]{geometry}",
+    # "fncychap": r"\usepackage[Rejne]{fncychap}",
     # Additional stuff for the LaTeX preamble.
-    "preamble": """\
-        \\usepackage[T1]{fontenc}
-        \\usepackage{amsfonts, amsmath, amssymb}
-        \\usepackage{graphicx}
-        \\usepackage{setspace}
-        \\singlespacing
+    "preamble": r"""
+        \usepackage[T1]{fontenc}
+        \usepackage{amsfonts, amsmath, amssymb, mathbbol}
+        \usepackage{graphicx}
+        \usepackage{setspace}
+        \singlespacing
+
+        \usepackage{fancyhdr}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \fancyhead[L]{
+            \ifthenelse{\isodd{\value{page}}}{ \small \nouppercase{\leftmark} }{}
+        }
+        \fancyhead[R]{
+            \ifthenelse{\isodd{\value{page}}}{}{ \small \nouppercase{\rightmark} }
+        }
+        \fancyfoot[CO, CE]{\thepage}
     """,
     # Latex figure (float) alignment
     #
-    # "figure_align": "htbp",
+    "figure_align": "htbp",
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [(master_doc, "CSDM.tex", "Documentation", author, "manual")]
+latex_documents = [
+    (master_doc, "mrinversion.tex", "mrinversion Documentation", author, "manual")
+]
 
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "csdm", "CSDM Documentation", [author], 1)]
+man_pages = [(master_doc, "mrinversion", "mrinversion Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
