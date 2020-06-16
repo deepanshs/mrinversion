@@ -57,7 +57,7 @@ The coordinates and the corresponding responses from this dataset are
 and the plot depicting the sideband spectrum follows
 
 .. plot::
-    :format: python
+    :format: doctest
     :context: close-figs
     :include-source:
 
@@ -368,7 +368,7 @@ The solution to the smooth lasso is accessed using the
 The plot of the solution is
 
 .. plot::
-    :format: python
+    :format: doctest
     :context: close-figs
     :include-source:
 
@@ -476,7 +476,7 @@ and the corresponding cross-validation error surface using the
 :attr:`~mrinversion.linear_model.SmoothLassoCV.cv_map` attribute.
 
 .. plot::
-    :format: python
+    :format: doctest
     :context: close-figs
     :include-source:
 
@@ -505,7 +505,7 @@ the :attr:`~mrinversion.linear_model.SmoothLassoCV.f` attribute.
 The probability distribution of the selected model
 
 .. plot::
-    :format: python
+    :format: doctest
     :context: close-figs
     :include-source:
 
