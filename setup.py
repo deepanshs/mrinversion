@@ -33,7 +33,7 @@ setup(
         "setuptools>=27.3",
         "matplotlib>=3.0.2",
         "csdmpy>=0.3",
-        "mrsimulator>=0.3",
+        "mrsimulator>=0.3.0a0",
     ],
     include_package_data=True,
     zip_safe=False,
