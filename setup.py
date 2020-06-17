@@ -17,12 +17,13 @@ module_dir = dirname(abspath(__file__))
 install_requires = [
     "numpy>=1.17",
     "setuptools>=27.3",
-    "matplotlib>=3.0.2",
     "csdmpy>=0.3",
     "mrsimulator>=0.3.0a0",
+    "scikit-learn>=0.22",
 ]
 
 setup_requires = ["setuptools>=27.3"]
+extras = {"matplotlib": ["matplotlib>=3.0"]}
 
 setup(
     name="mrinversion",
@@ -41,6 +42,7 @@ setup(
     # package_dir={"": "mrinversion"},
     install_requires=install_requires,
     setup_requires=setup_requires,
+    extras_require=extras,
     tests_require=["pytest", "pytest-runner"],
     include_package_data=True,
     zip_safe=False,

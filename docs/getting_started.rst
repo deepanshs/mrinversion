@@ -450,8 +450,8 @@ sampled uniformly on a logarithmic scale as,
     :context: close-figs
     :include-source:
 
-    >>> lambdas = 10 ** (-4 - 2 * (np.arange(2) / 1))
-    >>> alphas = 10 ** (-3 - 2 * (np.arange(2) / 1))
+    >>> lambdas = 10 ** (-4 - 2 * (np.arange(10) / 9))
+    >>> alphas = 10 ** (-3 - 2 * (np.arange(10) / 9))
 
 Setup the smooth lasso cross-validation using
 
