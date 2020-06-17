@@ -33,14 +33,14 @@ On Local machine (Using pip)
 The ``mrinversion`` package utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/latest/>`_
 package for generating the NMR line-shapes.
 
-For **linux** and **mac** users, type the following in the terminal to install the
+For **Linux** and **Mac** users, type the following in the terminal to install the
 package.
 
 .. code-block:: bash
 
     $ pip install mrinversion
 
-For **windows** user, first `install <https://mrsimulator.readthedocs.io/en/latest/installation.html#on-local-machine-using-pip>`_
+For **Windows** users, first, `install <https://mrsimulator.readthedocs.io/en/latest/installation.html#on-local-machine-using-pip>`_
 the mrsimulator package and then install the mrinversion package using the above command.
 
 If you get a ``PermissionError``, it usually means that you do not have the required
@@ -56,7 +56,7 @@ the `pip documentation <https://pip.pypa.io/en/stable/user_guide/#user-installs>
 Upgrading to a newer version
 """"""""""""""""""""""""""""
 
-To upgrade, type the following in the terminal/Prompt
+To upgrade, type the following in the terminal/Prompt,
 
 .. code-block:: bash
 

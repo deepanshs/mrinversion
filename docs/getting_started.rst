@@ -1,14 +1,14 @@
 
-============================================
-Getting started with ``mrinversion`` package
-============================================
+====================================
+Getting started with ``mrinversion``
+====================================
 
 We have put together a set of guidelines for using the `mrinversion` package.
 We encourage our users to follow these guidelines to promote consistency.
 
-Considering the NMR audience, what better example to start with than frequently
-measured spinning sideband spectrum. For illustrative purposes, we use a synthetic
-one-dimensional purely anisotropic sideband spectrum. You may consider this as a
+Considering the NMR audience, what better example to start with than a spinning
+sideband spectrum. For illustrative purposes, we use a synthetic one-dimensional
+purely anisotropic spinning sideband spectrum. You may consider this as a
 cross-section of your 2D MAT/PASS dataset.
 
 Okay, let's start with the prediction of the nuclear shielding tensor parameters
@@ -22,7 +22,7 @@ from a CSDM [#f1]_ compliant file-format.
 
 .. note::
 
-    The CSDM file-format is supported by most NMR software, such as, SIMPSON, DMFIT, RMN.
+    The CSDM file-format is supported by most NMR software, such as SIMPSON, DMFIT, RMN.
     A python package supporting CSDM file-format, csdmpy, is also available.
 
 .. plot::
@@ -35,12 +35,9 @@ from a CSDM [#f1]_ compliant file-format.
     >>> # the spinning sideband data file as a CSDM object.
     >>> filename = "https://osu.box.com/shared/static/xnlhecn8ifzcwx09f83gsh27rhc5i5l6.csdf"
     >>> data_object = cp.load(filename) # load the CSDM file with the csdmpy module
-    ...
-    >>> # the true probability distribution dataset as a CSDM object.
-    >>> datafile = "https://osu.box.com/shared/static/lufeus68orw1izrg8juthcqvp7w0cpzk.csdf"
-    >>> true_data_object = cp.load(datafile) # the true solution for comparison
 
-The variable ``data_object`` is the `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
+Here, the variable ``data_object`` is the
+`CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
 object containing a one-dimension pure anisotropic spinning sideband spectrum.
 The coordinates and the corresponding responses from this dataset are
 
@@ -49,12 +46,26 @@ The coordinates and the corresponding responses from this dataset are
     :context: close-figs
     :include-source:
 
-    >>> # convert the dimension from `Hz` to `ppm`.
+    >>> # convert the dimension coordinates from `Hz` to `ppm`.
     >>> data_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
     >>> coordinates = data_object.dimensions[0].coordinates.value
     >>> responses = data_object.dependent_variables[0].components[0]
 
-and the plot depicting the sideband spectrum follows
+For comparison, let's also include the true probability distribution from which the
+synthetic spinning sideband dataset is derived.
+
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
+
+    >>> # the true probability distribution dataset as a CSDM object.
+    >>> datafile = "https://osu.box.com/shared/static/lufeus68orw1izrg8juthcqvp7w0cpzk.csdf"
+    >>> true_data_object = cp.load(datafile) # the true solution for comparison
+
+
+The following is the plot of the spinning sideband spectrum as well as the corresponding
+true probability distribution.
 
 .. plot::
     :format: doctest
@@ -68,6 +79,7 @@ and the plot depicting the sideband spectrum follows
     >>> _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={'projection': 'csdm'})
     >>> line = ax[0].stem(coordinates, responses, markerfmt=' ', use_line_collection=True)
     >>> plt.setp(line, color="black", linewidth=2) # doctest: +SKIP
+    >>> ax[0].set_xlabel('frequency / ppm') # doctest: +SKIP
     >>> ax[0].invert_xaxis() # doctest: +SKIP
     ...
     ...
@@ -438,8 +450,8 @@ sampled uniformly on a logarithmic scale as,
     :context: close-figs
     :include-source:
 
-    >>> lambdas = 10 ** (-4 - 2 * (np.arange(10) / 9))
-    >>> alphas = 10 ** (-3 - 2 * (np.arange(10) / 9))
+    >>> lambdas = 10 ** (-4 - 2 * (np.arange(2) / 1))
+    >>> alphas = 10 ** (-3 - 2 * (np.arange(2) / 1))
 
 Setup the smooth lasso cross-validation using
 

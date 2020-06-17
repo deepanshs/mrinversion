@@ -62,8 +62,8 @@ Welcome to Mrinversion documentation!
 
 **About**
 
-The `mrinversion` python package is based on the statistical learning technique for
-determining the distribution of the magnetic resonance (NMR) tensor parameter
+The ``mrinversion`` python package is based on the statistical learning technique for
+determining the distribution of the magnetic resonance (NMR) tensor parameters
 from the two-dimensional NMR spectra correlating the isotropic to anisotropic
 resonances.
 The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
@@ -74,11 +74,11 @@ package for generating fast solid-state NMR lineshapes and
 
 **Features**
 
-The `mrinversion` package includes the **inversion of two-dimensional
+The ``mrinversion`` package includes the **inversion of two-dimensional
 solid-state NMR spectrum of dilute spin-systems to a three-dimensional distribution of
 tensor parameters**. At present, we support the inversion of
 
-- **Magic angle flipping (MAF)** spectral correlating the isotropic chemical shift
+- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
   resonances to pure anisotropic resonances into a three-dimensional distribution of
   nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta, \eta)`,
   where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta`
