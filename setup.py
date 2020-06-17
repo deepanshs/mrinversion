@@ -27,7 +27,7 @@ setup(
     url="https://github.com/DeepanshS/mrinversion/",
     # packages=find_packages("src"),
     # package_dir={"": "mrinversion"},
-    setup_requires=["numpy>=1.17", "setuptools>=27.3"],
+    setup_requires=["setuptools>=27.3"],
     install_requires=[
         "numpy>=1.17",
         "setuptools>=27.3",
