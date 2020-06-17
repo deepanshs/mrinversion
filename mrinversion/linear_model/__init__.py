@@ -145,7 +145,6 @@ def _get_augmented_data(K, s, alpha, regularizer, f_shape=None):
         K_[start:end] = J_i
         start = end
 
-    ss0, ss1 = s.shape
     s_ = np.zeros((ss0 + smooth_size, ss1))
     s_[:ss0] = s.real
 
