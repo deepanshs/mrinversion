@@ -16,7 +16,7 @@ Welcome to Mrinversion documentation!
             :target: https://pypi.python.org/pypi/mrinversion
             :alt: PyPI version
 
-          .. image:: https://img.shields.io/pypi/pyversions/mrsimulator
+          .. image:: https://img.shields.io/pypi/pyversions/mrinversion
             :alt: PyPI - Python Version
 
       * - Build Status
@@ -66,7 +66,7 @@ The `mrinversion` python package is based on the statistical learning technique 
 determining the distribution of the magnetic resonance (NMR) tensor parameter
 from the two-dimensional NMR spectra correlating the isotropic to anisotropic
 resonances.
-The library utilizes the `Mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
+The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
 package for generating fast solid-state NMR lineshapes and
 `scikit-learn <https://scikit-learn.org/stable/>`_ package for statistical learning.
 

@@ -14,9 +14,6 @@ branches:
     - master
 
 before_install:
-  - sudo apt-get install libopenblas-dev libfftw3-dev -y
-  - pip install "numpy>=1.17" cython
-  - pip install git+https://github.com/DeepanshS/mrsimulator.git
   - pip install --upgrade pip
   - pip install -r requirements-dev.txt
 
