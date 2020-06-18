@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+from .utils import supersampled_coordinates
 from mrinversion.kernel.base import BaseModel
-from mrinversion.util import supersampled_coordinates
 
 
 class T2(BaseModel):

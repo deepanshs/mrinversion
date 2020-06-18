@@ -48,3 +48,5 @@ is the regularization term, and :math:`{\bf f}^\dagger` is the regularized solut
 
 these inverse problems are ill-posed and ill-conditioned, resulting in
 infinit solutions which are also unstable in the presence of noise.
+
+For example, in a more familiar linear-inverse problem, the inverse Fourier transform, the two dimensions are the frequency and time dimensions, where the frequency dimension undergoes the inverse transformation, and the time dimension is where the inversion method transforms the data.

@@ -156,7 +156,7 @@ coordinate given as
 
 where :math:`\theta=\pi\eta/4`.
 
-In `Mrinversion`, the range and domain space dimensions are defined using the
+In ``mrinversion``, the range and domain space dimensions are defined using the
 `Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_ objects
 from the `csdmpy <https://csdmpy.readthedocs.io/en/latest/>`_ package.
 For nuclear shielding tensor line-shape kernel, we refer the range space

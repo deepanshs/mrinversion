@@ -13,38 +13,51 @@ from pylab import rcParams
 rcParams["figure.figsize"] = 4.5, 3.5
 rcParams["font.size"] = 9
 
+
+# function for plotting 2D dataset
+def plot2D(csdm_object):
+    # convert the coordinates from Hz to ppm for both dimensions
+    [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
+    ax = plt.subplot(projection="csdm")
+    ax.imshow(csdm_object, cmap="gist_ncar_r", aspect="auto")
+    ax.invert_xaxis()
+    ax.invert_yaxis()
+    plt.tight_layout()
+    plt.show()
+
+
 # %%
-# The following example is an application of the statistical learning method applied in
+# The following example is an application of the statistical learning method in
 # determining the distribution of the nuclear shielding tensor parameters from a 2D
 # magic-angle flipping (MAF) spectrum. In this example, we use the 2D MAF spectrum
 # [#f1]_ of :math:`\text{Rb}_2\text{O}\cdot2.25\text{SiO}_2` glass.
 #
 
 # %%
+# Dataset setup
+# -------------
+#
 # Import the dataset
-# ^^^^^^^^^^^^^^^^^^
+# ''''''''''''''''''
 #
 # Load the dataset. In this example, we import the dataset as the CSDM [#f2]_
 # data-object.
 import csdmpy as cp
 
 # the 2D MAF dataset in csdm format
-data_object = cp.load(
-    "https://osu.box.com/shared/static/0q19v1nvb349if6f4cy5p0yjlufw8p0a.csdf"
-)
-# get the real part of the complex dataset
+filename = "https://osu.box.com/shared/static/0q19v1nvb349if6f4cy5p0yjlufw8p0a.csdf"
+data_object = cp.load(filename)
+
+# For inversion, we only interest ourselves with the real part of the complex dataset.
 data_object = data_object.real
 
 # %%
-# The variable ``data_object`` is a
+# Here, the variable ``data_object`` is a
 # `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
-# object that holds the 2D MAF dataset. The plot of the 2D MAF dataset is
-ax = plt.subplot(projection="csdm")
-ax.imshow(data_object, cmap="gist_ncar_r", aspect="auto")
-ax.invert_xaxis()
-ax.invert_yaxis()
-plt.tight_layout()
-plt.show()
+# object that holds the real part of the 2D MAF dataset. The plot of the 2D MAF dataset
+# is
+plot2D(data_object)
+
 
 # %%
 # There are two dimensions in this dataset. The dimension at index 0, the horizontal
@@ -54,32 +67,30 @@ plt.show()
 print(data_object.shape)
 
 # %%
-# Prepping the data object for inversion
-# --------------------------------------
+# with 128 points along the anisotropic dimension (index 0) and 512 points along the
+# isotropic chemical shift dimension (index 1).
+
+# %%
+# Prepping the data for inversion
+# '''''''''''''''''''''''''''''''
 # **Step-1: Data Alignment**
 #
-# When using the csdm objects with the mrinversion package, the dimension at index 0
-# must be the dimension undergoing the linear inversion, which in this example is the
+# When using the csdm objects with the ``mrinversion`` package, the dimension at index
+# 0 must be the dimension undergoing the linear inversion, which in this example is the
 # pure anisotropic dimension. In the ``data_object`` variable, the anisotropic
 # dimension is already at index 0 and, therefore, no further action is required.
 #
 # **Step-2: Optimization**
 #
-# Notice how the signal from the MAF dataset only occupies a small fraction of the
-# two-dimensional frequency grid. Although we can apply our linear inversion algorithm
-# directly onto this dataset, it is not a computationally optimum approach because a
-# significant fraction of the time is spent in getting the inverse domain amplitudes
-# from the noise vectors. Therefore, for optimum performance, it is best to truncate
-# the dataset to the desired region before proceeding. Use the appropriate array
-# indexing/slicing to select the signal region.
+# Notice, the signal from the 2D MAF dataset occupies a small fraction of the
+# two-dimensional frequency grid. Though you may choose to proceed with the inversion
+# directly onto this dataset, it is not computationally optimum. For optimum
+# performance, trim the dataset to the region of relevant signals. Use the appropriate
+# array indexing/slicing to select the signal region.
+
 data_object_truncated = data_object[:, 250:285]
 
-ax = plt.subplot(projection="csdm")
-ax.imshow(data_object_truncated, cmap="gist_ncar_r", aspect="auto")
-ax.invert_xaxis()
-ax.invert_yaxis()
-plt.tight_layout()
-plt.show()
+plot2D(data_object_truncated)
 
 # %%
 # In the above code, we truncate the isotropic chemical shift dimension to isotropic
@@ -88,30 +99,27 @@ plt.show()
 print(data_object_truncated.dimensions[1].coordinates)
 
 # %%
-# Linear Inversion
-# ^^^^^^^^^^^^^^^^
+# Linear Inversion setup
+# ----------------------
 #
-# Set up the dimensions
-# ---------------------
+# Dimension setup
+# '''''''''''''''
 #
 # In a generic linear-inverse problem, one needs to define two sets of dimensions---the
 # dimensions undergoing a linear transformation, and the dimensions onto which the
-# inversion method transforms the data. For example, in a more familiar linear-inverse
-# problem, the inverse Fourier transform, the two dimensions are the frequency and time
-# dimensions. Here, the frequency dimension undergoes the inverse transformation, and
-# time is the dimension onto which the inversion method transforms the data.
+# inversion method transforms the data.
 # In the line-shape inversion, the two sets of dimensions are the anisotropic dimension
 # and the `x`-`y` dimensions.
 #
 # **Anisotropic-dimension:**
-# The anisotropic dimension is the dimension of the dataset, which holds pure
-# anisotropic frequency contributions. In mrinversion, this dimension must be the
-# dimension at index 0 of the data object.
+# The dimension of the dataset which holds the pure anisotropic frequency
+# contributions. In ``mrinversion``, this must always be the dimension at index 0 of
+# the data object.
 anisotropic_dimension = data_object_truncated.dimensions[0]
 
 # %%
-# **Inverse x-y dimensions:**
-# The two inverse dimensions correspond to the `x` and `y`-axis of the `x`-`y` grid.
+# **x-y dimensions:**
+# The two inverse dimensions corresponding to the `x` and `y`-axis of the `x`-`y` grid.
 inverse_dimensions = [
     cp.LinearDimension(count=25, increment="400 Hz", label="x"),  # the `x`-dimension.
     cp.LinearDimension(count=25, increment="400 Hz", label="y"),  # the `y`-dimension.
@@ -119,7 +127,7 @@ inverse_dimensions = [
 
 # %%
 # Generate the line-shape kernel
-# ------------------------------
+# ''''''''''''''''''''''''''''''
 #
 # For MAF datasets, the line-shape kernel corresponds to the pure nuclear shielding
 # anisotropy line-shapes.
@@ -143,9 +151,9 @@ lineshape = NuclearShieldingLineshape(
 # the first two arguments in the previous sub-section. The value of the `channel`
 # argument is the nuclei observed in the MAF experiment. In this example, this value
 # is '29Si'.
-# The value of the remaining attributes, such as the `magnetic_flux_density`,
-# `rotor_angle`, and `rotor_frequency` is set to match the conditions under which the
-# MAF spectrum was acquired. Note for the MAF measurements the rotor angle is usually
+# The remaining attribute values, such as the `magnetic_flux_density`, `rotor_angle`,
+# and `rotor_frequency`, is set to match the conditions under which the 2D MAF spectrum
+# was acquired. Note for the MAF measurements the rotor angle is usually
 # :math:`90^\circ` for the anisotropic dimension. Once the NuclearShieldingLineshape
 # instance is created, use the
 # :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the instance
@@ -155,13 +163,14 @@ print(K.shape)
 
 # %%
 # The kernel ``K`` is a NumPy array of shape (128, 625), where the axis with 128 points
-# corresponds to the points along the anisotropic dimension, and the axis with 625
-# points are the features corresponding to the :math:`25\times 25` `x`-`y` coordinates.
+# is the anisotropic dimension, and the axis with 625 points are the features
+# (line-shapes) corresponding to the :math:`25\times 25` `x`-`y` coordinates.
 
 # %%
 # Data Compression
-# ----------------
-# Data compression is optional but is recommended. It may reduce the size of the
+# ''''''''''''''''
+#
+# Data compression is optional but recommended. It may reduce the size of the
 # inverse problem and, thus, further computation time.
 from mrinversion.linear_model import TSVDCompression
 
@@ -172,8 +181,8 @@ compressed_s = new_system.compressed_s
 print(f"truncation_index = {new_system.truncation_index}")
 
 # %%
-# Set up the inverse problem
-# --------------------------
+# Inverse problem
+# -------------------------
 #
 # Solve the smooth-lasso problem. Normally, one should use the statistical learning
 # method to solve the problem over a range of α and λ values and determine a nuclear
@@ -272,7 +281,7 @@ residue.save("Rb2O.2.25SiO2_residue.csdf")  # save the residuals
 # to complete the case study.
 #
 # Data Visualization
-# ^^^^^^^^^^^^^^^^^^
+# ------------------
 #
 from mrinversion.plot import plot_3d
 from matplotlib import cm
@@ -401,7 +410,7 @@ plt.show()
 # %%
 #
 # Analysis
-# ^^^^^^^^
+# --------
 #
 # For analysis, we use the
 # `statistics <https://csdmpy.readthedocs.io/en/latest/api/statistics.html>`_
@@ -433,8 +442,8 @@ print("\tstandard deviation\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*st
 # The statistics shown above are according to the respective dimensions, that is, the
 # `x`, `y`, and the isotropic chemical shifts. To convert the `x` and `y` statistics
 # to commonly used :math:`\zeta` and :math:`\eta` statistics, use the
-# :func:`~mrinversion.kernel.x_y_to_zeta_eta` function.
-from mrinversion.kernel import x_y_to_zeta_eta
+# :func:`~mrinversion.kernel.utils.x_y_to_zeta_eta` function.
+from mrinversion.kernel.utils import x_y_to_zeta_eta
 
 mean_ζη_Q3 = x_y_to_zeta_eta(*mean_Q3[0:2])
 
@@ -459,7 +468,7 @@ print(
 
 # %%
 # References
-# ^^^^^^^^^^
+# ----------
 #
 # .. [#f1] Baltisberger, J. H., Florian, P., Keeler, E. G., Phyo, P. A., Sanders, K. J.,
 #       Grandinetti, P. J.. Modifier cation effects on 29Si nuclear shielding

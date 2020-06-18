@@ -394,8 +394,8 @@ print("\tstandard deviation\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*st
 # The statistics shown above are according to the respective dimensions, that is, the
 # `x`, `y`, and the isotropic chemical shifts. To convert the `x` and `y` statistics
 # to commonly used :math:`\zeta` and :math:`\eta` statistics, use the
-# :func:`~mrinversion.kernel.x_y_to_zeta_eta` function.
-from mrinversion.kernel import x_y_to_zeta_eta
+# :func:`~mrinversion.kernel.utils.x_y_to_zeta_eta` function.
+from mrinversion.kernel.utils import x_y_to_zeta_eta
 
 mean_ζη_Q3 = x_y_to_zeta_eta(*mean_Q3[0:2])
 

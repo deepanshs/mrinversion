@@ -9,7 +9,6 @@ from mrsimulator.methods import BlochDecaySpectrum
 from mrinversion.kernel import MAF
 from mrinversion.kernel import NuclearShieldingLineshape
 from mrinversion.kernel import SpinningSidebands
-from mrinversion.kernel.lineshape import zeta_eta_to_x_y
 from mrinversion.linear_model import TSVDCompression
 
 anisotropic_dimension = [
@@ -89,12 +88,6 @@ def test_zeta_eta_from_x_y():
 
     assert np.allclose(zeta, np.asarray(zeta_))
     assert np.allclose(eta, np.asarray(eta_))
-
-
-def test_x_y_from_zeta_eta():
-    x, y = zeta_eta_to_x_y([10, np.sqrt(2) * 25], [0, 1])
-    assert np.allclose(x, [0, 25])
-    assert np.allclose(y, [10, 25])
 
 
 def test_MAF_lineshape_kernel():
