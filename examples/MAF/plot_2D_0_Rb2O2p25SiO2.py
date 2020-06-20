@@ -193,11 +193,13 @@ print(f"truncation_index = {new_system.truncation_index}")
 # Solve the smooth-lasso problem. Use the statistical learning ``SmoothLassoCV``
 # method to solve the inverse problem over a range of α and λ values and determine
 # the best nuclear shielding tensor parameter distribution for the given 2D MAF
-# dataset.
+# dataset. Considering the limited build time for the documentation, we'll perform
+# cross-validation over a smaller :math:`10 \times 10` `x`-`y` grid. You may
+# increase the grid resolution for your problem, is desired.
 
 # set up the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
-alphas = 10 ** (-4 - 3 * (np.arange(20) / 19))
+lambdas = 10 ** (-5 - 0.75 * (np.arange(10) / 9))
+alphas = 10 ** (-5.5 - 1.25 * (np.arange(10) / 9))
 
 # set up the smooth lasso cross-validation class
 s_lasso = SmoothLassoCV(

@@ -484,6 +484,7 @@ class GeneralL2LassoCV:
         times=2,
         verbose=False,
         inverse_dimension=None,
+        n_jobs=-1,
     ):
 
         if alphas is None:
@@ -498,6 +499,7 @@ class GeneralL2LassoCV:
 
         self.folds = folds
 
+        self.n_jobs = n_jobs
         self.max_iterations = max_iterations
         self.tolerance = tolerance
         self.positive = positive
@@ -593,7 +595,7 @@ class GeneralL2LassoCV:
                 for i in range(self.cv_lambdas.size)
             )
             self.cv_map[j] = Parallel(
-                n_jobs=-1,
+                n_jobs=self.n_jobs,
                 verbose=self.verbose,
                 **{
                     "backend": {
@@ -766,6 +768,7 @@ class SmoothLassoCV(GeneralL2LassoCV):
         randomize=False,
         times=2,
         verbose=False,
+        n_jobs=-1,
     ):
         super().__init__(
             alphas=alphas,
@@ -780,4 +783,5 @@ class SmoothLassoCV(GeneralL2LassoCV):
             randomize=randomize,
             times=times,
             verbose=verbose,
+            n_jobs=n_jobs,
         )

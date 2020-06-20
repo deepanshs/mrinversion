@@ -5,7 +5,7 @@ from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D  # lgtm [py/unused-import]
 
 
 def get_polar_grids(ax, ticks=None, offset=0):
