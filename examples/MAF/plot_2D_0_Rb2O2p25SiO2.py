@@ -23,7 +23,7 @@ from pylab import rcParams
 
 from mrinversion.kernel import NuclearShieldingLineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
-from mrinversion.linear_model import SmoothLasso
+from mrinversion.linear_model import SmoothLassoCV
 from mrinversion.linear_model import TSVDCompression
 from mrinversion.plot import plot_3d
 
@@ -187,60 +187,34 @@ compressed_s = new_system.compressed_s
 print(f"truncation_index = {new_system.truncation_index}")
 
 # %%
-# Solving inverse problem
-# -----------------------
+# Solving the inverse problem
+# ---------------------------
 #
-# Solve the smooth-lasso problem. Ordinarily, one should use the statistical learning
-# method to solve the inverse problem over a range of α and λ values and then determine
+# Solve the smooth-lasso problem. Use the statistical learning ``SmoothLassoCV``
+# method to solve the inverse problem over a range of α and λ values and determine
 # the best nuclear shielding tensor parameter distribution for the given 2D MAF
 # dataset.
-# Given the time constraints for building this documentation, we skip this step
-# and evaluate the distribution at pre-optimized α and λ values. The optimum values are
-# :math:`\alpha = 8.86\times 10^{-7}` and :math:`\lambda = 3.79\times 10^{-6}`.
-# The following commented code was used in determining the optimum α and λ values.
 
-# %%
+# set up the pre-defined range of alpha and lambda values
+lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
+alphas = 10 ** (-4 - 3 * (np.arange(20) / 19))
 
-# from mrinversion.linear_model import SmoothLassoCV
-
-# # set up the pre-defined range of alpha and lambda values
-# lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
-# alphas = 10 ** (-4 - 3 * (np.arange(20) / 19))
-
-# # set up the smooth lasso cross-validation class
-# s_lasso = SmoothLassoCV(
-#     alphas=alphas,        # A numpy array of alpha values.
-#     lambdas=lambdas,      # A numpy array of lambda values.
-#     sigma=0.0043,         # The standard deviation of noise from the MAF data.
-#     folds=10,             # The number of folds in n-folds cross-validation.
-#     inverse_dimension=inverse_dimensions, # previously defined inverse dimensions.
-#     verbose=1, # If non-zero, prints the progress as the computation proceeds.
-# )
-
-# # run fit using the conpressed kernel and compressed data.
-# s_lasso.fit(compressed_K, compressed_s)
-
-# # the optimum hyper-parameters, alpha and lambda, from the cross-validation.
-# print(s_lasso.hyperparameter)
-# # {'alpha': 8.858667904100833e-07, 'lambda': 3.7926901907322535e-06}
-
-# # the solution
-# f_sol = s_lasso.f
-
-# # the cross-validation error curve
-# error_curve = s_lasso.cross_validation_curve
-
-# %%
-# If you use the ``SmoothLassoCV`` method, shown in the above comments, to evaluate the
-# optimum α and λ values, skip the following section of the code. The following code
-# block evaluates the inverse problem at the optimum alpha and lambda values.
-
-# set up the smooth lasso class
-s_lasso = SmoothLasso(
-    alpha=8.86e-7, lambda1=3.79e-6, inverse_dimension=inverse_dimensions
+# set up the smooth lasso cross-validation class
+s_lasso = SmoothLassoCV(
+    alphas=alphas,  # A numpy array of alpha values.
+    lambdas=lambdas,  # A numpy array of lambda values.
+    sigma=0.0043,  # The standard deviation of noise from the MAF data.
+    folds=10,  # The number of folds in n-folds cross-validation.
+    inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
+    verbose=1,  # If non-zero, prints the progress as the computation proceeds.
 )
-# run the fit method on the conpressed kernel and compressed data.
-s_lasso.fit(K=compressed_K, s=compressed_s)
+
+# run fit using the compressed kernel and compressed data.
+s_lasso.fit(compressed_K, compressed_s)
+
+# the optimum hyper-parameters, alpha and lambda, from the cross-validation.
+print(s_lasso.hyperparameter)
+# {'alpha': 8.858667904100833e-07, 'lambda': 3.7926901907322535e-06}
 
 # the solution
 f_sol = s_lasso.f
@@ -256,6 +230,23 @@ plot2D(residue, vmax=data_object_truncated.max(), vmin=data_object_truncated.min
 # The standard deviation of the residuals is close to the standard deviation of the
 # noise, :math:`\sigma = 0.0043`.
 residue.std()
+
+# %%
+# The cross-validation error curve is
+error_curve = s_lasso.cross_validation_curve
+
+plt.figure(figsize=(5, 3.5))
+ax = plt.subplot(projection="csdm")
+ax.contour(np.log10(error_curve), levels=25)
+ax.scatter(
+    -np.log10(s_lasso.hyperparameter["alpha"]),
+    -np.log10(s_lasso.hyperparameter["lambda"]),
+    marker="x",
+    color="k",
+)
+plt.tight_layout(pad=0.5)
+plt.show()
+
 
 # %%
 # Saving the solution
@@ -314,6 +305,7 @@ max_1d = [
     f_sol.sum(axis=(0, 2)).max().value,
     f_sol.sum(axis=(0, 1)).max().value,
 ]
+
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
 
@@ -346,6 +338,8 @@ plt.tight_layout()
 plt.show()
 
 # %%
+# **Visualizing the isotropic projections**
+#
 # Because the :math:`\text{Q}^4` and :math:`\text{Q}^3` regions are fully resolved
 # after the inversion, evaluating the contributions from these regions is trivial.
 # For examples, the distribution of the isotropic chemical shifts for these regions are
@@ -385,9 +379,8 @@ plt.show()
 #
 # For analysis, we use the
 # `statistics <https://csdmpy.readthedocs.io/en/latest/api/statistics.html>`_
-# module of the csdmpy package. In the following code, we perform the moment analysis
-# of the 3d volumes for both the :math:`\text{Q}^4` and :math:`\text{Q}^3` sites
-# up to the second moment.
+# module of the csdmpy package. Following is the moment analysis of the 3D volumes for
+# both the :math:`\text{Q}^4` and :math:`\text{Q}^3` regions up to the second moment.
 
 int_Q4 = stats.integral(Q4_region)  # volume of the Q4 distribution
 mean_Q4 = stats.mean(Q4_region)  # mean of the Q4 distribution
@@ -412,7 +405,6 @@ print("\tstandard deviation\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*st
 # `x`, `y`, and the isotropic chemical shifts. To convert the `x` and `y` statistics
 # to commonly used :math:`\zeta` and :math:`\eta` statistics, use the
 # :func:`~mrinversion.kernel.utils.x_y_to_zeta_eta` function.
-
 mean_ζη_Q3 = x_y_to_zeta_eta(*mean_Q3[0:2])
 
 # error propagation for calculating the standard deviation
@@ -432,7 +424,6 @@ print(
         std_ζ, std_η, std_Q3[2]
     )
 )
-
 
 # %%
 # References

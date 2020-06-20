@@ -81,21 +81,22 @@ print(data_object.shape)
 # '''''''''''''''''''''''''''''''
 # **Step-1: Data Alignment**
 #
-# When using the csdm object with mrinversion, the dimension at index 0 must always be
-# the dimension undergoing the linear inversion, which in the examples, is the pure
-# anisotropic dimension. In ``data_object``, however, the anisotropic dimension is at
-# index 1. You may swap the anisotropic dimension to index 0 by using the transpose
+# When using the csdm objects with the ``mrinversion`` package, the dimension at index
+# 0 must be the dimension undergoing the linear inversion. In this example, we plan to
+# invert the pure anisotropic shielding line-shape. In the ``data_object``, however,
+# the anisotropic dimension is at index 1. Transpose the dimensions using the transpose
 # method.
-# Also notice, that the MAF data only occupies a small fraction of the two-dimensional
-# frequency grid. It is, therefore, best to truncate the dataset to the desired region
-# before proceeding. Use the appropriate array indexing/slicing to select the signal
-# region.
-data_object_truncated = data_object.T[:, 155:180]
-plot2D(data_object_truncated)
+data_object = data_object.T
 
 # %%
-# In the above code, we first transpose the dataset and then truncate the isotropic
-# dimension to isotropic chemical shifts between indexes ranging from 155 to 175.
+# **Step-2: Optimization**
+#
+# Also notice, the signal from the 2D MAF dataset occupies a small fraction of the
+# two-dimensional frequency grid. Truncate the dataset to the relevant region
+# before proceeding. Use the appropriate array indexing/slicing to select the signal
+# region.
+data_object_truncated = data_object[:, 155:180]
+plot2D(data_object_truncated)
 
 # %%
 # Linear Inversion setup
@@ -144,7 +145,7 @@ lineshape = NuclearShieldingLineshape(
 # example, this value is '29Si'.
 # The remaining attribute values, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAF
-# spectrum was acquired. Note for this particular MAF measurement the rotor angle was
+# spectrum was acquired. Note for this particular MAF measurement, the rotor angle was
 # set to :math:`87.19^\circ` for the anisotropic dimension, not the usual
 # :math:`90^\circ`. Once the NuclearShieldingLineshape instance is created, use the
 # :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the instance
@@ -153,9 +154,9 @@ K = lineshape.kernel(supersampling=1)
 print(K.shape)
 
 # %%
-# The kernel ``K`` is a NumPy array of shape (128, 625), where the axis with 128 points
-# corresponds to the anisotropic dimension, and the axis with 625 points are the
-# features corresponding to the :math:`25\times 25` `x`-`y` coordinates.
+# The kernel ``K`` is a NumPy array of shape (128, 625), where the axes with 128 and
+# 625 points are the anisotropic dimension and the features (x-y coordinates)
+# corresponding to the :math:`25\times 25` `x`-`y` grid, respectively.
 
 # %%
 # Data Compression
@@ -168,6 +169,7 @@ compressed_K = new_system.compressed_K
 compressed_s = new_system.compressed_s
 
 print(f"truncation_index = {new_system.truncation_index}")
+
 # %%
 # Solving inverse problem
 # -----------------------
@@ -200,7 +202,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 #     max_iterations=20000, # maximum number of allowed iterations.
 # )
 
-# # run fit using the conpressed kernel and compressed data.
+# # run fit using the compressed kernel and compressed data.
 # s_lasso.fit(compressed_K, compressed_s)
 
 # # the optimum hyper-parameters, alpha and lambda, from the cross-validation.
@@ -214,13 +216,13 @@ print(f"truncation_index = {new_system.truncation_index}")
 # error_curve = s_lasso.cross_validation_curve
 
 # %%
-# If you use the ``SmoothLassoCV`` method, skip the following section of code.
+# If you use the ``SmoothLassoCV`` method above, skip the following block of code.
 
 # set up the smooth lasso class
 s_lasso = SmoothLasso(
     alpha=2.07e-7, lambda1=7.85e-6, inverse_dimension=inverse_dimensions
 )
-# run the fit method on the conpressed kernel and compressed data.
+# run the fit method on the compressed kernel and compressed data.
 s_lasso.fit(K=compressed_K, s=compressed_s)
 
 # the solution
@@ -241,7 +243,7 @@ residue.mean(), residue.std()
 # Saving the solution
 # '''''''''''''''''''
 #
-# To serialize the solution a file, use the `save()` method of the CSDM object,
+# To serialize the solution to a file, use the `save()` method of the CSDM object,
 # for example,
 f_sol.save("Na2O.4.7SiO2_inverse.csdf")  # save the solution
 residue.save("Na2O.4.7SiO2_residue.csdf")  # save the residuals
@@ -269,7 +271,7 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# From the 3D plot, we observe two distinct volumes: one for the :math:`\text{Q}^4`
+# From the 3D plot, we observe two distinct regions: one for the :math:`\text{Q}^4`
 # sites and another for the :math:`\text{Q}^3` sites.
 # Select the respective regions by using the appropriate array indexing,
 
@@ -280,7 +282,7 @@ Q3_region = f_sol[0:8, 11:22, 8:20]
 Q3_region.description = "Q3 region"
 
 # %%
-# The plot of the respective volumes is shown below.
+# The plot of the respective regions is shown below.
 
 # Calculate the normalization factor the 2D contour and 1D projections from the
 # original solution, `f_sol`. Use this normalization factor to scale the intensities
@@ -328,9 +330,11 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Because the Q4 and Q3 sites are fully resolved in this dataset, we can observe the
-# contributions from these sites without having to build any model. For examples, the
-# distribution of the isotropic chemical shifts for the Q4 and Q3 sites are
+# **Visualizing the isotropic projections**
+#
+# Because the :math:`\text{Q}^4` and :math:`\text{Q}^3` regions are fully resolved
+# after the inversion, evaluating the contributions from these regions is trivial.
+# For examples, the distribution of the isotropic chemical shifts for these regions are
 
 # Isotropic chemical shift projection of the MAF dataset.
 data_iso = data_object_truncated.sum(axis=0)
@@ -367,9 +371,8 @@ plt.show()
 #
 # For analysis, we use the
 # `statistics <https://csdmpy.readthedocs.io/en/latest/api/statistics.html>`_
-# module of the csdmpy package. In the following code, we perform the moment analysis
-# of the 3d volumes for both the :math:`\text{Q}^4` and :math:`\text{Q}^3` sites
-# up to the second moment.
+# module of the csdmpy package. Following is the moment analysis of the 3D volumes for
+# both the :math:`\text{Q}^4` and :math:`\text{Q}^3` regions up to the second moment.
 
 int_Q4 = stats.integral(Q4_region)  # volume of the Q4 distribution
 mean_Q4 = stats.mean(Q4_region)  # mean of the Q4 distribution
@@ -413,7 +416,6 @@ print(
         std_ζ, std_η, std_Q3[2]
     )
 )
-
 
 # %%
 # References
