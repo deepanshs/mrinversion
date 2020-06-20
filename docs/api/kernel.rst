@@ -7,7 +7,7 @@ Kernel
 ======
 
 
-.. currentmodule:: mrinversion.kernel
+.. currentmodule:: mrinversion.kernel.utils
 
 .. autofunction:: x_y_to_zeta_eta
 

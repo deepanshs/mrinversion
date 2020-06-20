@@ -262,12 +262,12 @@ class GeneralL2Lasso:
         f = estimator.coef_.copy()
         if s_.shape[1] > 1:
             f.shape = (s_.shape[1],) + self.f_shape
-            f[:, :, 0] /= 2
-            f[:, 0, :] /= 2
+            f[:, :, 0] /= 2.0
+            f[:, 0, :] /= 2.0
         else:
             f.shape = self.f_shape
-            f[:, 0] /= 2
-            f[0, :] /= 2
+            f[:, 0] /= 2.0
+            f[0, :] /= 2.0
 
         f *= self.scale
 
