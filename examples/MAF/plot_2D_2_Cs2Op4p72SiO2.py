@@ -199,7 +199,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # s_lasso = SmoothLassoCV(
 #     alphas=alphas,  # A numpy array of alpha values.
 #     lambdas=lambdas,  # A numpy array of lambda values.
-#     sigma=0.003,  # The standard deviation of noise from the MAF data.
+#     sigma=0.002,  # The standard deviation of noise from the MAF data.
 #     folds=10,  # The number of folds in n-folds cross-validation.
 #     inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
 #     verbose=1,  # If non-zero, prints the progress as the computation proceeds.
@@ -275,6 +275,9 @@ residuals.save("Cs2O.4.72SiO2_residue.csdf")  # save the residuals
 #
 # Visualizing the 3D solution
 # '''''''''''''''''''''''''''
+
+# Normalize the solution
+f_sol /= f_sol.max()
 
 # Convert the coordinates of the solution, `f_sol`, from Hz to ppm.
 [item.to("ppm", "nmr_frequency_ratio") for item in f_sol.dimensions]

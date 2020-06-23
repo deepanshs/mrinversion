@@ -85,7 +85,7 @@ def plot_3d(
     clr = cmap
     ck = cmap(0)
     facecolors = cmap(f)
-    facecolors[:, :, :, -1] = f / 9.0
+    facecolors[:, :, :, -1] = f / 7.5
     index = np.where(f < clip_percent / 100)
     facecolors[:, :, :, -1][index] = 0
     facecolors.shape = (f.size, 4)

@@ -272,6 +272,9 @@ residuals.save("2Na2O.3SiO2_residue.csdf")  # save the residuals
 # Visualizing the 3D solution
 # '''''''''''''''''''''''''''
 
+# Normalize the solution
+f_sol /= f_sol.max()
+
 # Convert the coordinates of the solution, `f_sol`, from Hz to ppm.
 [item.to("ppm", "nmr_frequency_ratio") for item in f_sol.dimensions]
 

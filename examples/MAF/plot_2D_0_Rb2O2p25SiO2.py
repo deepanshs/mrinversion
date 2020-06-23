@@ -214,7 +214,7 @@ alphas = 10 ** (-5.5 - 1.25 * (np.arange(5) / 4))
 s_lasso = SmoothLassoCV(
     alphas=alphas,  # A numpy array of alpha values.
     lambdas=lambdas,  # A numpy array of lambda values.
-    sigma=0.0043,  # The standard deviation of noise from the 2D MAF data.
+    sigma=0.0045,  # The standard deviation of noise from the 2D MAF data.
     folds=10,  # The number of folds in n-folds cross-validation.
     inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
     verbose=1,  # If non-zero, prints the progress as the computation proceeds.
@@ -302,6 +302,9 @@ residuals.save("Rb2O.2.25SiO2_residue.csdf")  # save the residuals
 #
 # Visualizing the 3D solution
 # '''''''''''''''''''''''''''
+
+# Normalize the solution
+f_sol /= f_sol.max()
 
 # Convert the coordinates of the solution, `f_sol`, from Hz to ppm.
 [item.to("ppm", "nmr_frequency_ratio") for item in f_sol.dimensions]
