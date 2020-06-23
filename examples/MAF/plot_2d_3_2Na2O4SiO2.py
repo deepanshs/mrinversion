@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2D MAF data of 2Na2O 3SiO2 glass
+2D MAF data of 2Na2O.3SiO2 glass
 ================================
 """
 # %%
@@ -185,6 +185,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # %%
 
 # from mrinversion.linear_model import SmoothLassoCV
+# import numpy as np
 
 # # setup the pre-defined range of alpha and lambda values
 # lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
@@ -280,7 +281,7 @@ ax = plt.gca(projection="3d")
 plot_3d(
     ax,
     f_sol,
-    theta_angle=20,
+    theta_angle=25,
     angle=-50,
     x_lim=[0, 150],
     y_lim=[0, 150],
@@ -297,8 +298,8 @@ plt.show()
 # a naive selection of the three regions. One may also apply sophisticated
 # classification algorithms to better quantify the Q-species.
 
-Q4_region = f_sol[0:6, 0:6, 14:35] * 2
-Q4_region.description = "Q4 region x 2"
+Q4_region = f_sol[0:6, 0:6, 14:35] * 3
+Q4_region.description = "Q4 region x 3"
 
 Q3_region = f_sol[0:8, 7:, 20:39]
 Q3_region.description = "Q3 region"
@@ -352,14 +353,14 @@ plot_3d(
 plot_3d(
     ax,
     Q2_region,
-    theta_angle=20,
-    angle=-132,
+    theta_angle=25,
+    angle=-50,
     x_lim=[0, 150],  # the x-limit
     y_lim=[0, 150],  # the y-limit
     z_lim=[-60, -120],  # the z-limit
     max_2d=max_2d,  # normalization factors for the 2D contours projections
     max_1d=max_1d,  # normalization factors for the 1D projections
-    cmap=cm.Purples_r,  # colormap
+    cmap=cm.Oranges_r,  # colormap
     box=False,  # draw a box around the region
 )
 ax.legend()

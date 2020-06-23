@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2D MAF data of Rb2O 2.25SiO2 glass
+2D MAF data of Rb2O.2.25SiO2 glass
 ==================================
 """
 # %%
@@ -405,6 +405,7 @@ ax.plot(f_sol_iso, "--k", label="tensor")
 ax.plot(Q4_region_iso, "r", label="Q4")
 ax.plot(Q3_region_iso, "b", label="Q3")
 ax.plot(data_iso, "-k", label="MAF")
+ax.plot(data_iso - f_sol_iso - 0.1, "gray", label="residuals")
 ax.set_title("Isotropic projection")
 ax.invert_xaxis()
 plt.legend()

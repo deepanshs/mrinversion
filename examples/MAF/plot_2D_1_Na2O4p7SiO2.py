@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2D MAF data of Na2O 4.7SiO2 glass
+2D MAF data of Na2O.4.7SiO2 glass
 =================================
 """
 # %%

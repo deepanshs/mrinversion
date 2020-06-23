@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2D MAF of MgO.SiO2 glass
-^^^^^^^^^^^^^^^^^^^^^^^^
+2D MAF data of MgO.SiO2 glass
+=============================
 """
 # %%
 # The following example illustrates an application of the statistical learning method
-# applied to determine the distribution of the nuclear shielding tensor parameters from
-# a 2D magic-angle flipping (MAF) spectrum. In this example,
-# we use the 2D MAF spectrum [#f1]_ of :math:`2\text{MgO}\cdot\text{SiO}_2`
-# glass.
+# applied in determining the distribution of the nuclear shielding tensor parameters
+# from a 2D magic-angle flipping (MAF) spectrum. In this example, we use the 2D MAF
+# spectrum [#f1]_ of :math:`2\text{MgO}\cdot\text{SiO}_2` glass.
 #
 # Before getting started
 # ----------------------
@@ -27,7 +26,7 @@ from mrinversion.plot import plot_3d
 # sphinx_gallery_thumbnail_number = 4
 
 # %%
-# **Setup for matplotlib figures**
+# Setup for the matplotlib figures.
 rcParams["figure.figsize"] = 4.5, 3.5
 rcParams["font.size"] = 9
 
@@ -49,8 +48,7 @@ def plot2D(csdm_object, **kwargs):
 # Import the dataset
 # ''''''''''''''''''
 #
-# Load the dataset. In this example, we import the dataset as the CSDM [#f2]_
-# data-object.
+# Load the dataset. Here, we import the dataset as the CSDM [#f2]_ data-object.
 
 # The 2D MAF dataset in csdm format
 filename = "https://osu.box.com/shared/static/mai73gk6nv4uhwuwrm30rr8wczxv3uyt.csdf"
@@ -58,38 +56,38 @@ data_object = cp.load(filename)
 
 # For inversion, we only interest ourselves with the real part of the complex dataset.
 data_object = data_object.real
+
 # We will also convert the coordinates of both dimensions from Hz to ppm.
 _ = [item.to("ppm", "nmr_frequency_ratio") for item in data_object.dimensions]
 
 # %%
-# The variable ``data_object`` is a
+# Here, the variable ``data_object`` is a
 # `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
-# object that holds the 2D MAF dataset. The plot of the MAF dataset is
+# object that holds the real part of the 2D MAF dataset. The plot of the 2D MAF dataset
+# is
 plot2D(data_object)
 
 # %%
-# There are two dimensions in this dataset. The dimension at index 0 is the
-# isotropic chemical shift dimension, while the dimension at index 1 is the pure
-# anisotropic dimension. The number of coordinates along the respective dimensions
-# is
-print(data_object.shape)
-
-# %%
+# There are two dimensions in this dataset. The dimension at index 0 is the pure
+# anisotropic dimension, while the dimension at index 1 is the isotropic chemical shift
+# dimension.
+#
 # Prepping the data for inversion
 # '''''''''''''''''''''''''''''''
 # **Step-1: Data Alignment**
 #
-# When using csdm objects with mrinversion, the dimension at index 0 must always be
-# the dimension undergoing the linear inversion, which in this example is the
-# pure anisotropic dimension. In the variable ``data_object``, the anisotropic dimension
-# is already at index 0 and, therefore, no further action is required.
+# When using the csdm objects with the ``mrinversion`` package, the dimension at index
+# 0 must be the dimension undergoing the linear inversion. In this example, we plan to
+# invert the pure anisotropic shielding line-shape. In the ``data_object``, the
+# anisotropic dimension is already at index 0 and, therefore, no further action is
+# required.
 #
 # **Step-2: Optimization**
 #
-# Also notice, that the MAF data only occupies a small fraction of the two-dimensional
-# frequency grid. It is, therefore, best to truncate the dataset to the desired region
-# before proceeding. Use the appropriate array indexing/slicing to select the signal
-# region.
+# Also notice, the signal from the 2D MAF dataset occupies a small fraction of the
+# two-dimensional frequency grid. For optimum performance, truncate the dataset to the
+# relevant region before proceeding. Use the appropriate array indexing/slicing to
+# select the signal region.
 data_object_truncated = data_object[:, 37:74]
 plot2D(data_object_truncated)
 
@@ -121,38 +119,47 @@ inverse_dimensions = [
 # For MAF datasets, the line-shape kernel corresponds to the pure nuclear shielding
 # anisotropy line-shapes. Use the :class:`~mrinversion.kernel.NuclearShieldingLineshape`
 # class to generate a shielding line-shape kernel.
-method = NuclearShieldingLineshape(
+lineshape = NuclearShieldingLineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimensions,
     channel="29Si",
     magnetic_flux_density="9.4 T",
-    rotor_angle="90 deg",
+    rotor_angle="90°",
     rotor_frequency="12 kHz",
     number_of_sidebands=4,
 )
 
 # %%
-# The above code generates an instance of the NuclearShieldingLineshape class, which we
-# assigned to the variable ``method``.
-# The two required arguments of this class are the `anisotropic_dimension` and
-# `inverse_dimension`, as previously defined.
-# The value of the remaining optional attributes such as the channel, magnetic flux
-# density, rotor angle, and rotor frequency is set to match the conditions under which
-# the MAF spectrum was acquired. Once the
-# NuclearShieldingLineshape instance is created, use the kernel() method to generate
-# the MAF lineshape kernel.
-K = method.kernel(supersampling=1)
+# Here, ``lineshape`` is an instance of the
+# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The required arguments
+# of this class are the `anisotropic_dimension`, `inverse_dimension`, and `channel`.
+# We have already defined the first two arguments in the previous sub-section. The
+# value of the `channel` argument is the nucleus observed in the MAF experiment. In
+# this example, this value is '29Si'.
+# The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
+# and `rotor_frequency`, are set to match the conditions under which the 2D MAF
+# spectrum was acquired. The value of the
+# `number_of_sidebands` argument is the number of sidebands calculated for each
+# line-shape within the kernel. Unless, you have a lot of spinning sidebands in your
+# MAF dataset, four sidebands should be enough.
+#
+# Once the NuclearShieldingLineshape instance is created, use the
+# :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the instance
+# to generate the MAF line-shape kernel.
+K = lineshape.kernel(supersampling=1)
 print(K.shape)
 
 # %%
-# The kernel ``K`` is a NumPy array of shape (128, 625), where the axis with 128 points
-# corresponds to the anisotropic dimension, and the axis with 625 points are the
-# features corresponding to the :math:`25\times 25` `x`-`y` coordinates.
+# The kernel ``K`` is a NumPy array of shape (32, 900), where the axes with 32 and
+# 900 points are the anisotropic dimension and the features (x-y coordinates)
+# corresponding to the :math:`25\times 25` `x`-`y` grid, respectively.
 
 # %%
 # Data Compression
 # ''''''''''''''''
 #
+# Data compression is optional but recommended. It may reduce the size of the
+# inverse problem and, thus, further computation time.
 new_system = TSVDCompression(K, data_object_truncated)
 compressed_K = new_system.compressed_K
 compressed_s = new_system.compressed_s
@@ -160,16 +167,18 @@ compressed_s = new_system.compressed_s
 print(f"truncation_index = {new_system.truncation_index}")
 
 # %%
-# Solving inverse problem
-# -----------------------
+# Solving the inverse problem
+# ---------------------------
 #
-# Solve the smooth-lasso problem. Normally, one should use the statistical learning
-# method to solve the problem over a range of α and λ values, and determine a nuclear
-# shielding tensor distribution that best depicts the 2D MAF dataset.
-# Given, the time constraints for building this documentation, we skip this step
-# and evaluate the nuclear shielding tensor distribution at the pre-optimized α
-# and λ values, where the optimum values are :math:`\alpha = 2.2\times 10^{-8}` and
-# :math:`\lambda = 1.27\times 10^{-6}`.
+# Smooth LASSO cross-validation
+# '''''''''''''''''''''''''''''
+#
+# Solve the smooth-lasso problem. Ordinarily, one should use the statistical learning
+# method to solve the inverse problem over a range of α and λ values and then determine
+# the best nuclear shielding tensor parameter distribution for the given 2D MAF
+# dataset. Considering the limited build time for the documentation, we skip this step
+# and evaluate the distribution at pre-optimized α and λ values. The optimum values are
+# :math:`\alpha = 3.36\times 10^{-5}` and :math:`\lambda = 5.33\times 10^{-6}`.
 # The following commented code was used in determining the optimum α and λ values.
 
 # %%
@@ -177,16 +186,18 @@ print(f"truncation_index = {new_system.truncation_index}")
 # from mrinversion.linear_model import SmoothLassoCV
 # import numpy as np
 
+# # setup the pre-defined range of alpha and lambda values
 # lambdas = 10 ** (-4.8 - 1 * (np.arange(20) / 19))
 # alphas = 10 ** (-2.5 - 2.5 * (np.arange(20) / 19))
 
+# # setup the smooth lasso cross-validation class
 # s_lasso = SmoothLassoCV(
-#     alphas=alphas,
-#     lambdas=lambdas,
-#     sigma=0.015,
-#     folds=10,
-#     inverse_dimension=inverse_dimensions,
-#     verbose=1
+#     alphas=alphas,  # A numpy array of alpha values.
+#     lambdas=lambdas,  # A numpy array of lambda values.
+#     sigma=0.015,  # The standard deviation of noise from the MAF data.
+#     folds=10,  # The number of folds in n-folds cross-validation.
+#     inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
+#     verbose=1,  # If non-zero, prints the progress as the computation proceeds.
 # )
 
 # # run fit using the compressed kernel and compressed data.
@@ -203,8 +214,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # error_curve = s_lasso.cross_validation_curve
 
 # %%
-# If you use the above cross-validation, ``SmoothLassoCV`` method, you may skip the
-# following section of code.
+# If you use the above ``SmoothLassoCV`` method, skip the following code-block.
 
 s_lasso = SmoothLasso(
     alpha=3.36e-5, lambda1=5.33e-6, inverse_dimension=inverse_dimensions
@@ -212,45 +222,58 @@ s_lasso = SmoothLasso(
 # run the fit method on the compressed kernel and compressed data.
 s_lasso.fit(K=compressed_K, s=compressed_s)
 
-# the solution
-f_sol = s_lasso.f
+# %%
+# The optimum solution
+# ''''''''''''''''''''
+#
+# The :attr:`~mrinversion.linear_model.SmoothLasso.f` attribute of the instance holds
+# the solution,
+f_sol = s_lasso.f  # f_sol is a CSDM object.
 
 # %%
-# Here, ``f_sol`` is the solution corresponding to the optimized hyperparameters. To
-# calculate the residuals between the data and predicted data(fit), use the `residuals`
-# method, as follows,
-residue = s_lasso.residuals(K, data_object_truncated.real)
-plot2D(residue, vmax=data_object_truncated.max(), vmin=data_object_truncated.min())
+# where ``f_sol`` is the optimum solution.
+#
+# The fit residuals
+# '''''''''''''''''
+#
+# To calculate the residuals between the data and predicted data(fit), use the
+# :meth:`~mrinversion.linear_model.SmoothLasso.residuals` method, as follows,
+residuals = s_lasso.residuals(K, data_object_truncated)
+# residuals is a CSDM object.
+
+# The plot of the residuals.
+plot2D(residuals, vmax=data_object_truncated.max(), vmin=data_object_truncated.min())
 
 # %%
 # The standard deviation of the residuals is
-residue.std()
+residuals.std()
 
 # %%
 # Saving the solution
 # '''''''''''''''''''
 #
-# To serialize the solution to file, use the `save()` method of the CSDM object,
+# To serialize the solution to a file, use the `save()` method of the CSDM object,
 # for example,
 f_sol.save("MgO.SiO2_inverse.csdf")  # save the solution
-residue.save("MgO.SiO2_residue.csdf")  # save the residuals
+residuals.save("MgO.SiO2_residue.csdf")  # save the residuals
 
 # %%
 # Data Visualization
 # ------------------
 #
 # At this point, we have solved the inverse problem and obtained an optimum
-# distribution of the nuclear shielding tensors from the 2D MAF dataset. You may use
-# any data visualization and interpretation tool of choice for further analysis.
-# In the following sections, we provide minimal visualization and analysis
-# to complete the case study.
+# distribution of the nuclear shielding tensor parameters from the 2D MAF dataset. You
+# may use any data visualization and interpretation tool of choice for further
+# analysis. In the following sections, we provide minimal visualization to complete the
+# case study.
 #
-# **Visualizing the 3D solution**
+# Visualizing the 3D solution
+# '''''''''''''''''''''''''''
 
-# convert the coordinates of the solution, `f_sol`, from frequency units to ppm.
+# Convert the coordinates of the solution, `f_sol`, from Hz to ppm.
 [item.to("ppm", "nmr_frequency_ratio") for item in f_sol.dimensions]
 
-# The 3d plot of the solution
+# The 3D plot of the solution
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
 plot_3d(
