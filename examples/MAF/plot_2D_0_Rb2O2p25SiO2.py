@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2D MAF of Rb2O 2.25SiO2 glass
-=============================
+2D MAF data of Rb2O 2.25SiO2 glass
+==================================
 """
 # %%
 # The following example is an application of the statistical learning method in
@@ -30,7 +30,7 @@ from mrinversion.plot import plot_3d
 # sphinx_gallery_thumbnail_number = 6
 
 # %%
-# **Setup for matplotlib figures.**
+# Setup for the matplotlib figures.
 rcParams["figure.figsize"] = 4.5, 3.5
 rcParams["font.size"] = 9
 
@@ -61,6 +61,7 @@ data_object = cp.load(filename)
 
 # For inversion, we only interest ourselves with the real part of the complex dataset.
 data_object = data_object.real
+
 # We will also convert the coordinates of both dimensions from Hz to ppm.
 _ = [item.to("ppm", "nmr_frequency_ratio") for item in data_object.dimensions]
 
@@ -159,7 +160,7 @@ lineshape = NuclearShieldingLineshape(
 # We have already defined the first two arguments in the previous sub-section. The
 # value of the `channel` argument is the nucleus observed in the MAF experiment. In
 # this example, this value is '29Si'.
-# The remaining attribute values, such as the `magnetic_flux_density`, `rotor_angle`,
+# The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAF
 # spectrum was acquired. Note for the MAF measurements the rotor angle is usually
 # :math:`90^\circ` for the anisotropic dimension. The value of the
@@ -219,8 +220,8 @@ s_lasso = SmoothLassoCV(
     verbose=1,  # If non-zero, prints the progress as the computation proceeds.
 )
 
-# run fit using the compressed kernel and compressed data.
-s_lasso.fit(compressed_K, compressed_s)
+# run the fit method on the compressed kernel and compressed data.
+s_lasso.fit(K=compressed_K, s=compressed_s)
 
 # %%
 # The optimum hyper-parameters
@@ -268,8 +269,9 @@ f_sol = s_lasso.f  # f_sol is a CSDM object.
 # '''''''''''''''''
 #
 # To calculate the residuals between the data and predicted data(fit), use the
-# :meth:`~mrinversion.linear_model.SmoothLasso.residuals` method, as follows,
-residuals = s_lasso.residuals(K, data_object_truncated)  # residuals is a CSDM object.
+# :meth:`~mrinversion.linear_model.SmoothLassoCV.residuals` method, as follows,
+residuals = s_lasso.residuals(K=K, s=data_object_truncated)
+# residuals is a CSDM object.
 
 # The plot of the residuals.
 plot2D(residuals, vmax=data_object_truncated.max(), vmin=data_object_truncated.min())
@@ -353,7 +355,7 @@ plot_3d(
     cmap=cm.Reds_r,  # colormap
     box=True,  # draw a box around the region
 )
-# plot for Q3 region
+# plot for the Q3 region
 plot_3d(
     ax,
     Q3_region,
