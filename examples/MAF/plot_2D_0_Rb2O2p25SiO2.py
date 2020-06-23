@@ -27,10 +27,10 @@ from mrinversion.linear_model import SmoothLassoCV
 from mrinversion.linear_model import TSVDCompression
 from mrinversion.plot import plot_3d
 
-# sphinx_gallery_thumbnail_number = 5
+# sphinx_gallery_thumbnail_number = 6
 
 # %%
-# **Setup for matplotlib figures**
+# **Setup for matplotlib figures.**
 rcParams["figure.figsize"] = 4.5, 3.5
 rcParams["font.size"] = 9
 
@@ -157,15 +157,20 @@ lineshape = NuclearShieldingLineshape(
 # :class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The required arguments
 # of this class are the `anisotropic_dimension`, `inverse_dimension`, and `channel`.
 # We have already defined the first two arguments in the previous sub-section. The
-# value of the `channel` argument is the nuclei observed in the MAF experiment. In this
-# example, this value is '29Si'.
+# value of the `channel` argument is the nucleus observed in the MAF experiment. In
+# this example, this value is '29Si'.
 # The remaining attribute values, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAF
 # spectrum was acquired. Note for the MAF measurements the rotor angle is usually
-# :math:`90^\circ` for the anisotropic dimension. Once the NuclearShieldingLineshape
-# instance is created, use the
+# :math:`90^\circ` for the anisotropic dimension. The value of the
+# `number_of_sidebands` argument is the number of sidebands calculated for each
+# line-shape within the kernel. Unless, you have a lot of spinning sidebands in your
+# MAF dataset, the value of this argument is generally low. Here, we calculate four
+# spinning sidebands per line-shape within in the kernel.
+#
+# Once the NuclearShieldingLineshape instance is created, use the
 # :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the instance
-# to generate the MAF lineshape kernel.
+# to generate the MAF line-shape kernel.
 K = lineshape.kernel(supersampling=1)
 print(K.shape)
 
@@ -190,22 +195,25 @@ print(f"truncation_index = {new_system.truncation_index}")
 # Solving the inverse problem
 # ---------------------------
 #
+# Smooth LASSO cross-validation
+# '''''''''''''''''''''''''''''
+#
 # Solve the smooth-lasso problem. Use the statistical learning ``SmoothLassoCV``
 # method to solve the inverse problem over a range of α and λ values and determine
 # the best nuclear shielding tensor parameter distribution for the given 2D MAF
 # dataset. Considering the limited build time for the documentation, we'll perform
-# cross-validation over a smaller :math:`10 \times 10` `x`-`y` grid. You may
-# increase the grid resolution for your problem, is desired.
+# the cross-validation over a smaller :math:`5 \times 5` `x`-`y` grid. You may
+# increase the grid resolution for your problem if desired.
 
-# set up the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-5 - 0.75 * (np.arange(10) / 9))
-alphas = 10 ** (-5.5 - 1.25 * (np.arange(10) / 9))
+# setup the pre-defined range of alpha and lambda values
+lambdas = 10 ** (-5.2 - 0.35 * (np.arange(5) / 4))
+alphas = 10 ** (-5.5 - 1.25 * (np.arange(5) / 4))
 
-# set up the smooth lasso cross-validation class
+# setup the smooth lasso cross-validation class
 s_lasso = SmoothLassoCV(
     alphas=alphas,  # A numpy array of alpha values.
     lambdas=lambdas,  # A numpy array of lambda values.
-    sigma=0.0043,  # The standard deviation of noise from the MAF data.
+    sigma=0.0043,  # The standard deviation of noise from the 2D MAF data.
     folds=10,  # The number of folds in n-folds cross-validation.
     inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
     verbose=1,  # If non-zero, prints the progress as the computation proceeds.
@@ -214,29 +222,25 @@ s_lasso = SmoothLassoCV(
 # run fit using the compressed kernel and compressed data.
 s_lasso.fit(compressed_K, compressed_s)
 
-# the optimum hyper-parameters, alpha and lambda, from the cross-validation.
+# %%
+# The optimum hyper-parameters
+# ''''''''''''''''''''''''''''
+#
+# Use the :attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameter` attribute of
+# the instance for the optimum hyper-parameters, :math:`\alpha` and :math:`\lambda`,
+# determined from the cross-validation.
 print(s_lasso.hyperparameter)
-# {'alpha': 8.858667904100833e-07, 'lambda': 3.7926901907322535e-06}
-
-# the solution
-f_sol = s_lasso.f
 
 # %%
-# Here, ``f_sol`` is the solution corresponding to the optimized hyperparameters. To
-# calculate the residuals between the data and predicted data(fit), use the
-# :meth:`~mrinversion.linear_model.SmoothLasso.residuals` method, as follows,
-residue = s_lasso.residuals(K, data_object_truncated)
-plot2D(residue, vmax=data_object_truncated.max(), vmin=data_object_truncated.min())
+# The cross-validation surface
+# ''''''''''''''''''''''''''''
+#
+# Optionally, you may want to visualize the cross-validation error curve/surface. Use
+# the :attr:`~mrinversion.linear_model.SmoothLasso.cross_validation_curve` attribute of
+# the instance, as follows
+error_curve = s_lasso.cross_validation_curve  # `error_curve` is a CSDM object.
 
-# %%
-# The standard deviation of the residuals is close to the standard deviation of the
-# noise, :math:`\sigma = 0.0043`.
-residue.std()
-
-# %%
-# The cross-validation error curve is
-error_curve = s_lasso.cross_validation_curve
-
+# plot of the cross validation surface
 plt.figure(figsize=(5, 3.5))
 ax = plt.subplot(projection="csdm")
 ax.contour(np.log10(error_curve), levels=25)
@@ -249,6 +253,31 @@ ax.scatter(
 plt.tight_layout(pad=0.5)
 plt.show()
 
+# %%
+# The optimum solution
+# ''''''''''''''''''''
+#
+# The :attr:`~mrinversion.linear_model.SmoothLassoCV.f` attribute of the instance holds
+# the solution corresponding to the optimum hyper-parameters,
+f_sol = s_lasso.f  # f_sol is a CSDM object.
+
+# %%
+# where ``f_sol`` is the optimum solution.
+#
+# The fit residuals
+# '''''''''''''''''
+#
+# To calculate the residuals between the data and predicted data(fit), use the
+# :meth:`~mrinversion.linear_model.SmoothLasso.residuals` method, as follows,
+residuals = s_lasso.residuals(K, data_object_truncated)  # residuals is a CSDM object.
+
+# The plot of the residuals.
+plot2D(residuals, vmax=data_object_truncated.max(), vmin=data_object_truncated.min())
+
+# %%
+# The standard deviation of the residuals is close to the standard deviation of the
+# noise, :math:`\sigma = 0.0043`.
+residuals.std()
 
 # %%
 # Saving the solution
@@ -257,7 +286,7 @@ plt.show()
 # To serialize the solution (nuclear shielding tensor parameter distribution) to a
 # file, use the `save()` method of the CSDM object, for example,
 f_sol.save("Rb2O.2.25SiO2_inverse.csdf")  # save the solution
-residue.save("Rb2O.2.25SiO2_residue.csdf")  # save the residuals
+residuals.save("Rb2O.2.25SiO2_residue.csdf")  # save the residuals
 
 # %%
 # Data Visualization
@@ -269,12 +298,13 @@ residue.save("Rb2O.2.25SiO2_residue.csdf")  # save the residuals
 # analysis. In the following sections, we provide minimal visualization and analysis
 # to complete the case study.
 #
-# **Visualizing the 3D solution**
+# Visualizing the 3D solution
+# '''''''''''''''''''''''''''
 
-# Convert the coordinates of the solution, `f_sol`, from frequency units to ppm.
+# Convert the coordinates of the solution, `f_sol`, from Hz to ppm.
 [item.to("ppm", "nmr_frequency_ratio") for item in f_sol.dimensions]
 
-# The 3d plot of the solution
+# The 3D plot of the solution
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
 plot_3d(ax, f_sol, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-50, -150])
@@ -282,7 +312,7 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# From the 3D plot, we observe two distinct volumes: one for the :math:`\text{Q}^4`
+# From the 3D plot, we observe two distinct regions: one for the :math:`\text{Q}^4`
 # sites and another for the :math:`\text{Q}^3` sites.
 # Select the respective regions by using the appropriate array indexing,
 
@@ -292,9 +322,9 @@ Q4_region.description = "Q4 region"
 Q3_region = f_sol[0:8, 10:24, 11:30]
 Q3_region.description = "Q3 region"
 # %%
-# The plot of the respective volumes is shown below.
+# The plot of the respective regions is shown below.
 
-# Calculate the normalization factor the 2D contour and 1D projections from the
+# Calculate the normalization factor for the 2D contours and 1D projections from the
 # original solution, `f_sol`. Use this normalization factor to scale the intensities
 # from the sub-regions.
 max_2d = [
@@ -340,29 +370,33 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# **Visualizing the isotropic projections**
+# Visualizing the isotropic projections.
+# ''''''''''''''''''''''''''''''''''''''
 #
 # Because the :math:`\text{Q}^4` and :math:`\text{Q}^3` regions are fully resolved
 # after the inversion, evaluating the contributions from these regions is trivial.
 # For examples, the distribution of the isotropic chemical shifts for these regions are
 
-# Isotropic chemical shift projection of the MAF dataset.
+# Isotropic chemical shift projection of the 2D MAF dataset.
 data_iso = data_object_truncated.sum(axis=0)
-data_iso /= data_iso.max()  # normalize
+data_iso /= data_iso.max()  # normalize the projection
 
 # Isotropic chemical shift projection of the tensor distribution dataset.
 f_sol_iso = f_sol.sum(axis=(0, 1))
-f_sol_iso_max = f_sol_iso.max()
-f_sol_iso /= f_sol_iso_max  # normalize
 
 # Isotropic chemical shift projection of the tensor distribution for the Q4 region.
 Q4_region_iso = Q4_region.sum(axis=(0, 1))
-Q4_region_iso /= f_sol_iso_max  # normalize
 
 # Isotropic chemical shift projection of the tensor distribution for the Q3 region.
 Q3_region_iso = Q3_region.sum(axis=(0, 1))
-Q3_region_iso /= f_sol_iso_max  # normalize
 
+# Normalize the three projections.
+f_sol_iso_max = f_sol_iso.max()
+f_sol_iso /= f_sol_iso_max
+Q4_region_iso /= f_sol_iso_max
+Q3_region_iso /= f_sol_iso_max
+
+# The plot the different projections.
 plt.figure(figsize=(5.5, 3.5))
 ax = plt.gca(projection="csdm")
 ax.plot(f_sol_iso, "--k", label="tensor")
@@ -379,7 +413,7 @@ plt.show()
 # Analysis
 # --------
 #
-# For analysis, we use the
+# For the analysis, we use the
 # `statistics <https://csdmpy.readthedocs.io/en/latest/api/statistics.html>`_
 # module of the csdmpy package. Following is the moment analysis of the 3D volumes for
 # both the :math:`\text{Q}^4` and :math:`\text{Q}^3` regions up to the second moment.
