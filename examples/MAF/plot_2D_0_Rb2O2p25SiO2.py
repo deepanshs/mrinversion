@@ -468,6 +468,34 @@ print(
 )
 
 # %%
+# Result cross-verification
+# -------------------------
+#
+# The reported value for the Qn-species distribution from Baltisberger `et. al.` [#f1]_
+# is listed below and is consistent with the above result.
+#
+# .. list-table::
+#    :widths: 7 15 28 25 25
+#    :header-rows: 1
+#
+#    * - Species
+#      - Yield
+#      - Isotropic chemical shift, :math:`\delta_\text{iso}`
+#      - Shielding anisotropy, :math:`\zeta`:
+#      - Shielding asymmetry, :math:`\eta`:
+#
+#    * - Q4
+#      - :math:`11.0 \pm 0.3` %
+#      - :math:`-98.0 \pm 5.64` ppm
+#      - 0 ppm (fixed)
+#      - 0 (fixed)
+#
+#    * - Q3
+#      - :math:`89 \pm 0.1` %
+#      - :math:`-89.5 \pm 4.65` ppm
+#      - 80.7 ppm with a 6.7 ppm Gaussian broadening
+#      - 0 (fixed)
+#
 # References
 # ----------
 #

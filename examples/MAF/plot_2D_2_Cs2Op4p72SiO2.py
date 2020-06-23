@@ -143,7 +143,7 @@ lineshape = NuclearShieldingLineshape(
 # The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAF
 # spectrum was acquired. Note for this particular MAF measurement, the rotor angle was
-# set to :math:`87.19^\circ` for the anisotropic dimension, not the usual
+# set to :math:`87.14^\circ` for the anisotropic dimension, not the usual
 # :math:`90^\circ`. The value of the
 # `number_of_sidebands` argument is the number of sidebands calculated for each
 # line-shape within the kernel. Unless, you have a lot of spinning sidebands in your
@@ -445,6 +445,34 @@ print(
 )
 
 # %%
+# Result cross-verification
+# -------------------------
+#
+# The reported value for the Qn-species distribution from Baltisberger `et. al.` [#f1]_
+# is listed below and is consistent with the above result.
+#
+# .. list-table::
+#    :widths: 7 15 28 25 25
+#    :header-rows: 1
+#
+#    * - Species
+#      - Yield
+#      - Isotropic chemical shift, :math:`\delta_\text{iso}`
+#      - Shielding anisotropy, :math:`\zeta`:
+#      - Shielding asymmetry, :math:`\eta`:
+#
+#    * - Q4
+#      - :math:`57.7 \pm 0.4` %
+#      - :math:`-104.7 \pm 5.2` ppm
+#      - 0 ppm (fixed)
+#      - 0 (fixed)
+#
+#    * - Q3
+#      - :math:`42.3 \pm 0.4` %
+#      - :math:`-96.1 \pm 4.0` ppm
+#      - 89.0 ppm
+#      - 0 (fixed)
+#
 # References
 # ----------
 #
