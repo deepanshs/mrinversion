@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-from .utils import supersampled_coordinates
+from .utils import _supersampled_coordinates
 from mrinversion.kernel.base import BaseModel
 
 
@@ -34,7 +34,7 @@ class T2(BaseModel):
             A numpy array.
         """
         x = self.kernel_dimension.coordinates
-        x_inverse = supersampled_coordinates(
+        x_inverse = _supersampled_coordinates(
             self.inverse_kernel_dimension, supersampling=supersampling
         )
         amp = np.exp(np.tensordot(-(1 / x_inverse), x, 0))
@@ -61,7 +61,7 @@ class T1(BaseModel):
 
     def kernel(self, supersampling=1):
         x = self.kernel_dimension.coordinates
-        x_inverse = supersampled_coordinates(
+        x_inverse = _supersampled_coordinates(
             self.inverse_kernel_dimension, supersampling=supersampling
         )
         amp = 1 - np.exp(np.tensordot(-(1 / x_inverse), x, 0))

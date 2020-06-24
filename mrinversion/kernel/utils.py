@@ -7,22 +7,24 @@ def x_y_to_zeta_eta(x, y):
         following definition,
 
         .. math::
-            \zeta = \sqrt(x^2 + y^2)
-            \eta = (4/\pi) \tan^{-1} |x/y|,
-
-        if :math:`|x| \le |y|`, otherwise,
+            \left.\begin{align}
+            \zeta &= \sqrt{x^2 + y^2}, \\
+            \eta &= \frac{4}{\pi} \tan^{-1} \left|\frac{x}{y}\right|
+            \end{align} {~~~~~~~~} \right\} {~~~~~~~~} |x| \le |y|
 
         .. math::
-            \zeta = -\sqrt(x^2 + y^2)
-            \eta = (4/\pi) \tan^{-1} |y/x|.
+            \left.\begin{align}
+            \zeta &= -\sqrt{x^2 + y^2}, \\
+            \eta &= \frac{4}{\pi} \tan^{-1} \left|\frac{y}{x}\right|
+            \end{align} {~~~~~~~~} \right\} {~~~~~~~~} |x| \gt |y|
 
         Args:
             x: floats or Quantity object. The coordinate x.
             y: floats or Quantity object. The coordinate y.
 
         Return:
-            zeta: The coordinate :math:`zeta`.
-            eta: The coordinate :math:`\eta`.
+            A list of two ndarrays. The first array is the :math:`\zeta`
+            coordinates. The second array is the :math:`\eta` coordinates.
     """
     x_unit = y_unit = 1
     if x.__class__.__name__ == "Quantity":
@@ -49,27 +51,7 @@ def x_y_to_zeta_eta(x, y):
 
 
 def _x_y_to_zeta_eta(x, y):
-    r"""Convert the coordinates :math:`(x,y)` to :math:`(\zeta, \eta)` using the
-        following definition,
-
-        .. math::
-            \zeta = \sqrt(x^2 + y^2)
-            \eta = (4/\pi) \tan^{-1} |x/y|,
-
-        if :math:`|x| \le |y|`, otherwise,
-
-        .. math::
-            \zeta = -\sqrt(x^2 + y^2)
-            \eta = (4/\pi) \tan^{-1} |y/x|.
-
-        Args:
-            x: ndarray or list of floats. The coordinate x.
-            y: ndarray or list of floats. The coordinate y.
-
-        Return:
-            zeta: 1D-ndarray. The coordinate :math:`zeta`.
-            eta: 1D-ndarray. The coordinate :math:`\eta`.
-    """
+    """Same as def x_y_to_zeta_eta, but for ndarrays."""
     x = np.abs(x)
     y = np.abs(y)
     zeta = np.sqrt(x ** 2 + y ** 2)  # + offset
@@ -89,24 +71,26 @@ def zeta_eta_to_x_y(zeta, eta):
         following definition,
 
         .. math::
-            x = |\zeta| \sin\theta
-            y = |\zeta| \cos\theta,
-
-        if :math:`\zeta \ge 0`, otherwise,
+            \left. \begin{align}
+            x &= |\zeta| \sin\theta, \\
+            y &= |\zeta| \cos\theta
+            \end{align} {~~~~~~~~} \right\} {~~~~~~~~} \zeta \ge 0
 
         .. math::
-            x = |\zeta| \cos\theta
-            y = |\zeta| \sin\theta,
+            \left. \begin{align}
+            x &= |\zeta| \cos\theta, \\
+            y &= |\zeta| \sin\theta
+            \end{align} {~~~~~~~~} \right\} {~~~~~~~~} \zeta \lt 0
 
-        where :math:`\theta = \pi\eta/4`.
+        where :math:`\theta = \frac{\pi}{4}\eta`.
 
         Args:
             x: ndarray or list of floats. The coordinate x.
             y: ndarray or list of floats. The coordinate y.
 
         Return:
-            zeta: 1D-ndarray. The coordinate :math:`zeta`.
-            eta: 1D-ndarray. The coordinate :math:`\eta`.
+            A list of ndarrays. The first array holds the coordinate :math:`x`. The
+            second array holds the coordinates :math:`y`.
     """
     zeta = np.asarray(zeta)
     eta = np.asarray(eta)
@@ -126,13 +110,13 @@ def zeta_eta_to_x_y(zeta, eta):
     return x.ravel(), y.ravel()
 
 
-def cal_zeta_eta_from_x_y_distribution(dimension, grid, supersampling):
+def _x_y_to_zeta_eta_distribution(grid, supersampling):
     """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
     # if grid.x.coordinates_offset != grid.y.coordinates_offset:
     #     raise ValueError("coordinates_offset for x and y grid must be identical")
 
-    x_coordinates = supersampled_coordinates(grid[0], supersampling=supersampling)
-    y_coordinates = supersampled_coordinates(grid[1], supersampling=supersampling)
+    x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)
+    y_coordinates = _supersampled_coordinates(grid[1], supersampling=supersampling)
 
     if x_coordinates.unit.physical_type == "frequency":
         x_coordinates = x_coordinates.to("Hz").value
@@ -140,8 +124,10 @@ def cal_zeta_eta_from_x_y_distribution(dimension, grid, supersampling):
         # offset = grid.x.coordinates_offset.to("Hz").value
 
     elif x_coordinates.unit.physical_type == "dimensionless":
-        x_coordinates = (x_coordinates * dimension.larmor_frequency).to("").value
-        y_coordinates = (y_coordinates * dimension.larmor_frequency).to("").value
+        x_coordinates = x_coordinates.to("ppm").value
+        y_coordinates = y_coordinates.to("ppm").value
+        # x_coordinates = (x_coordinates * dimension.larmor_frequency).to("").value
+        # y_coordinates = (y_coordinates * dimension.larmor_frequency).to("").value
         # offset = grid.x.coordinates_offset.to("").value
 
     x_mesh, y_mesh = np.meshgrid(
@@ -153,24 +139,24 @@ def cal_zeta_eta_from_x_y_distribution(dimension, grid, supersampling):
     return _x_y_to_zeta_eta(x_mesh, y_mesh)
 
 
-def supersampled_coordinates(dimension, supersampling=1):
+def _supersampled_coordinates(dimension, supersampling=1):
     r"""The coordinates along the dimension.
 
-        Args:
-            supersampling: An integer used in supersampling the coordinates along the
-                dimension, If :math:`n` is the count, :math:`\Delta_x` is the
-                increment, :math:`x_0` is the coordinates offset along the dimension,
-                and :math:`m` is the supersampling, a total of :math:`mn` coordinates
-                are sampled using
+    Args:
+        supersampling: An integer used in supersampling the coordinates along the
+            dimension, If :math:`n` is the count, :math:`\Delta_x` is the increment,
+            :math:`x_0` is the coordinates offset along the dimension, and :math:`m` is
+            the supersampling factor, a total of :math:`mn` coordinates are sampled
+            using
 
-                .. math::
-                    x = [0 .. (nm-1)] \Delta_x + \x_0 - \frac{1}{2} \Delta_x (m-1)
+            .. math::
+                x = [0 .. (nm-1)] \Delta_x + \x_0 - \frac{1}{2} \Delta_x (m-1)
 
-                where :math:`\Delta_x' = \frac{\Delta_x}{m}`.
+            where :math:`\Delta_x' = \frac{\Delta_x}{m}`.
 
-        Returns:
-            An `Quantity` array of coordinates.
-        """
+    Returns:
+        An `Quantity` array of coordinates.
+    """
     array = dimension.coordinates
     if dimension.type == "linear":
         increment = dimension.increment / supersampling

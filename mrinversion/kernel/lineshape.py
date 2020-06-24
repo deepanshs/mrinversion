@@ -4,7 +4,7 @@ from mrsimulator import SpinSystem
 from mrsimulator.methods import BlochDecayCentralTransitionSpectrum
 from mrsimulator.methods import BlochDecaySpectrum
 
-from .utils import cal_zeta_eta_from_x_y_distribution
+from .utils import _x_y_to_zeta_eta_distribution
 from mrinversion.kernel.base import _check_dimension_type
 from mrinversion.kernel.base import BaseModel
 
@@ -67,8 +67,8 @@ class LineShape(BaseModel):
     def _get_zeta_eta(self, supersampling):
         """Return zeta and eta coordinates over x-y grid"""
 
-        zeta, eta = cal_zeta_eta_from_x_y_distribution(
-            self.kernel_dimension, self.inverse_kernel_dimension, supersampling
+        zeta, eta = _x_y_to_zeta_eta_distribution(
+            self.inverse_kernel_dimension, supersampling
         )
         return zeta, eta
 

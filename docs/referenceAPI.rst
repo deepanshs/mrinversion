@@ -5,5 +5,8 @@ API-Reference
 
 .. toctree::
 
-    api/kernel
-    api/linear_model
+    api/shielding_kernel
+    api/SmoothLasso
+    api/SmoothLassoCV
+    api/TSVDCompression
+    api/utils

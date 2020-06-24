@@ -2,9 +2,9 @@
 import csdmpy as cp
 import numpy as np
 
+from mrinversion.kernel.utils import _supersampled_coordinates
 from mrinversion.kernel.utils import _x_y_to_zeta_eta
-from mrinversion.kernel.utils import cal_zeta_eta_from_x_y_distribution
-from mrinversion.kernel.utils import supersampled_coordinates
+from mrinversion.kernel.utils import _x_y_to_zeta_eta_distribution
 from mrinversion.kernel.utils import x_y_to_zeta_eta
 from mrinversion.kernel.utils import zeta_eta_to_x_y
 
@@ -38,15 +38,13 @@ def test_x_y_to_zeta_eta():
 
 
 def test_zeta_eta_to_x_y():
-    x, y = zeta_eta_to_x_y([10, np.sqrt(2) * 25], [0, 1])
-    assert np.allclose(x, [0, 25])
-    assert np.allclose(y, [10, 25])
+    sq25 = np.sqrt(2) * 25
+    x, y = zeta_eta_to_x_y([10, sq25, -10, -sq25], [0, 1, 0, 1])
+    assert np.allclose(x, [0, 25, 10, 25])
+    assert np.allclose(y, [10, 25, 0, 25])
 
 
-def test_cal_zeta_eta_from_x_y_distribution():
-    anisotropic_dimension = [
-        cp.Dimension(type="linear", count=96, increment="208.33 Hz", complex_fft=True)
-    ]
+def test_x_y_to_zeta_eta_distribution():
     inverse_dimension = [
         cp.Dimension(type="linear", count=4, increment="3 kHz"),
         cp.Dimension(type="linear", count=4, increment="3 kHz"),
@@ -70,9 +68,7 @@ def test_cal_zeta_eta_from_x_y_distribution():
                 zeta_.append(z)
                 eta_.append(1.0)
 
-    zeta, eta = cal_zeta_eta_from_x_y_distribution(
-        anisotropic_dimension, inverse_dimension, supersampling=1
-    )
+    zeta, eta = _x_y_to_zeta_eta_distribution(inverse_dimension, supersampling=1)
 
     assert np.allclose(zeta, np.asarray(zeta_))
     assert np.allclose(eta, np.asarray(eta_))
@@ -84,6 +80,6 @@ def test_supersampling():
     y = np.arange(20) * 0.5
     for i in range(10):
         oversample = i + 1
-        y_oversampled = supersampled_coordinates(dim, supersampling=oversample)
+        y_oversampled = _supersampled_coordinates(dim, supersampling=oversample)
         y_reduced = y_oversampled.reshape(-1, oversample).mean(axis=-1)
         assert np.allclose(y_reduced.value, y)
