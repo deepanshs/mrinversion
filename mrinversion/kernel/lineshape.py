@@ -25,7 +25,7 @@ class LineShape(BaseModel):
         super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 2)
 
         kernel = self.__class__.__name__
-        dim_types = "frequency"
+        dim_types = ["frequency", "dimensionless"]
         _check_dimension_type(self.kernel_dimension, "anisotropic", dim_types, kernel)
         _check_dimension_type(
             self.inverse_kernel_dimension, "inverse", dim_types, kernel
@@ -134,11 +134,22 @@ class NuclearShieldingLineshape(LineShape):
         method = BlochDecaySpectrum.parse_dict_with_units(self.method_args)
         isotope = self.method_args["channels"][0]
         zeta, eta = self._get_zeta_eta(supersampling)
-        # convert zeta to ppm
-        B0 = method.spectral_dimensions[0].events[0].magnetic_flux_density  # in T
-        gamma = method.channels[0].gyromagnetic_ratio  # in MHz/T
-        larmor_frequency = -gamma * B0  # in MHZ
-        zeta /= larmor_frequency  # zeta in ppm
+
+        x_csdm = self.inverse_kernel_dimension[0]
+        if x_csdm.coordinates.unit.physical_type == "frequency":
+
+            # larmor frequency from method.
+            B0 = method.spectral_dimensions[0].events[0].magnetic_flux_density  # in T
+            gamma = method.channels[0].gyromagnetic_ratio  # in MHz/T
+            larmor_frequency = -gamma * B0  # in MHz
+
+            # convert zeta to ppm if given in frequency units.
+            zeta /= larmor_frequency  # zeta in ppm
+
+            for dim_i in self.inverse_kernel_dimension:
+                if dim_i.origin_offset.value == 0:
+                    dim_i.origin_offset = f"{larmor_frequency} MHz"
+
         spin_systems = [
             SpinSystem(
                 sites=[dict(isotope=isotope, shielding_symmetric=dict(zeta=z, eta=e))]
@@ -149,9 +160,6 @@ class NuclearShieldingLineshape(LineShape):
         dim = method.spectral_dimensions[0]
         if dim.origin_offset == 0:
             dim.origin_offset = larmor_frequency * 1e6  # in Hz
-        for dim_i in self.inverse_kernel_dimension:
-            if dim_i.origin_offset.value == 0:
-                dim_i.origin_offset = f"{larmor_frequency} MHz"
 
         self.simulator.spin_systems = spin_systems
         self.simulator.methods = [method]

@@ -3,8 +3,8 @@ from copy import deepcopy
 
 import numpy as np
 
-from mrinversion.linear_model import _get_augmented_data
-from mrinversion.linear_model import _get_cv_indexes
+from mrinversion.linear_model._base_l1l2 import _get_augmented_data
+from mrinversion.linear_model._base_l1l2 import _get_cv_indexes
 
 
 def test01():

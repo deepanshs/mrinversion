@@ -103,7 +103,7 @@ def test_dimensionality_of_lineshape_kernel():
         cp.Dimension(type="linear", count=25, increment="370 m"),
     ]
 
-    error = r"dimension with quantity name `\['frequency'\]` is required for the"
+    error = r"with quantity name `\['frequency', 'dimensionless'\]` is required for "
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingLineshape(
             anisotropic_dimension=kernel_dimensions,
@@ -118,7 +118,6 @@ def test_dimensionality_of_lineshape_kernel():
     kernel_dimensions = cp.Dimension(
         type="linear", count=96, increment="208.33 ms", complex_fft=True
     )
-    error = r"dimension with quantity name `\['frequency'\]` is required for the"
     with pytest.raises(ValueError, match=".*{0}.*".format(error)):
         NuclearShieldingLineshape(
             anisotropic_dimension=kernel_dimensions,
