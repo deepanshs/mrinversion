@@ -73,7 +73,7 @@ true probability distribution.
     :include-source:
 
     >>> import matplotlib.pyplot as plt
-    >>> from mrinversion.plot import get_polar_grids
+    >>> from mrinversion.utils import get_polar_grids
     >>> import numpy as np
     ...
     >>> _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={'projection': 'csdm'})

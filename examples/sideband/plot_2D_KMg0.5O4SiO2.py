@@ -22,7 +22,7 @@ from mrinversion.kernel import NuclearShieldingLineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
-from mrinversion.plot import plot_3d
+from mrinversion.utils import plot_3d
 
 # sphinx_gallery_thumbnail_number = 5
 
@@ -459,10 +459,10 @@ print(
 # References
 # ----------
 #
-# .. [#f1]  Alvarez, D. J., Sanders, K. J., Phyo, P. A., Baltisberger, J. H.,
-#       Grandinetti, P. J. Cluster formation of network-modifier cations in cesium
-#       silicate glasses, J. Chem. Phys. 148, 094502,  (2018).
-#       `doi:10.1063/1.5020986 <https://doi.org/10.1063/1.5020986>`_
+# .. [#f1]  Walder, B. J., Dey, K. K., Kaseman, D. C., Baltisberger, J. H.,
+#       Grandinetti, P. J. Sideband separation experiments in NMR with phase
+#       incremented echo train acquisition, J. Chem. Phys. 138, 4803142, (2013).
+#       `doi:10.1063/1.4803142. <https://doi.org/10.1063/1.4803142>`_
 #
 # .. [#f2] Srivastava, D.J., Vosegaard, T., Massiot, D., Grandinetti, P.J. (2020) Core
 #       Scientific Dataset Model: A lightweight and portable model and file format

@@ -34,9 +34,9 @@ responses = data_object.dependent_variables[0].components[0]
 # distribution of the synthetic dataset is shown below.
 import numpy as np
 import matplotlib.pyplot as plt
-from mrinversion.plot import get_polar_grids
+from mrinversion.utils import get_polar_grids
 
-# convert the dimension from `Hz` to `ppm`.
+# convert the dimension of MAF cross-section from `Hz` to `ppm`.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
 
 # the plot of the 1D MAF cross-section dataset.
@@ -72,9 +72,7 @@ plt.show()
 #
 # The direct dimension is the pure anisotropic dimension, which in this case, is the
 # only dimension.
-anisotropic_dimension = cp.LinearDimension(
-    count=96, increment="208.33 Hz", coordinates_offset="-9999.84 Hz"
-)
+anisotropic_dimension = data_object.dimensions[0]
 
 # %%
 # **Indirect-dimension**
@@ -90,28 +88,26 @@ inverse_dimension = [
 # Generate the line-shape kernel
 # ------------------------------
 #
-# The following code creates a NuclearShieldingLineshape class object called ``method``.
-# The two required arguments of this class are the direct and inverse dimensions, which
-# are the key in generating the transformation kernel, transforming the data on the
-# direct dimension to the data on the inverse-dimensions.
-# The value of the remaining optional attributes such as the channel, magnetic flux
-# density, rotor angle, and rotor frequency is set to match the conditions under which
+# The following code creates a NuclearShieldingLineshape class object called
+# ``lineshape``. The three required arguments of this class are the
+# `anisotropic_dimension`, `inverse_dimension`, and `channel`.
+# The value of the remaining optional attributes, `magnetic_flux_density`,
+# `rotor_angle`, and `rotor_frequency` is set to match the conditions under which
 # the MAF spectrum was acquired. Note, for the MAF measurements, the rotor angle is
 # usually :math:`90^\circ` for the anisotropic dimension. Once the
 # NuclearShieldingLineshape instance is created, use the kernel() method to generate
 # the MAF lineshape kernel.
 from mrinversion.kernel import NuclearShieldingLineshape
 
-method = NuclearShieldingLineshape(
+lineshape = NuclearShieldingLineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimension,
     channel="29Si",
     magnetic_flux_density="9.4 T",
     rotor_angle="90 deg",
     rotor_frequency="14 kHz",
-    number_of_sidebands=1,
 )
-K = method.kernel(supersampling=4)
+K = lineshape.kernel(supersampling=1)
 
 # %%
 # Data Compression
@@ -138,13 +134,14 @@ compressed_s = new_system.compressed_s
 from mrinversion.linear_model import SmoothLasso
 
 # guess alpha and lambda values.
-s_lasso = SmoothLasso(alpha=0.001, lambda1=5e-6, inverse_dimension=inverse_dimension)
+s_lasso = SmoothLasso(alpha=1e-4, lambda1=5e-6, inverse_dimension=inverse_dimension)
 s_lasso.fit(K=compressed_K, s=compressed_s)
 f_sol = s_lasso.f
 
 # %%
-# Here, ``f_sol`` is the solution corresponding to hyperparameters :math:`\alpha=0.005`
-# and :math:`\lambda=5\times 10^{-6}`. The plot of this solution follows
+# Here, ``f_sol`` is the solution corresponding to hyperparameters
+# :math:`\alpha=1\times10^{-5}` and :math:`\lambda=5\times 10^{-6}`. The plot of this
+# solution is
 _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={"projection": "csdm"})
 
 # the plot of the tensor distribution solution.
@@ -175,11 +172,11 @@ plt.show()
 # Create a guess range of values for the :math:`\alpha` and :math:`\lambda`
 # hyperparameters.
 # The following code generates a range of :math:`\lambda` values sampled uniformly on a
-# log scale and ranging from :math:`10^{-5}` to :math:`10^{-7}`. The range for the
+# log scale and ranging from :math:`10^{-5.5}` to :math:`10^{-6.5}`. The range for the
 # hyperparameter :math:`\alpha` is similarly sampled uniformly on a log scale, ranging
-# from :math:`10^{-2.5}` to :math:`10^{-4.5}`.
-lambdas = 10 ** (-5 - 2 * (np.arange(10) / 9))
-alphas = 10 ** (-4 - 2 * (np.arange(10) / 9))
+# from :math:`10^{-4}` to :math:`10^{-6}`.
+lambdas = 10 ** (-5.5 - 1 * (np.arange(6) / 5))
+alphas = 10 ** (-4 - 2 * (np.arange(6) / 5))
 
 # %%
 from mrinversion.linear_model import SmoothLassoCV

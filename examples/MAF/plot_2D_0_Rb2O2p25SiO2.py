@@ -25,7 +25,7 @@ from mrinversion.kernel import NuclearShieldingLineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
 from mrinversion.linear_model import SmoothLassoCV
 from mrinversion.linear_model import TSVDCompression
-from mrinversion.plot import plot_3d
+from mrinversion.utils import plot_3d
 
 # sphinx_gallery_thumbnail_number = 6
 

@@ -21,7 +21,7 @@ from pylab import rcParams
 from mrinversion.kernel import NuclearShieldingLineshape
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
-from mrinversion.plot import plot_3d
+from mrinversion.utils import plot_3d
 
 # sphinx_gallery_thumbnail_number = 4
 
@@ -108,8 +108,8 @@ anisotropic_dimension = data_object_truncated.dimensions[0]
 # **x-y dimensions:**
 # The two inverse dimensions corresponding to the `x` and `y`-axis of the `x`-`y` grid.
 inverse_dimensions = [
-    cp.LinearDimension(count=30, increment="450 Hz", label="x"),  # the `x`-dimension.
-    cp.LinearDimension(count=30, increment="450 Hz", label="y"),  # the `y`-dimension.
+    cp.LinearDimension(count=25, increment="450 Hz", label="x"),  # the `x`-dimension.
+    cp.LinearDimension(count=25, increment="450 Hz", label="y"),  # the `y`-dimension.
 ]
 
 # %%
@@ -280,13 +280,7 @@ f_sol /= f_sol.max()
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
 plot_3d(
-    ax,
-    f_sol,
-    theta_angle=15,
-    angle=-132,
-    x_lim=[0, 165],
-    y_lim=[0, 165],
-    z_lim=[-55, -115],
+    ax, f_sol, elev=15, azim=-132, x_lim=[0, 165], y_lim=[0, 165], z_lim=[-55, -115],
 )
 plt.tight_layout()
 plt.show()
@@ -296,11 +290,11 @@ plt.show()
 # References
 # ----------
 #
-# .. [#f1] P. Zhang, C. Dunlap, P. Florian, P. J. Grandinetti, I. Farnan, J. F.
-#       Stebbins, Silicon site distributions in an alkali silicate glass derived by
-#       two-dimensional 29Si nuclear magnetic resonance, J. Non. Cryst. Solids 204
-#       294–300 (1996). `doi:10.1016/S0022-3093(96)00601-1
-#       <https://doi.org/doi:10.1016/S0022-3093(96)00601-1>`_.
+# .. [#f1] Davis, M., Sanders, K. J., Grandinetti, P. J., Gaudio, S. J., Sen, S.,
+#       Structural investigations of magnesium silicate glasses by 29 Si magic-angle
+#       flipping NMR, J. Non. Cryst. Solids 357 2787–2795 (2011).
+#       `doi:10.1016/j.jnoncrysol.2011.02.045.
+#       <https://doi.org/doi:10.1016/j.jnoncrysol.2011.02.045>`_
 #
 # .. [#f2] Srivastava, D.J., Vosegaard, T., Massiot, D., Grandinetti, P.J. (2020) Core
 #       Scientific Dataset Model: A lightweight and portable model and file format

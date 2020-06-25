@@ -22,7 +22,7 @@ from pylab import rcParams
 from mrinversion.kernel import NuclearShieldingLineshape
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
-from mrinversion.plot import plot_3d
+from mrinversion.utils import plot_3d
 
 # sphinx_gallery_thumbnail_number = 5
 
@@ -282,13 +282,7 @@ f_sol /= f_sol.max()
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
 plot_3d(
-    ax,
-    f_sol,
-    theta_angle=25,
-    angle=-50,
-    x_lim=[0, 150],
-    y_lim=[0, 150],
-    z_lim=[-60, -120],
+    ax, f_sol, elev=25, azim=-50, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-60, -120],
 )
 plt.tight_layout()
 plt.show()
@@ -356,8 +350,8 @@ plot_3d(
 plot_3d(
     ax,
     Q2_region,
-    theta_angle=25,
-    angle=-50,
+    elev=25,  # the elevation angle in the z plane
+    azim=-50,  # the azimuth angle in the x-y plane
     x_lim=[0, 150],  # the x-limit
     y_lim=[0, 150],  # the y-limit
     z_lim=[-60, -120],  # the z-limit
@@ -374,8 +368,8 @@ plt.show()
 # References
 # ----------
 #
-# .. [#f1] P. Zhang, C. Dunlap, P. Florian, P. J. Grandinetti, I. Farnan, J. F.
-#       Stebbins, Silicon site distributions in an alkali silicate glass derived by
+# .. [#f1] Zhang, P., Dunlap, C., Florian, P., Grandinetti, P. J., Farnan, I., Stebbins
+#       , J. F. Silicon site distributions in an alkali silicate glass derived by
 #       two-dimensional 29Si nuclear magnetic resonance, J. Non. Cryst. Solids 204
 #       294–300 (1996). `doi:10.1016/S0022-3093(96)00601-1
 #       <https://doi.org/doi:10.1016/S0022-3093(96)00601-1>`_.

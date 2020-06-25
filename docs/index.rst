@@ -119,7 +119,9 @@ tensor parameters**. At present, we support the inversion of
     installation
     requirement
     introduction
+    before_getting_started
     getting_started
+
     auto_examples/index
     referenceAPI
 

@@ -37,7 +37,7 @@ responses = data_object.dependent_variables[0].components[0]
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
-from mrinversion.plot import get_polar_grids
+from mrinversion.utils import get_polar_grids
 
 # convert the dimension from `Hz` to `ppm`.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -144,13 +144,14 @@ compressed_s = new_system.compressed_s
 from mrinversion.linear_model import SmoothLasso
 
 # guess alpha and lambda values.
-s_lasso = SmoothLasso(alpha=0.001, lambda1=5e-6, inverse_dimension=inverse_dimension)
+s_lasso = SmoothLasso(alpha=1e-4, lambda1=5e-6, inverse_dimension=inverse_dimension)
 s_lasso.fit(K=compressed_K, s=compressed_s)
 f_sol = s_lasso.f
 
 # %%
-# Here, ``f_sol`` is the solution corresponding to hyperparameters :math:`\alpha=0.005`
-# and :math:`\lambda=5\times 10^{-6}`. The plot of this solution follows
+# Here, ``f_sol`` is the solution corresponding to hyperparameters
+# :math:`\alpha=1\times10^{-4}` and :math:`\lambda=5\times 10^{-6}`. The plot of this
+# solution is
 _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={"projection": "csdm"})
 
 # the plot of the tensor distribution solution.
@@ -184,8 +185,8 @@ plt.show()
 # log scale and ranging from :math:`10^{-5}` to :math:`10^{-7}`. The range for the
 # hyperparameter :math:`\alpha` is similarly sampled uniformly on a log scale, ranging
 # from :math:`10^{-2.5}` to :math:`10^{-4.5}`.
-lambdas = 10 ** (-5 - 2 * (np.arange(10) / 9))
-alphas = 10 ** (-4 - 2 * (np.arange(10) / 9))
+lambdas = 10 ** (-5 - 1 * (np.arange(6) / 5))
+alphas = 10 ** (-4 - 2 * (np.arange(6) / 5))
 
 # %%
 from mrinversion.linear_model import SmoothLassoCV
