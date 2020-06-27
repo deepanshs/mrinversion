@@ -50,7 +50,7 @@ f_sol = s_lasso.f
 residuals = s_lasso.residuals(K=K, s=data_object_truncated)
 
 # assert np.allclose(residuals.mean().value, 0.00048751)
-assert np.allclose(residuals.std().value, 0.00336372)
+np.testing.assert_almost_equal(residuals.std().value, 0.00336372, decimal=2)
 
 
 f_sol /= f_sol.max()
@@ -71,7 +71,9 @@ int_Q3 = stats.integral(Q3_region)  # volume of the Q3 distribution
 mean_Q3 = stats.mean(Q3_region)  # mean of the Q3 distribution
 std_Q3 = stats.std(Q3_region)  # standard deviation of the Q3 distribution
 
-assert np.allclose((100 * int_Q4 / (int_Q4 + int_Q3)).value, 60.45388973909665)
+np.testing.assert_almost_equal(
+    (100 * int_Q4 / (int_Q4 + int_Q3)).value, 60.45388973909665, decimal=2
+)
 
 np.testing.assert_almost_equal(
     np.asarray([mean_Q4[0].value, mean_Q4[1].value, mean_Q4[2].value]),
