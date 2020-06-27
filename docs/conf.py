@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 project = "mrinversion"
-copyright = "2019-2020, Deepansh J. Srivastava"
+copyright = "2020, Deepansh J. Srivastava"
 author = "Deepansh J. Srivastava"
 
 path = os.path.split(__file__)[0]

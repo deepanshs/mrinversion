@@ -20,8 +20,13 @@ inverse_dimension = [
     cp.Dimension(type="linear", count=4, increment="3 kHz"),
 ]
 
+inverse_dimension_ppm = [
+    cp.Dimension(type="linear", count=4, increment="3 ppm"),
+    cp.Dimension(type="linear", count=4, increment="3 ppm"),
+]
 
-def generate_shielding_kernel(zeta_, eta_, angle, freq, n_sidebands):
+
+def generate_shielding_kernel(zeta_, eta_, angle, freq, n_sidebands, to_ppm=True):
     method = BlochDecaySpectrum(
         channels=["29Si"],
         magnetic_flux_density=9.4,
@@ -31,8 +36,9 @@ def generate_shielding_kernel(zeta_, eta_, angle, freq, n_sidebands):
         rotor_angle=angle,
         rotor_frequency=freq,
     )
-    larmor_frequency = -method.channels[0].gyromagnetic_ratio * 9.4  # in MHz
-    zeta_ /= larmor_frequency
+    if to_ppm:
+        larmor_frequency = -method.channels[0].gyromagnetic_ratio * 9.4  # in MHz
+        zeta_ /= larmor_frequency
 
     spin_systems = [
         SpinSystem(
@@ -123,6 +129,7 @@ def test_MAF_lineshape_kernel():
 
 
 def test_spinning_sidebands_kernel():
+    # 1
     ns_obj = NuclearShieldingLineshape(
         anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
@@ -138,6 +145,25 @@ def test_spinning_sidebands_kernel():
 
     assert np.allclose(K, sim_lineshape, rtol=1.0e-3, atol=1e-3)
 
+    # 2
+    ns_obj = NuclearShieldingLineshape(
+        anisotropic_dimension=anisotropic_dimension,
+        inverse_dimension=inverse_dimension_ppm,
+        channel="29Si",
+        magnetic_flux_density="9.4 T",
+        rotor_angle="54.735 deg",
+        rotor_frequency="100 Hz",
+        number_of_sidebands=96,
+    )
+    zeta, eta = ns_obj._get_zeta_eta(supersampling=1)
+    K = ns_obj.kernel(supersampling=1)
+    sim_lineshape = generate_shielding_kernel(
+        zeta, eta, 0.9553059660790962, 100, 96, to_ppm=False
+    ).T
+
+    assert np.allclose(K, sim_lineshape, rtol=1.0e-3, atol=1e-3)
+
+    # 3
     ns_obj = SpinningSidebands(
         anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,

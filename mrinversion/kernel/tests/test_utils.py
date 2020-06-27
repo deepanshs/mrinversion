@@ -13,6 +13,8 @@ def test_x_y_to_zeta_eta():
 
     x = np.random.rand(16) * 3000
     y = np.random.rand(16) * 3000
+    x[-1] = y[-1] = 56.0
+    x[-2] = y[-2] = 0.0
     factor_ = 4 / np.pi
     zeta_ = []
     eta_ = []

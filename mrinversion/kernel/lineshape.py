@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from mrsimulator import Simulator
 from mrsimulator import SpinSystem
-from mrsimulator.methods import BlochDecayCentralTransitionSpectrum
 from mrsimulator.methods import BlochDecaySpectrum
 
 from .utils import _x_y_to_zeta_eta_distribution
@@ -256,43 +255,43 @@ class SpinningSidebands(NuclearShieldingLineshape):
         )
 
 
-class DAS(LineShape):
-    def __init__(
-        self,
-        anisotropic_dimension,
-        inverse_kernel_dimension,
-        channel,
-        magnetic_flux_density="9.4 T",
-        rotor_angle="54.735 deg",
-        rotor_frequency="600 Hz",
-        number_of_sidebands=None,
-    ):
-        super().__init__(
-            anisotropic_dimension,
-            inverse_kernel_dimension,
-            channel,
-            magnetic_flux_density,
-            rotor_angle,
-            rotor_frequency,
-            number_of_sidebands,
-            # "DAS",
-        )
+# class DAS(LineShape):
+#     def __init__(
+#         self,
+#         anisotropic_dimension,
+#         inverse_kernel_dimension,
+#         channel,
+#         magnetic_flux_density="9.4 T",
+#         rotor_angle="54.735 deg",
+#         rotor_frequency="600 Hz",
+#         number_of_sidebands=None,
+#     ):
+#         super().__init__(
+#             anisotropic_dimension,
+#             inverse_kernel_dimension,
+#             channel,
+#             magnetic_flux_density,
+#             rotor_angle,
+#             rotor_frequency,
+#             number_of_sidebands,
+#             # "DAS",
+#         )
 
-    def kernel(self, supersampling):
-        method = BlochDecayCentralTransitionSpectrum.parse_dict_with_units(
-            self.method_args
-        )
-        isotope = self.method_args["channels"][0]
-        Cq, eta = self._get_zeta_eta(supersampling)
-        spin_systems = [
-            SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
-            for cq_, e in zip(Cq, eta)
-        ]
+#     def kernel(self, supersampling):
+#         method = BlochDecayCentralTransitionSpectrum.parse_dict_with_units(
+#             self.method_args
+#         )
+#         isotope = self.method_args["channels"][0]
+#         Cq, eta = self._get_zeta_eta(supersampling)
+#         spin_systems = [
+#             SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
+#             for cq_, e in zip(Cq, eta)
+#         ]
 
-        self.simulator.spin_systems = spin_systems
-        self.simulator.methods = [method]
-        self.simulator.run(pack_as_csdm=False)
+#         self.simulator.spin_systems = spin_systems
+#         self.simulator.methods = [method]
+#         self.simulator.run(pack_as_csdm=False)
 
-        amp = self.simulator.methods[0].simulation
+#         amp = self.simulator.methods[0].simulation
 
-        return self._averaged_kernel(amp, supersampling)
+#         return self._averaged_kernel(amp, supersampling)

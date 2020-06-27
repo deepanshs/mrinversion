@@ -105,10 +105,10 @@ def _check_csdm_dimension(dimensions, dimension_id):
 
 
 def _check_dimension_type(dimensions, direction, dimension_quantity, kernel_type):
-    if isinstance(dimension_quantity, tuple):
-        dimension_quantity = list(dimension_quantity)
-    if isinstance(dimension_quantity, str):
-        dimension_quantity = [dimension_quantity]
+    # if isinstance(dimension_quantity, tuple):
+    #     dimension_quantity = list(dimension_quantity)
+    # if isinstance(dimension_quantity, str):
+    #     dimension_quantity = [dimension_quantity]
 
     if not isinstance(dimensions, list):
         if dimensions.quantity_name not in dimension_quantity:

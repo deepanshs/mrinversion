@@ -76,8 +76,8 @@ true probability distribution.
     >>> from mrinversion.utils import get_polar_grids
     >>> import numpy as np
     ...
-    >>> _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={'projection': 'csdm'})
-    >>> line = ax[0].stem(coordinates, responses, markerfmt=' ', use_line_collection=True)
+    >>> _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={'projection': 'csdm'}) # doctest: +SKIP
+    >>> line = ax[0].stem(coordinates, responses, markerfmt=' ', use_line_collection=True) # doctest: +SKIP
     >>> plt.setp(line, color="black", linewidth=2) # doctest: +SKIP
     >>> ax[0].set_xlabel('frequency / ppm') # doctest: +SKIP
     >>> ax[0].invert_xaxis() # doctest: +SKIP
