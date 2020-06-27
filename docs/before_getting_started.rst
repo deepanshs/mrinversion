@@ -27,15 +27,15 @@ Magic angle flipping datasets
 
 
   * - |uncheck|
-    - **Did you zero-fill the dataset?**
-    - Zero filling the dataset is purely cosmetic. It makes the spectrum look visually
-      appealing, but adds no information, that is, zero-filled data contains the same
-      information as a non-zero filled dataset. In terms of computation, however, a
-      zero-filled spectrum will take longer to solve.
+    - **Did you zero-fill the time-domain dataset?**
+    - Zero filling the time domain dataset is purely cosmetic. It makes the spectrum
+      look visually appealing, but adds no information, that is, zero-filled data
+      contains the same information as a non-zero filled dataset. In terms of
+      computation, however, a zero-filled spectrum will take longer to solve.
 
       **Recommendation**: Avoid zero-filling the dataset. If you do wish to zero-fill,
-      try to keep the total number of points along the anisotropic dimensions in the
-      range of 120 - 150.
+      keep the total number of points along the anisotropic dimension in the range
+      120 - 150.
 
   * - |uncheck|
     - **Did you correct for the isotropic offset along the anisotropic dimension?**
@@ -47,7 +47,7 @@ Magic angle flipping datasets
       there is an isotropic component along the anisotropic dimension, which is not
       removed by the shear transformation.
 
-      **Strongly Recommendation**: Correct for the isotropic offset along the
+      **Strongly Recommended**: Correct for the isotropic offset along the
       anisotropic dimension by adding an appropriate coordinates-offset, which is the
       negative of the isotropic offset.
 
