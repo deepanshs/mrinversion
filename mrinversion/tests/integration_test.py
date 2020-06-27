@@ -78,23 +78,23 @@ np.testing.assert_almost_equal(
 np.testing.assert_almost_equal(
     np.asarray([mean_Q4[0].value, mean_Q4[1].value, mean_Q4[2].value]),
     np.asarray([8.604842824865958, 9.05845796147297, -103.6976331077773]),
-    decimal=2,
+    decimal=1,
 )
 
 np.testing.assert_almost_equal(
     np.asarray([mean_Q3[0].value, mean_Q3[1].value, mean_Q3[2].value]),
     np.asarray([10.35036818411856, 79.02481579085152, -90.58326773441284]),
-    decimal=2,
+    decimal=1,
 )
 
 np.testing.assert_almost_equal(
     np.asarray([std_Q4[0].value, std_Q4[1].value, std_Q4[2].value]),
     np.asarray([4.525457744683861, 4.686253809896416, 5.369228151035292]),
-    decimal=2,
+    decimal=1,
 )
 
 np.testing.assert_almost_equal(
     np.asarray([std_Q3[0].value, std_Q3[1].value, std_Q3[2].value]),
     np.asarray([6.138761032132587, 7.837190479891721, 4.210912435356488]),
-    decimal=2,
+    decimal=1,
 )
