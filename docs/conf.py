@@ -226,7 +226,7 @@ html_theme_options = {
 # Theme options
 # html_logo = "_static/csdmpy.png"
 html_style = "style.css"
-html_title = f"Mrinversion:doc v{__version__}"
+html_title = f"mrinversion:doc v{__version__}"
 html_last_updated_fmt = ""
 # html_logo = "mrinversion"
 html_sidebars = {

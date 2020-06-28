@@ -6,7 +6,3 @@ TSVDCompression
 
 .. autoclass:: TSVDCompression
    :show-inheritance:
-
-   .. rubric:: Methods Documentation
-
-   .. automethod:: compress
