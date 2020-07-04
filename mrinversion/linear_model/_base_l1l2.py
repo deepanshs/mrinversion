@@ -373,11 +373,19 @@ class GeneralL2LassoCV:
         self.f = self.opt.f
 
         # convert cv_map to csdm
-        self.cv_map = cp.as_csdm(self.cv_map.T)
-        d0 = cp.as_dimension(-np.log10(self.cv_alphas), label="-log(α)")
+        self.cv_map = cp.as_csdm(np.squeeze(self.cv_map.T))
+        if len(self.cv_alphas) != 1:
+            d0 = cp.as_dimension(-np.log10(self.cv_alphas), label="-log(α)")
+            self.cv_map.dimensions[0] = d0
+
+        if len(self.cv_lambdas) == 1:
+            return
+
         d1 = cp.as_dimension(-np.log10(self.cv_lambdas), label="-log(λ)")
-        self.cv_map.dimensions[0] = d0
-        self.cv_map.dimensions[1] = d1
+        if len(self.cv_alphas) != 1:
+            self.cv_map.dimensions[1] = d1
+        else:
+            self.cv_map.dimensions[0] = d1
 
     def predict(self, K):
         r"""
