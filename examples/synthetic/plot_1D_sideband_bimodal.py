@@ -101,8 +101,8 @@ inverse_dimension = [
 ]
 
 # %%
-# Generate the line-shape kernel
-# ''''''''''''''''''''''''''''''
+# Generating the kernel
+# '''''''''''''''''''''
 #
 # For sideband datasets, the line-shape kernel corresponds to the pure anisotropic
 # nuclear shielding spinning sideband spectra. Use the

@@ -114,13 +114,12 @@ inverse_dimensions = [
 ]
 
 # %%
-# Generate the line-shape kernel
-# ''''''''''''''''''''''''''''''
+# Generating the kernel
+# '''''''''''''''''''''
 #
-# For MAF/PASS datasets, the line-shape kernel corresponds to the pure nuclear
-# shielding anisotropy line-shapes. Use the
-# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class to generate a shielding
-# spinning sidebands kernel.
+# For MAF/PASS datasets, the kernel corresponds to the pure nuclear shielding anisotropy
+# sideband spectra. Use the :class:`~mrinversion.kernel.NuclearShieldingLineshape` class
+# to generate a shielding spinning sidebands kernel.
 sidebands = NuclearShieldingLineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimensions,

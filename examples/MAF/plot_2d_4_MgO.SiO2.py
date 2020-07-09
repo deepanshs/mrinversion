@@ -113,8 +113,8 @@ inverse_dimensions = [
 ]
 
 # %%
-# Generate the line-shape kernel
-# ''''''''''''''''''''''''''''''
+# Generating the kernel
+# '''''''''''''''''''''
 #
 # For MAF datasets, the line-shape kernel corresponds to the pure nuclear shielding
 # anisotropy line-shapes. Use the :class:`~mrinversion.kernel.NuclearShieldingLineshape`

@@ -37,7 +37,7 @@ have the following generic form
 .. math::
    :label: eq_1
 
-   {\bf K f} = {\bf s},
+   {\bf K \cdot f} = {\bf s},
 
 where :math:`{\bf K} \in \mathbb{R}^{m\times n}` is the transforming kernel (matrix),
 :math:`{\bf f} \in \mathbb{R}^n` is the unknown and desired solution, and
@@ -48,7 +48,7 @@ the solution to the problem in Eq. :eq:`eq_1` has a simple closed-form solution,
 .. math::
     :label: eq_2
 
-    {\bf f} = {\bf K}^{-1} {\bf s}.
+    {\bf f} = {\bf K}^{-1} {\bf \cdot s}.
 
 But practical science isn't easy that way! Let's see how.
 
@@ -71,7 +71,9 @@ methods of form
 .. math::
     :label: eq_3
 
-    {\bf f^\dagger} = \underbrace{\text{argmin}}_{\bf f} \left(\|{\bf Kf} - {\bf s}\|^2_2 + g({\bf f})\right),
+    {\bf f^\dagger} = \underbrace{\text{argmin}}_{\bf f} \left(
+        \|{\bf K \cdot f} - {\bf s}\|^2_2 + g({\bf f})
+    \right),
 
 where :math:`\|{\bf z}\|_2` is the `l-2` norm of :math:`{\bf z}`, :math:`g({\bf f})`
 is the regularization term, and :math:`{\bf f}^\dagger` is the regularized solution.
@@ -100,7 +102,7 @@ minimizes the objective function,
 .. math::
     :label: slasso
 
-    \| {\bf Kf - s} \|^2_2 + \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2
+    \| {\bf K \cdot f - s} \|^2_2 + \alpha \sum_{i=1}^{d} \| {\bf J}_i \cdot {\bf f} \|_2^2
                 + \lambda  \| {\bf f} \|_1 ,
 
 where :math:`\alpha` and :math:`\lambda` are the hyperparameters controlling the
@@ -127,8 +129,6 @@ The symbol :math:`\otimes` is the Kronecker product. The terms,
 respective dimensions, with the constraint that :math:`\prod_{i=1}^{d}n_i = n`,
 where :math:`d` is the total number of dimensions in the solution :math:`{\bf f}`,
 and :math:`n` is the total number of features in kernel, :math:`{\bf K}`.
-
-
 
 Understanding the `x-y` plot
 ----------------------------
@@ -162,3 +162,27 @@ describes the observed spectrum.
 
 Challenges with the :math:`\zeta`-:math:`\eta` grid
 """""""""""""""""""""""""""""""""""""""""""""""""""
+Comming soon...
+
+Introducing the :math:`x`-:math:`y` grid
+""""""""""""""""""""""""""""""""""""""""
+
+The `x`-`y` grid is a piece-wise polar grid of second-rank traceless tensor parameters,
+:math:`\zeta` and :math:`\eta`. The mapping of :math:`\zeta`, and :math:`\eta`
+coordinates onto the `x`-`y` grid is defined as
+
+.. math::
+    :label: zeta_eta_def
+
+    x = \left\{ \begin{array}{l r}
+                |\zeta|\sin\theta, & \forall \zeta\ge0, \\
+                |\zeta|\cos\theta, & \text{elsewhere}
+               \end{array}
+        \right. \\
+    y = \left\{ \begin{array}{l r}
+                |\zeta|\cos\theta, & \forall \zeta\ge0, \\
+                |\zeta|\sin\theta, & \text{elsewhere}
+               \end{array}
+        \right.
+
+where :math:`\theta=\pi\eta/4`.
