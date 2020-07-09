@@ -99,7 +99,7 @@ plot2D(data_object_truncated)
 # '''''''''''''''
 #
 # **Anisotropic-dimension:**
-# The dimension of the dataset which holds the pure anisotropic frequency
+# The dimension of the dataset that holds the pure anisotropic frequency
 # contributions. In ``mrinversion``, this must always be the dimension at index 0 of
 # the data object.
 anisotropic_dimension = data_object_truncated.dimensions[0]

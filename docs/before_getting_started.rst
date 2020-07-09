@@ -12,8 +12,11 @@
 Before getting started
 ======================
 
+Prepping the dataset
+--------------------
+
 Magic angle flipping datasets
------------------------------
+'''''''''''''''''''''''''''''
 
 .. list-table::
   :widths: 1 25 74
@@ -52,7 +55,7 @@ Magic angle flipping datasets
       negative of the isotropic offset.
 
 Spinning Sideband correlation datasets
---------------------------------------
+''''''''''''''''''''''''''''''''''''''
 
 .. list-table::
   :widths: 1 25 74

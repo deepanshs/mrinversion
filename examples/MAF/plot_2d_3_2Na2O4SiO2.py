@@ -100,7 +100,7 @@ plot2D(data_object_truncated)
 # '''''''''''''''
 #
 # **Anisotropic-dimension:**
-# The dimension of the dataset which holds the pure anisotropic frequency
+# The dimension of the dataset that holds the pure anisotropic frequency
 # contributions. In ``mrinversion``, this must always be the dimension at index 0 of
 # the data object.
 anisotropic_dimension = data_object_truncated.dimensions[0]
@@ -139,10 +139,9 @@ lineshape = NuclearShieldingLineshape(
 # this example, this value is '29Si'.
 # The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAF
-# spectrum was acquired. The value of the
-# `number_of_sidebands` argument is the number of sidebands calculated for each
-# line-shape within the kernel. Unless, you have a lot of spinning sidebands in your
-# MAF dataset, four sidebands should be enough.
+# spectrum was acquired. The value of the `number_of_sidebands` argument is the number
+# of sidebands calculated for each line-shape within the kernel. Unless, you have a lot
+# of spinning sidebands in your MAF dataset, four sidebands should be enough.
 #
 # Once the NuclearShieldingLineshape instance is created, use the
 # :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the instance

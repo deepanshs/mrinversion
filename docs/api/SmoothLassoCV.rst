@@ -6,10 +6,6 @@ Smooth Lasso cross-validation
 .. autoclass:: SmoothLassoCV
    :show-inheritance:
 
-   .. rubric:: Attributes Documentation
-
-   .. autoattribute:: cross_validation_curve
-
    .. rubric:: Methods Documentation
 
    .. automethod:: fit

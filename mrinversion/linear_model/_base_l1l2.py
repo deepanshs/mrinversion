@@ -79,11 +79,15 @@ class GeneralL2Lasso:
         r"""
         Fit the model using the coordinate descent method from scikit-learn.
 
-        Args:
-            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
-                shape (m, n).
-            s: A csdm object or an equivalent numpy array holding the signal,
-                :math:`{\bf s}`, as a :math:`m \times m_\text{count}` matrix.
+        Args
+        ----
+
+        K: ndarray
+            The :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
+            shape (m, n).
+        s: ndarray or CSDM object.
+            A csdm object or an equivalent numpy array holding the signal,
+            :math:`{\bf s}`, as a :math:`m \times m_\text{count}` matrix.
         """
         if isinstance(s, cp.CSDM):
             self.s = s
@@ -151,12 +155,17 @@ class GeneralL2Lasso:
         r"""
         Predict the signal using the linear model.
 
-        Args:
-            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
-                shape (m, n).
+        Args
+        ----
 
-        Return:
-            A numpy array of shape (m, m_count) with the predicted values.
+        K: ndarray
+            A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of shape
+            (m, n).
+
+        Return
+        ------
+        ndarray
+            A numpy array of shape (m, m_count) with the predicted values
         """
         predict = self.estimator.predict(K) * self.scale
 
@@ -172,15 +181,21 @@ class GeneralL2Lasso:
 
         where :math:`{\bf f^*}` is the optimum solution.
 
-        Args:
-            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
-                shape (m, n).
-            s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
-                :math:`{\bf s}`.
+        Args
+        ----
+        K: ndarray.
+            A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of shape
+            (m, n).
+        s: ndarray ot CSDM object.
+            A csdm object or a :math:`m \times m_\text{count}` signal matrix,
+            :math:`{\bf s}`.
 
-        Return:
+        Return
+        ------
+        ndarray or CSDM object.
             If `s` is a csdm object, returns a csdm object with the residuals. If `s`
             is a numpy array, return a :math:`m \times m_\text{count}` residue matrix.
+            csdm object
         """
         if isinstance(s, cp.CSDM):
             s_ = s.dependent_variables[0].components[0].T
@@ -198,7 +213,7 @@ class GeneralL2Lasso:
 
     def score(self, K, s, sample_weights=None):
         """
-        Return the coefficient of determination, :math:`R^2`, of the prediction.
+        The coefficient of determination, :math:`R^2`, of the prediction.
         For more information, read scikit-learn documentation.
         """
         return self.estimator.score(K, s / self.scale, sample_weights)
@@ -430,7 +445,10 @@ class GeneralL2LassoCV:
 
     @property
     def cross_validation_curve(self):
-        """Return the cross-validation error metric curve."""
+        """The cross-validation error metric determined as the mean square error.
+
+        Returns: A two-dimensional CSDM object.
+        """
         return self.cv_map
 
 

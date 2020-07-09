@@ -41,26 +41,37 @@ class SmoothLasso(GeneralL2Lasso):
     respective dimensions, with the constraint that :math:`\prod_{i=1}^{d}n_i = n`,
     where :math:`d` is the total number of dimensions.
 
-    Args:
-        float alpha: The hyperparameter, :math:`\alpha`.
-        float lambda1: The hyperparameter, :math:`\lambda`.
-        list inverse_dimension: A list of csdmpy Dimension objects representing the
-            inverse space.
-        int max_iterations: The maximum number of iterations allowed when
-            solving the problem. The default value is 10000.
-        float tolerance: The tolerance at which the solution is considered
-            converged. The default value is 1e-5.
-        bool positive: If True, the amplitudes in the solution, :math:`{\bf f}`
-            are all positive, else the solution may contain positive and negative
-            amplitudes. The default is True.
+    Args
+    ----
+
+    alpha: float
+        The hyperparameter, :math:`\alpha`.
+    lambda1: float
+        The hyperparameter, :math:`\lambda`.
+    inverse_dimension: list
+        A list of csdmpy Dimension objects representing the inverse space.
+    max_iterations: int
+        The maximum number of iterations allowed when solving the problem. The default
+        value is 10000.
+    tolerance: float
+        The tolerance at which the solution is considered converged. The default value
+        is 1e-5.
+    positive: bool
+        If True, the amplitudes in the solution, :math:`{\bf f}`, is contrained to only
+        positive values, else the solution may contain positive and negative amplitudes.
+        The default is True.
 
     .. rubric:: Attribute documentation
 
-    Attributes:
-        f: A ndarray of shape (`m_count`, `nd`, ..., `n1`, `n0`) representing the
-            solution, :math:`{\bf f} \in \mathbb{R}^{m_\text{count} \times n_d \times
-            \cdots n_1 \times n_0}`.
-        n_iter: The number of iterations required to reach the specified tolerance.
+    Attributes
+    ----------
+
+    f: ndarray or CSDM object.
+        A ndarray of shape (`m_count`, `nd`, ..., `n1`, `n0`) representing the
+        solution, :math:`{\bf f} \in \mathbb{R}^{m_\text{count} \times n_d \times
+        \cdots n_1 \times n_0}`.
+    n_iter: int
+        The number of iterations required to reach the specified tolerance.
     """
 
     def __init__(
@@ -122,31 +133,44 @@ class SmoothLassoCV(GeneralL2LassoCV):
 
     The cross-validation is carried out using a stratified splitting of the signal.
 
-    Args:
-        alphas: ndarray, a list of hyperparameter, :math:`\alpha`.
-        lambdas: ndarray, a list of hyperparameter, :math:`\lambda`.
-        inverse_dimension: A list of csdmpy Dimension objects representing the inverse
-            space.
-        folds: int, the number of folds used in cross-validation.The default is 10.
-        max_iterations: Interger, the maximum number of iterations allowed when solving
-            the problem. The default value is 10000.
-        tolerance: Float, the tolerance at which the solution is considered converged.
-            The default value is 1e-5.
-        positive: Boolean. If True, the amplitudes in the solution, :math:`{\bf f}` is
-            all positive, else the solution may contain positive and negative
-            amplitudes. The default is True.
-        sigma: float, the standard deviation of the noise in the signal. The default is
-            0.0
+    Args
+    ----
+
+    alphas: ndarray
+        A list of hyperparameter, :math:`\alpha`.
+    lambdas: ndarray
+        A list of hyperparameter, :math:`\lambda`.
+    inverse_dimension: list
+        A list of csdmpy Dimension objects representing the inverse space.
+    folds: int
+        The number of folds used in cross-validation.The default is 10.
+    max_iterations: int
+        The maximum number of iterations allowed when solving the problem. The default
+        value is 10000.
+    tolerance: float
+        The tolerance at which the solution is considered converged. The default value
+        is 1e-5.
+    positive: bool
+        If True, the amplitudes in the solution, :math:`{\bf f}`, is contrained to only
+        positive values, else the solution may contain positive and negative amplitudes.
+        The default is True.
+    sigma: float
+        The standard deviation of the noise in the signal. The default is 0.0.
 
     .. rubric:: Attribute documentation
 
-    Attributes:
-        f: An ndarray or CSDM object.
-            A ndarray of shape (m_count, nd, ..., n1, n0). The solution,
-            :math:`{\bf f} \in \mathbb{R}^{m_\text{count} \times n_d \times \cdots n_1
-            \times n_0}` or an equivalent CSDM object.
-        n_iter: Integer, the number of iterations required to reach the specified
-            tolerance.
+    Attributes
+    ----------
+    f: ndarray or CSDM object.
+        A ndarray of shape (m_count, nd, ..., n1, n0). The solution,
+        :math:`{\bf f} \in \mathbb{R}^{m_\text{count} \times n_d \times \cdots n_1
+        \times n_0}` or an equivalent CSDM object.
+    n_iter: int.
+        The number of iterations required to reach the specified tolerance.
+    hyperparameter: dict.
+        A dictionary with the :math:`\alpha` and :math:\lambda` hyperparameters.
+    cross_validation_curve: CSDM object.
+        The cross-validation error metric determined as the mean square error.
     """
 
     def __init__(
