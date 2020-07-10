@@ -227,27 +227,27 @@ s_lasso.fit(K=compressed_K, s=compressed_s)
 # The optimum hyper-parameters
 # ''''''''''''''''''''''''''''
 #
-# Use the :attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameter` attribute of
+# Use the :attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameters` attribute of
 # the instance for the optimum hyper-parameters, :math:`\alpha` and :math:`\lambda`,
 # determined from the cross-validation.
-print(s_lasso.hyperparameter)
+print(s_lasso.hyperparameters)
 
 # %%
 # The cross-validation surface
 # ''''''''''''''''''''''''''''
 #
 # Optionally, you may want to visualize the cross-validation error curve/surface. Use
-# the :attr:`~mrinversion.linear_model.SmoothLasso.cross_validation_curve` attribute of
-# the instance, as follows
-error_curve = s_lasso.cross_validation_curve  # `error_curve` is a CSDM object.
+# the :attr:`~mrinversion.linear_model.SmoothLassoCV.cross_validation_curve` attribute
+# of the instance, as follows
+CV_metric = s_lasso.cross_validation_curve  # `CV_metric` is a CSDM object.
 
 # plot of the cross validation surface
 plt.figure(figsize=(5, 3.5))
 ax = plt.subplot(projection="csdm")
-ax.contour(np.log10(error_curve), levels=25)
+ax.contour(np.log10(CV_metric), levels=25)
 ax.scatter(
-    -np.log10(s_lasso.hyperparameter["alpha"]),
-    -np.log10(s_lasso.hyperparameter["lambda"]),
+    -np.log10(s_lasso.hyperparameters["alpha"]),
+    -np.log10(s_lasso.hyperparameters["lambda"]),
     marker="x",
     color="k",
 )
@@ -401,7 +401,7 @@ f_sol_iso /= f_sol_iso_max
 Q4_region_iso /= f_sol_iso_max
 Q3_region_iso /= f_sol_iso_max
 
-# The plot the different projections.
+# The plot of the different projections.
 plt.figure(figsize=(5.5, 3.5))
 ax = plt.gca(projection="csdm")
 ax.plot(f_sol_iso, "--k", label="tensor")

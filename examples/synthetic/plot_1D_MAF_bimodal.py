@@ -214,10 +214,10 @@ s_lasso_cv.fit(compressed_K, compressed_s)
 # The optimum hyper-parameters
 # ''''''''''''''''''''''''''''
 #
-# Use the :attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameter` attribute of
+# Use the :attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameters` attribute of
 # the instance for the optimum hyper-parameters, :math:`\alpha` and :math:`\lambda`,
 # determined from the cross-validation.
-print(s_lasso_cv.hyperparameter)
+print(s_lasso_cv.hyperparameters)
 
 # %%
 # The cross-validation surface
@@ -234,8 +234,8 @@ plt.figure(figsize=(5, 3.5))
 ax = plt.subplot(projection="csdm")
 ax.contour(np.log10(s_lasso_cv.cv_map), levels=25)
 ax.scatter(
-    -np.log10(s_lasso_cv.hyperparameter["alpha"]),
-    -np.log10(s_lasso_cv.hyperparameter["lambda"]),
+    -np.log10(s_lasso_cv.hyperparameters["alpha"]),
+    -np.log10(s_lasso_cv.hyperparameters["lambda"]),
     marker="x",
     color="k",
 )

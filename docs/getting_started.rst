@@ -27,6 +27,7 @@ from this spectrum.
     >>> from mrinversion.utils import get_polar_grids
     >>> from mrinversion.kernel import NuclearShieldingLineshape
     >>> from mrinversion.linear_model import TSVDCompression
+    >>> from mrinversion.linear_model import SmoothLasso
     >>> from mrinversion.linear_model import SmoothLassoCV
     ...
     ...
@@ -111,14 +112,18 @@ true probability distribution.
     >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
-The figure on the left is the synthetic spinning sideband dataset for
-the nuclear shielding tensor distribution shown on the right. In the figure
-on the right, the parameter ζ is the radial dimension, and η is the angular
-dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
-corresponds to the positive and negative values of ζ. The radial grid lines
-are drawn at every 20 ppm increments of ζ, and the angular grid lines are drawn
-at every 0.2 increments of η. The `x` and `y`-axis are η = 0, and the diagonal is
-η = 1.
+.. _fig1_getting_started:
+.. figure:: _static/null.*
+    :align: left
+
+    The figure on the left is the synthetic spinning sideband dataset for
+    the nuclear shielding tensor distribution shown on the right. In the figure
+    on the right, the parameter ζ is the radial dimension, and η is the angular
+    dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
+    corresponds to the positive and negative values of ζ. The radial grid lines
+    are drawn at every 20 ppm increments of ζ, and the angular grid lines are drawn
+    at every 0.2 increments of η. The `x` and `y`-axis are η = 0, and the diagonal is
+    η = 1.
 
 
 Dimension Setup
@@ -301,7 +306,6 @@ Import the :class:`~mrinversion.linear_model.SmoothLasso` class and follow,
     :context: close-figs
     :include-source:
 
-    >>> from mrinversion.linear_model import SmoothLasso
     >>> s_lasso = SmoothLasso(alpha=0.01, lambda1=1e-04, inverse_dimension=inverse_dimension)
 
 Here, the variable ``s_lasso`` is an instance of the
@@ -352,16 +356,18 @@ The plot of the solution is
     >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
-The figure on the left is the solution to the nuclear shielding
-tensor distribution derived from the inversion of the spinning
-sideband dataset. The figure on the right is the true nuclear
-shielding tensor distribution. The ζ and η coordinates are depicted
-as piecewise polar, where ζ is the radial dimension, and η is the angular
-dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
-corresponds to the positive and negative values of ζ.  The radial grid lines
-are drawn at every 20 ppm increment of ζ, and the angular grid lines are
-drawn at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the
-diagonal is η = 1.
+.. _fig2_getting_started:
+.. figure:: _static/null.*
+    :align: left
+
+    The figure on the left is the guess solution of the nuclear shielding tensor distribution
+    derived from the inversion of the spinning sideband dataset. The figure on the right
+    is the true nuclear shielding tensor distribution. The ζ and η coordinates are
+    depicted as piecewise polar, where ζ is the radial dimension, and η is the angular
+    dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red corresponds
+    to the positive and negative values of ζ.  The radial grid lines are drawn at every
+    20 ppm increment of ζ, and the angular grid lines are drawn at every 0.2 increment
+    of η. The `x` and `y` axis are η = 0, and the diagonal is η = 1.
 
 
 You may also evaluate the spectrum predicted from the solution using the
@@ -437,7 +443,7 @@ The optimum hyperparameters
 '''''''''''''''''''''''''''
 
 The optimized hyperparameters may be accessed using the
-:attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameter` attribute of
+:attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameters` attribute of
 the class instance,
 
 .. plot::
@@ -445,8 +451,8 @@ the class instance,
     :context: close-figs
     :include-source:
 
-    >>> alpha = s_lasso_cv.hyperparameter['alpha']
-    >>> lambda_1 = s_lasso_cv.hyperparameter['lambda']
+    >>> alpha = s_lasso_cv.hyperparameters['alpha']
+    >>> lambda_1 = s_lasso_cv.hyperparameters['lambda']
 
 The cross-validation surface
 ''''''''''''''''''''''''''''
@@ -462,14 +468,17 @@ data using the :attr:`~mrinversion.linear_model.SmoothLassoCV.cv_map` attribute.
     >>> plt.figure(figsize=(5, 3.5)) # doctest: +SKIP
     >>> ax = plt.subplot(projection='csdm') # doctest: +SKIP
     >>> ax.contour(np.log10(s_lasso_cv.cv_map), levels=25) # doctest: +SKIP
-    >>> ax.scatter(-np.log10(s_lasso_cv.hyperparameter['alpha']),
-    ...         -np.log10(s_lasso_cv.hyperparameter['lambda']),
+    >>> ax.scatter(-np.log10(s_lasso_cv.hyperparameters['alpha']),
+    ...         -np.log10(s_lasso_cv.hyperparameters['lambda']),
     ...         marker='x', color='k') # doctest: +SKIP
     >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
-The ten-folds cross-validation prediction error surface as a function of hyperparameters
-:math:`\alpha` and :math:`\beta`.
+.. _fig3_getting_started:
+.. figure:: _static/null.*
+
+    The ten-folds cross-validation prediction error surface as a function of
+    the hyperparameters :math:`\alpha` and :math:`\beta`.
 
 The optimum solution
 ''''''''''''''''''''
@@ -497,15 +506,19 @@ The plot of the selected tensor parameter distribution is shown below.
     >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
-The figure on the left is the best model selected by the 10-folds
-cross-validation method. The figure on the right is the true model of the
-nuclear shielding tensor distribution. The ζ and η coordinates are depicted
-as piecewise polar, where ζ is the radial dimension, and η is the angular
-dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
-corresponds to the positive and negative values of ζ.  The radial grid lines
-are drawn at every 20 ppm increment of ζ, and the angular grid lines are
-drawn at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the
-diagonal is η = 1.
+.. _fig4_getting_started:
+.. figure:: _static/null.*
+    :align: left
+
+    The figure on the left is the optimum solution selected by the 10-folds
+    cross-validation method. The figure on the right is the true model of the
+    nuclear shielding tensor distribution. The ζ and η coordinates are depicted
+    as piecewise polar, where ζ is the radial dimension, and η is the angular
+    dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
+    corresponds to the positive and negative values of ζ.  The radial grid lines
+    are drawn at every 20 ppm increment of ζ, and the angular grid lines are
+    drawn at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the
+    diagonal is η = 1.
 
 
 .. seealso::
@@ -514,7 +527,6 @@ diagonal is η = 1.
     `Quantity <http://docs.astropy.org/en/stable/api/astropy.units.Quantity.html#astropy.units.Quantity>`_,
     `numpy array <https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.ndarray.html>`_,
     `Matplotlib library <https://matplotlib.org>`_
-
 
 .. [#f1] Srivastava, D. J., Vosegaard, T., Massiot, D., Grandinetti, P. J.,
             Core Scientific Dataset Model: A lightweight and portable model and

@@ -151,7 +151,7 @@ lineshape = NuclearShieldingLineshape(
 # The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAF
 # spectrum was acquired. Note for this particular MAF measurement, the rotor angle was
-# set to :math:`87.19^\circ` for the anisotropic dimension, not the usual
+# set to :math:`87.14^\circ` for the anisotropic dimension, not the usual
 # :math:`90^\circ`. The value of the
 # `number_of_sidebands` argument is the number of sidebands calculated for each
 # line-shape within the kernel. Unless, you have a lot of spinning sidebands in your
@@ -218,17 +218,19 @@ print(f"truncation_index = {new_system.truncation_index}")
 # s_lasso.fit(compressed_K, compressed_s)
 
 # # the optimum hyper-parameters, alpha and lambda, from the cross-validation.
-# print(s_lasso.hyperparameter)
+# print(s_lasso.hyperparameters)
 # # {'alpha': 2.06913808111479e-07, 'lambda': 7.847599703514622e-06}
 
 # # the solution
 # f_sol = s_lasso.f
 
 # # the cross-validation error curve
-# error_curve = s_lasso.cross_validation_curve
+# CV_metric = s_lasso.cross_validation_curve
 
 # %%
-# If you use the above ``SmoothLassoCV`` method, skip the following code-block.
+# If you use the above ``SmoothLassoCV`` method, skip the following code-block. The
+# following code-block evaluates the smooth-lasso solution at the pre-optimized
+# hyperparameters.
 
 # Setup the smooth lasso class
 s_lasso = SmoothLasso(
@@ -383,7 +385,7 @@ f_sol_iso /= f_sol_iso_max
 Q4_region_iso /= f_sol_iso_max
 Q3_region_iso /= f_sol_iso_max
 
-# The plot the different projections.
+# The plot of the different projections.
 plt.figure(figsize=(5.5, 3.5))
 ax = plt.gca(projection="csdm")
 ax.plot(f_sol_iso, "--k", label="tensor")

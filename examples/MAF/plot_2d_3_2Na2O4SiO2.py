@@ -204,14 +204,14 @@ print(f"truncation_index = {new_system.truncation_index}")
 # s_lasso.fit(compressed_K, compressed_s)
 
 # # the optimum hyper-parameters, alpha and lambda, from the cross-validation.
-# print(s_lasso.hyperparameter)
+# print(s_lasso.hyperparameters)
 # # {'alpha': 2.198392648862289e-08, 'lambda': 1.2742749857031348e-06}
 
 # # the solution
 # f_sol = s_lasso.f
 
 # # the cross-validation error curve
-# error_curve = s_lasso.cross_validation_curve
+# CV_metric = s_lasso.cross_validation_curve
 
 # %%
 # If you use the above ``SmoothLassoCV`` method, skip the following code-block.

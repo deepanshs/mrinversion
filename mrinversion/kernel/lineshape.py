@@ -147,7 +147,7 @@ class NuclearShieldingLineshape(LineShape):
 
             for dim_i in self.inverse_kernel_dimension:
                 if dim_i.origin_offset.value == 0:
-                    dim_i.origin_offset = f"{larmor_frequency} MHz"
+                    dim_i.origin_offset = f"{abs(larmor_frequency)} MHz"
 
         spin_systems = [
             SpinSystem(

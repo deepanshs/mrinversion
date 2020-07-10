@@ -137,9 +137,9 @@ class SmoothLassoCV(GeneralL2LassoCV):
     ----
 
     alphas: ndarray
-        A list of hyperparameter, :math:`\alpha`.
+        A list of :math:`\alpha` hyperparameters.
     lambdas: ndarray
-        A list of hyperparameter, :math:`\lambda`.
+        A list of :math:`\lambda` hyperparameters.
     inverse_dimension: list
         A list of csdmpy Dimension objects representing the inverse space.
     folds: int
@@ -167,7 +167,7 @@ class SmoothLassoCV(GeneralL2LassoCV):
         \times n_0}` or an equivalent CSDM object.
     n_iter: int.
         The number of iterations required to reach the specified tolerance.
-    hyperparameter: dict.
+    hyperparameters: dict.
         A dictionary with the :math:`\alpha` and :math:\lambda` hyperparameters.
     cross_validation_curve: CSDM object.
         The cross-validation error metric determined as the mean square error.

@@ -63,7 +63,7 @@ class GeneralL2Lasso:
         inverse_dimension=None,
     ):
 
-        self.hyperparameter = {"lambda": lambda1, "alpha": alpha}
+        self.hyperparameters = {"lambda": lambda1, "alpha": alpha}
         self.max_iterations = max_iterations
         self.tolerance = tolerance
         self.positive = positive
@@ -108,7 +108,7 @@ class GeneralL2Lasso:
         Ks, ss = _get_augmented_data(
             K=K,
             s=s_ / self.scale,
-            alpha=s_.size * self.hyperparameter["alpha"],
+            alpha=s_.size * self.hyperparameters["alpha"],
             regularizer=self.regularizer,
             f_shape=self.f_shape,
         )
@@ -116,7 +116,7 @@ class GeneralL2Lasso:
         # The factor 0.5 for alpha in the Lasso problem is to compensate
         # 1/(2 * n_sample) factor in OLS term
         estimator = Lasso(
-            alpha=self.hyperparameter["lambda"] / 2.0,
+            alpha=self.hyperparameters["lambda"] / 2.0,
             fit_intercept=False,
             copy_X=True,
             max_iter=self.max_iterations,
@@ -255,7 +255,7 @@ class GeneralL2LassoCV:
         self.positive = positive
         self.sigma = sigma
         self.regularizer = regularizer
-        self.hyperparameter = {}
+        self.hyperparameters = {}
         self.f = None
         self.randomize = randomize
         self.times = times
@@ -370,14 +370,14 @@ class GeneralL2LassoCV:
         # The argmin of the minimum value is the selected model as it has the least
         # prediction error.
         index = np.unravel_index(self.cv_map.argmin(), self.cv_map.shape)
-        self.hyperparameter["alpha"] = self.cv_alphas[index[0]]
-        self.hyperparameter["lambda"] = self.cv_lambdas[index[1]]
+        self.hyperparameters["alpha"] = self.cv_alphas[index[0]]
+        self.hyperparameters["lambda"] = self.cv_lambdas[index[1]]
 
         # Calculate the solution using the complete data at the optimized lambda and
         # alpha values
         self.opt = GeneralL2Lasso(
-            alpha=self.hyperparameter["alpha"],
-            lambda1=self.hyperparameter["lambda"],
+            alpha=self.hyperparameters["alpha"],
+            lambda1=self.hyperparameters["lambda"],
             max_iterations=self.max_iterations,
             tolerance=self.tolerance,
             positive=self.positive,
