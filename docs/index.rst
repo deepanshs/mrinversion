@@ -67,14 +67,14 @@ determining the distribution of the magnetic resonance (NMR) tensor parameters
 from the two-dimensional NMR spectra correlating the isotropic to anisotropic
 resonances.
 The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
-package for generating fast solid-state NMR lineshapes and
+package for generating solid-state NMR lineshapes and
 `scikit-learn <https://scikit-learn.org/stable/>`_ package for statistical learning.
 
 ----
 
 **Features**
 
-The ``mrinversion`` package includes the **inversion of two-dimensional
+The ``mrinversion`` package includes the **inversion of a two-dimensional
 solid-state NMR spectrum of dilute spin-systems to a three-dimensional distribution of
 tensor parameters**. At present, we support the inversion of
 
@@ -86,8 +86,8 @@ tensor parameters**. At present, we support the inversion of
   respectively, defined using the Haeberlen convention.
 
 - **Magic angle turning (MAT), Phase adjusted spinning sidebands (PASS)**, and similar
-  spectra correlating the isotropic chemical shift resonances to pure
-  anisotropic sideband resonances into a three-dimensional distribution of
+  spectra correlating the isotropic chemical shift resonances to pure anisotropic
+  spinning sideband resonances into a three-dimensional distribution of
   nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta, \eta)`,
   where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta`
   and :math:`\eta`, are the shielding anisotropy and asymmetry parameters,
@@ -121,9 +121,10 @@ tensor parameters**. At present, we support the inversion of
     introduction
     before_getting_started
     getting_started
-
     auto_examples/index
     referenceAPI
+
+
 
 ----
 

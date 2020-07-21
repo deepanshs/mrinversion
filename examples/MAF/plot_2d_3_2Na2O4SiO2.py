@@ -49,7 +49,7 @@ def plot2D(csdm_object, **kwargs):
 # Import the dataset
 # ''''''''''''''''''
 #
-# Load the dataset. Here, we import the dataset as the CSDM [#f2]_ data-object.
+# Load the dataset. Here, we import the dataset as the CSDM data-object.
 
 # The 2D MAF dataset in csdm format
 filename = "https://osu.box.com/shared/static/k405dsptwe1p43x8mfi1wc1geywrypzc.csdf"
@@ -372,8 +372,3 @@ plt.show()
 #       two-dimensional 29Si nuclear magnetic resonance, J. Non. Cryst. Solids 204
 #       294–300 (1996). `doi:10.1016/S0022-3093(96)00601-1
 #       <https://doi.org/doi:10.1016/S0022-3093(96)00601-1>`_.
-#
-# .. [#f2] Srivastava, D.J., Vosegaard, T., Massiot, D., Grandinetti, P.J. (2020) Core
-#       Scientific Dataset Model: A lightweight and portable model and file format
-#       for multi-dimensional scientific data.
-#       `PLOS ONE 15(1): e0225953. <https://doi.org/10.1371/journal.pone.0225953>`_

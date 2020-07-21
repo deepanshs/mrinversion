@@ -90,6 +90,8 @@ spectrum inversion, we choose the smooth-LASSO regularization.
 
 .. For example, in a more familiar linear-inverse problem, the inverse Fourier transform, the two dimensions are the frequency and time dimensions, where the frequency dimension undergoes the inverse transformation, and the time dimension is where the inversion method transforms the data.
 
+.. _smooth_lasso_intro:
+
 Smooth-LASSO regularization
 """""""""""""""""""""""""""
 
@@ -138,11 +140,11 @@ described by three principal components, :math:`s_{xx}`, :math:`s_{yy}`, and
 :math:`s_{zz}`, in the principal axis system (PAS). Often, depending on the context of
 the problem, the three principal components are expressed with three new parameters
 following a convention. One such convention is the Haeberlen convention, which
-defines three new parameters, :math:`\delta_\text{iso}^\text{CS}`, :math:`\zeta`, and
-:math:`\eta`, as the isotropic chemical shift, shielding anisotropy, and shielding
-asymmetry. Here, the parameters :math:`\zeta` and :math:`\eta` contribute to the purely
-anisotropic frequencies, and determining the distribution of these two parameters is
-the focus of this library.
+defines three new parameters, :math:`\delta_\text{iso}^\text{CS}`, :math:`\zeta_\sigma`, and
+:math:`\eta_\sigma`, as the isotropic chemical shift, shielding anisotropy, and shielding
+asymmetry. Here, the parameters :math:`\zeta_\sigma` and :math:`\eta_\sigma` contribute
+to the purely anisotropic frequencies, and determining the distribution of these two
+parameters is the focus of this library.
 
 Defining the inverse grid
 ''''''''''''''''''''''''''
@@ -152,37 +154,67 @@ solving the problem. A familiar example is the inverse Fourier transform, where
 the inverse grid is defined following the Nyquist–Shannon sampling theorem. Unlike
 IFFT, however, there is no well-defined sampling grid for the second-rank traceless
 symmetric tensor parameters. One obvious choice is to define a two-dimensional
-:math:`\zeta`-:math:`\eta` Cartesian grid.
+:math:`\zeta_\sigma`-:math:`\eta_\sigma` Cartesian grid.
 
-As far as the inversion problem is concerned, :math:`\zeta` and :math:`\eta` are just
-labels for the sub-spectrum. In simplistic terms, the inversion problem solves for the
-probability of each sub-spectrum, from a given pre-defined basis of subspectra, that
-describes the observed spectrum.
+As far as the inversion problem is concerned, :math:`\zeta_\sigma` and :math:`\eta_\sigma`
+are just labels for the subspectra. In simplistic terms, the inversion problem solves
+for the probability of each subspectrum, from a given pre-defined basis of subspectra,
+that describes the observed spectrum. If the subspectra basis is defined over a
+:math:`\zeta_\sigma`-:math:`\eta_\sigma` Cartesian grid, multiple
+:math:`(\zeta_\sigma, \eta_\sigma)` coordinates points to the same subspectra, therefore,
+distinguishing these coordinates from the subspectra becomes impossible.
 
+The issue of multiple coordinates pointing to the same object is not new. It is
+a common problem when representing polar coordinates in the Cartesian basis. Try describing
+the coordinates of the south pole using latitudes and longitudes.
 
-Challenges with the :math:`\zeta`-:math:`\eta` grid
-"""""""""""""""""""""""""""""""""""""""""""""""""""
-Comming soon...
+To resolve the issue of multiple coordinates pointing to the same subspectra, we redefine
+the :math:`\zeta_\sigma`-:math:`\eta_\sigma` parameters on an `x`-`y` Cartesian grid,
+where the basis subspectra are distinguishable.
 
 Introducing the :math:`x`-:math:`y` grid
 """"""""""""""""""""""""""""""""""""""""
 
 The `x`-`y` grid is a piece-wise polar grid of second-rank traceless tensor parameters,
-:math:`\zeta` and :math:`\eta`. The mapping of :math:`\zeta`, and :math:`\eta`
-coordinates onto the `x`-`y` grid is defined as
+:math:`\zeta_\sigma` and :math:`\eta_\sigma`. The mapping of :math:`\zeta_\sigma`, and
+:math:`\eta_\sigma` coordinates onto the `x`-`y` grid is defined as
 
 .. math::
     :label: zeta_eta_def
 
     x = \left\{ \begin{array}{l r}
-                |\zeta|\sin\theta, & \forall \zeta\ge0, \\
-                |\zeta|\cos\theta, & \text{elsewhere}
+                |\zeta_\sigma|\sin\theta, & \forall \zeta_\sigma\ge0, \\
+                |\zeta_\sigma|\cos\theta, & \text{elsewhere}
                \end{array}
         \right. \\
     y = \left\{ \begin{array}{l r}
-                |\zeta|\cos\theta, & \forall \zeta\ge0, \\
-                |\zeta|\sin\theta, & \text{elsewhere}
+                |\zeta_\sigma|\cos\theta, & \forall \zeta_\sigma\ge0, \\
+                |\zeta_\sigma|\sin\theta, & \text{elsewhere}
                \end{array}
         \right.
 
-where :math:`\theta=\pi\eta/4`.
+where :math:`\theta=\pi\eta_\sigma/4`.
+
+.. plot::
+    :format: doctest
+    :context: close-figs
+    :include-source:
+
+    >>> import matplotlib.pyplot as plt # doctest: +SKIP
+    >>> from mrinversion.utils import get_polar_grids # doctest: +SKIP
+    ...
+    >>> _ = plt.figure(figsize=(4,3.5)) # doctest: +SKIP
+    >>> ax=plt.gca() # doctest: +SKIP
+    >>> get_polar_grids(ax) # doctest: +SKIP
+    >>> ax.set_xlabel('x / ppm') # doctest: +SKIP
+    >>> ax.set_ylabel('y / ppm') # doctest: +SKIP
+    >>> plt.tight_layout() # doctest: +SKIP
+    >>> plt.show() # doctest: +SKIP
+
+In the above figure, the shielding anisotropy parameter, :math:`\zeta_\sigma`, is
+the radial dimension, and the asymmetry parameter, :math:`\eta`, is the angular
+dimension, defined in Eq. :eq:`zeta_eta_def`. The region in red and blue corresponds
+to the positive and negative values of :math:`\zeta_\sigma`. The radial grid lines
+are drawn at every 0.2 ppm increments of :math:`\zeta_\sigma`, and the angular grid
+lines are drawn at every 0.2 increments of :math:`\eta_\sigma`. The `x` and `y`-axis
+are the :math:`\eta_\sigma = 0`, and the diagonal is :math:`\eta_\sigma = 1`.

@@ -4,7 +4,7 @@
 Package dependencies
 ====================
 
-``mrinversion`` depends on the following packages:
+The ``mrinversion`` library depends on the following packages:
 
 **Required packages**
 

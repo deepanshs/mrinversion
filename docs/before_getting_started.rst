@@ -15,6 +15,9 @@ Before getting started
 Prepping the dataset
 --------------------
 
+The following are some recommendations to help prep your dataset before subjecting to
+linear inversion.
+
 Magic angle flipping datasets
 '''''''''''''''''''''''''''''
 
@@ -30,15 +33,15 @@ Magic angle flipping datasets
 
 
   * - |uncheck|
-    - **Did you zero-fill the time-domain dataset?**
+    - **Did you zero-fill the time-domain dataset corresponding to the anisotropic
+      dimension?**
     - Zero filling the time domain dataset is purely cosmetic. It makes the spectrum
-      look visually appealing, but adds no information, that is, zero-filled data
+      look visually appealing, but adds no information, that is, a zero-filled dataset
       contains the same information as a non-zero filled dataset. In terms of
       computation, however, a zero-filled spectrum will take longer to solve.
 
-      **Recommendation**: Avoid zero-filling the dataset. If you do wish to zero-fill,
-      keep the total number of points along the anisotropic dimension in the range
-      120 - 150.
+      **Recommendation**: Try to keep the total number of points along the anisotropic
+      dimension in the range of 120 - 150 points.
 
   * - |uncheck|
     - **Did you correct for the isotropic offset along the anisotropic dimension?**
@@ -50,9 +53,12 @@ Magic angle flipping datasets
       there is an isotropic component along the anisotropic dimension, which is not
       removed by the shear transformation.
 
-      **Strongly Recommended**: Correct for the isotropic offset along the
-      anisotropic dimension by adding an appropriate coordinates-offset, which is the
-      negative of the isotropic offset.
+      **Required**: Correct for the isotropic offset along the
+      anisotropic dimension by adding an appropriate coordinates-offset.
+
+  * - |uncheck|
+    - **Are there sinc wiggles in your spectrum?**
+    - Kernel correction for spectrum with sinc wiggle artifacts is coming soon.
 
 Spinning Sideband correlation datasets
 ''''''''''''''''''''''''''''''''''''''
@@ -62,8 +68,8 @@ Spinning Sideband correlation datasets
 
   * - |uncheck|
     - **Did you shear the dataset?**
-    - The inversion method assumes that the dataset is sheared, such that one of
-      the dimensions is a pure anisotropic spinning sidebands dimension.
+    - The inversion method assumes that the spinning sideband dataset is sheared, such that
+      one of the dimensions is a pure anisotropic spinning sidebands dimension.
 
       **Required**: Apply a shear transformation before proceeding.
 

@@ -64,6 +64,7 @@ def plot_3d(
     box=False,
     clip_percent=0.0,
     linewidth=1,
+    alpha_factor=7.5,
 ):
     r"""Generate a 3D density plot with 2D contour and 1D projections.
 
@@ -90,6 +91,7 @@ def plot_3d(
         clip_percent: (Optional) The amplitudes of the dataset below the given percent
             is made transparent for the volumetric plot.
         linewidth: (Optional) The linewidth of the 2D countours, 1D plots and box.
+        alpha_factor: (Optional) The factor to scale the alpha channel of the 3D volume.
     """
 
     if max_2d is None:
@@ -111,7 +113,7 @@ def plot_3d(
     clr = cmap
     ck = cmap(0)
     facecolors = cmap(f)
-    facecolors[:, :, :, -1] = f / 7.5
+    facecolors[:, :, :, -1] = f / alpha_factor
     index = np.where(f < clip_percent / 100)
     facecolors[:, :, :, -1][index] = 0
     facecolors.shape = (f.size, 4)

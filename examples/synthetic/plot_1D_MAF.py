@@ -249,7 +249,7 @@ cv_curve = s_lasso_cv.cross_validation_curve
 # plot of the cross-validation curve
 plt.figure(figsize=(5, 3.5))
 ax = plt.subplot(projection="csdm")
-ax.contour(np.log10(s_lasso_cv.cv_map), levels=25)
+ax.contour(np.log10(s_lasso_cv.cross_validation_curve), levels=25)
 ax.scatter(
     -np.log10(s_lasso_cv.hyperparameters["alpha"]),
     -np.log10(s_lasso_cv.hyperparameters["lambda"]),

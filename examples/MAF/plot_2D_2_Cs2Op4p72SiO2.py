@@ -52,7 +52,7 @@ def plot2D(csdm_object, **kwargs):
 # Import the dataset
 # ''''''''''''''''''
 #
-# Load the dataset. Here, we import the dataset as the CSDM [#f2]_ data-object.
+# Load the dataset. Here, we import the dataset as the CSDM data-object.
 
 # The 2D MAF dataset in csdm format
 filename = "https://osu.box.com/shared/static/40dczkn6qwqyg0jtl8sr1jn89vmlwm0i.csdf"
@@ -424,7 +424,7 @@ print("\tstandard deviation\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*st
 # %%
 # The statistics shown above are according to the respective dimensions, that is, the
 # `x`, `y`, and the isotropic chemical shifts. To convert the `x` and `y` statistics
-# to commonly used :math:`\zeta` and :math:`\eta` statistics, use the
+# to commonly used :math:`\zeta_\sigma` and :math:`\eta_\sigma` statistics, use the
 # :func:`~mrinversion.kernel.utils.x_y_to_zeta_eta` function.
 mean_ζη_Q3 = x_y_to_zeta_eta(*mean_Q3[0:2])
 
@@ -460,8 +460,8 @@ print(
 #    * - Species
 #      - Yield
 #      - Isotropic chemical shift, :math:`\delta_\text{iso}`
-#      - Shielding anisotropy, :math:`\zeta`:
-#      - Shielding asymmetry, :math:`\eta`:
+#      - Shielding anisotropy, :math:`\zeta_\sigma`:
+#      - Shielding asymmetry, :math:`\eta_\sigma`:
 #
 #    * - Q4
 #      - :math:`57.7 \pm 0.4` %
@@ -482,8 +482,3 @@ print(
 #       Grandinetti, P. J. Cluster formation of network-modifier cations in cesium
 #       silicate glasses, J. Chem. Phys. 148, 094502,  (2018).
 #       `doi:10.1063/1.5020986 <https://doi.org/10.1063/1.5020986>`_
-#
-# .. [#f2] Srivastava, D.J., Vosegaard, T., Massiot, D., Grandinetti, P.J. (2020) Core
-#       Scientific Dataset Model: A lightweight and portable model and file format
-#       for multi-dimensional scientific data.
-#       `PLOS ONE 15(1): e0225953. <https://doi.org/10.1371/journal.pone.0225953>`_

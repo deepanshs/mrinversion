@@ -49,7 +49,7 @@ def plot2D(csdm_object, **kwargs):
 # Import the dataset
 # ''''''''''''''''''
 #
-# Load the dataset. Here, we import the dataset as the CSDM [#f2]_ data-object.
+# Load the dataset. Here, we import the dataset as the CSDM data-object.
 
 # The 2D MAT dataset in csdm format
 filename = "https://osu.box.com/shared/static/6l1gqljd2odh5ctommhhoqcnx3iak59c.csdf"
@@ -462,11 +462,6 @@ print(
 #       Grandinetti, P. J. Sideband separation experiments in NMR with phase
 #       incremented echo train acquisition, J. Chem. Phys. 138, 4803142, (2013).
 #       `doi:10.1063/1.4803142. <https://doi.org/10.1063/1.4803142>`_
-#
-# .. [#f2] Srivastava, D.J., Vosegaard, T., Massiot, D., Grandinetti, P.J. (2020) Core
-#       Scientific Dataset Model: A lightweight and portable model and file format
-#       for multi-dimensional scientific data.
-#       `PLOS ONE 15(1): e0225953. <https://doi.org/10.1371/journal.pone.0225953>`_
 #
 # .. [#f3] Gullion, T., Extended chemical-shift modulation, J. Mag. Res., **85**, 3,
 #       (1989).

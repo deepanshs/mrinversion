@@ -22,14 +22,8 @@ from this spectrum.
     :include-source:
 
     >>> import numpy as np
-    >>> import csdmpy as cp
     >>> import matplotlib.pyplot as plt
     >>> from mrinversion.utils import get_polar_grids
-    >>> from mrinversion.kernel import NuclearShieldingLineshape
-    >>> from mrinversion.linear_model import TSVDCompression
-    >>> from mrinversion.linear_model import SmoothLasso
-    >>> from mrinversion.linear_model import SmoothLassoCV
-    ...
     ...
     >>> # a function to plot the 2D tensor parameter distribution
     >>> def plot2D(ax, csdm_object, title=''):
@@ -51,11 +45,14 @@ Import the dataset
 ------------------
 
 The first step is getting the sideband spectrum. In this example, we get the data
-from a CSDM [#f1]_ compliant file-format.
+from a CSDM [#f1]_ compliant file-format. Import the
+`csdmpy <https://csdmpy.readthedocs.io/en/latest/>`_ module and load the dataset as
+follows,
 
 .. note::
 
-    The CSDM file-format is supported by most NMR software, such as SIMPSON, DMFIT, RMN.
+    The CSDM file-format is supported by most NMR software, such as SIMPSON [#f5]_,
+    DMFIT [#f6]_, RMN [#f7]_.
     A python package supporting CSDM file-format, csdmpy, is also available.
 
 .. plot::
@@ -63,24 +60,25 @@ from a CSDM [#f1]_ compliant file-format.
     :context: close-figs
     :include-source:
 
+    >>> import csdmpy as cp
+    ...
     >>> filename = "https://osu.box.com/shared/static/xnlhecn8ifzcwx09f83gsh27rhc5i5l6.csdf"
     >>> data_object = cp.load(filename) # load the CSDM file with the csdmpy module
-    ...
-    >>> # convert the dimension coordinates from `Hz` to `ppm`.
-    >>> data_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
 
-Here, the variable ``data_object`` is the
-`CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
-object containing a one-dimension pure anisotropic spinning sideband spectrum.
-The coordinates and the corresponding responses from this dataset are
+Here, the variable `data_object` is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
+object. In most cases, the NMR spectroscopic dimension is a frequency dimension. The NMR
+spectroscopists, however, prefer to view the spectrum on a dimensionless scale. If the
+dataset dimension within the CSDM object is in frequency, you may convert it into `ppm`
+as follows,
 
 .. plot::
     :format: doctest
     :context: close-figs
     :include-source:
 
-    >>> coordinates = data_object.dimensions[0].coordinates.value
-    >>> responses = data_object.dependent_variables[0].components[0]
+    >>> # convert the dimension coordinates from `Hz` to `ppm`.
+    >>> data_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
+
 
 For comparison, let's also include the true probability distribution from which the
 synthetic spinning sideband dataset is derived.
@@ -103,8 +101,7 @@ true probability distribution.
     :include-source:
 
     >>> _, ax = plt.subplots(1, 2, figsize=(9, 3.5), subplot_kw={'projection': 'csdm'}) # doctest: +SKIP
-    >>> line = ax[0].stem(coordinates, responses, markerfmt=' ', use_line_collection=True) # doctest: +SKIP
-    >>> plt.setp(line, color="black", linewidth=2) # doctest: +SKIP
+    >>> ax[0].plot(data_object) # doctest: +SKIP
     >>> ax[0].set_xlabel('frequency / ppm') # doctest: +SKIP
     >>> ax[0].invert_xaxis() # doctest: +SKIP
     ...
@@ -116,14 +113,15 @@ true probability distribution.
 .. figure:: _static/null.*
     :align: left
 
-    The figure on the left is the synthetic spinning sideband dataset for
-    the nuclear shielding tensor distribution shown on the right. In the figure
-    on the right, the parameter ζ is the radial dimension, and η is the angular
-    dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
-    corresponds to the positive and negative values of ζ. The radial grid lines
-    are drawn at every 20 ppm increments of ζ, and the angular grid lines are drawn
-    at every 0.2 increments of η. The `x` and `y`-axis are η = 0, and the diagonal is
-    η = 1.
+    The figure on the left is the synthetic spinning sideband dataset for the nuclear
+    shielding tensor distribution shown on the right. In the figure on the right, the
+    shielding anisotropy parameter, :math:`\zeta_\sigma`, is the radial dimension, and
+    the asymmetry parameter, :math:`\eta`, is the angular dimension, defined in Eq.
+    :eq:`zeta_eta_def`. The region in red and blue corresponds to the positive and
+    negative values of :math:`\zeta_\sigma`. The radial grid lines are drawn at every
+    20 ppm increments of :math:`\zeta_\sigma`, and the angular grid lines are drawn
+    at every 0.2 increments of :math:`\eta_\sigma`. The `x` and `y`-axis are the
+    :math:`\eta_\sigma = 0`, and the diagonal is :math:`\eta_\sigma = 1`.
 
 
 Dimension Setup
@@ -161,7 +159,7 @@ Here, the anisotropic dimension is sampled at 625 Hz for 32 points with an offse
 
 **x-y dimensions**
 The two inverse dimensions corresponding to the `x` and `y`-axis of the `x`-`y` grid.
-Similarly, define the `x` and `y` dimensions.
+Similarly, define the `x` and `y` dimensions as
 
 .. plot::
     :format: doctest
@@ -188,12 +186,13 @@ generate the kernel as follows,
     :context: close-figs
     :include-source:
 
+    >>> from mrinversion.kernel import NuclearShieldingLineshape
     >>> lineshapes = NuclearShieldingLineshape(
     ...     anisotropic_dimension=anisotropic_dimension,
     ...     inverse_dimension=inverse_dimension,
     ...     channel='29Si',
     ...     magnetic_flux_density='9.4 T',
-    ...     rotor_angle='54.735 deg',
+    ...     rotor_angle='54.735°',
     ...     rotor_frequency='625 Hz',
     ...     number_of_sidebands=32
     ... )
@@ -260,7 +259,8 @@ import the :class:`~mrinversion.linear_model.TSVDCompression` class and follow,
     :context: close-figs
     :include-source:
 
-    >>> new_system = TSVDCompression(K, data_object)
+    >>> from mrinversion.linear_model import TSVDCompression
+    >>> new_system = TSVDCompression(K=K, s=data_object)
     compression factor = 1.032258064516129
     >>> compressed_K = new_system.compressed_K
     >>> compressed_s = new_system.compressed_s
@@ -286,18 +286,8 @@ compressed signal is
 Setting up the inverse problem
 ------------------------------
 
-When setting up the inversion, we solved the smooth LASSO [#f4]_ problem of
-form
-
-.. math::
-        \| {\bf Kf - s} \|^2_2 + \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2
-                    + \lambda  \| {\bf f} \|_1 ,
-
-where :math:`{\bf K}` is the kernel, :math:`{\bf s}` is the known signal
-containing noise, and :math:`{\bf f}` is the desired solution. The parameters
-:math:`\alpha` and :math:`\lambda` are the hyperparameters controlling the
-smoothness and sparsity of the solution :math:`{\bf f}`. See the documentation
-for the :class:`~mrinversion.linear_model.SmoothLasso` class for details.
+When setting up the inversion, we solved the smooth LASSO [#f4]_ problem. Read the
+:ref:`smooth_lasso_intro` section for further details.
 
 Import the :class:`~mrinversion.linear_model.SmoothLasso` class and follow,
 
@@ -306,13 +296,14 @@ Import the :class:`~mrinversion.linear_model.SmoothLasso` class and follow,
     :context: close-figs
     :include-source:
 
+    >>> from mrinversion.linear_model import SmoothLasso
     >>> s_lasso = SmoothLasso(alpha=0.01, lambda1=1e-04, inverse_dimension=inverse_dimension)
 
 Here, the variable ``s_lasso`` is an instance of the
 :class:`~mrinversion.linear_model.SmoothLasso` class. The required arguments
 of this class are `alpha` and `lambda1`, corresponding to the hyperparameters
-:math:`\alpha` and :math:`\lambda`, respectively, in the above equation. At the
-moment we don't know the optimum value of the `alpha` and `lambda1` parameters.
+:math:`\alpha` and :math:`\lambda`, respectively, in the Eq. :eq:`slasso`. At the
+moment, we don't know the optimum value of the `alpha` and `lambda1` parameters.
 We start with a guess value.
 
 To solve the smooth lasso problem, use the
@@ -333,8 +324,7 @@ use the uncompressed values of the kernel and signal in this method, if desired.
 
 
 The solution to the smooth lasso is accessed using the
-:attr:`~mrinversion.linear_model.SmoothLasso.f` attribute of the respective
-``s_lasso`` object.
+:attr:`~mrinversion.linear_model.SmoothLasso.f` attribute of the respective object.
 
 .. plot::
     :format: doctest
@@ -362,16 +352,11 @@ The plot of the solution is
 
     The figure on the left is the guess solution of the nuclear shielding tensor distribution
     derived from the inversion of the spinning sideband dataset. The figure on the right
-    is the true nuclear shielding tensor distribution. The ζ and η coordinates are
-    depicted as piecewise polar, where ζ is the radial dimension, and η is the angular
-    dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red corresponds
-    to the positive and negative values of ζ.  The radial grid lines are drawn at every
-    20 ppm increment of ζ, and the angular grid lines are drawn at every 0.2 increment
-    of η. The `x` and `y` axis are η = 0, and the diagonal is η = 1.
+    is the true nuclear shielding tensor distribution.
 
 
-You may also evaluate the spectrum predicted from the solution using the
-:meth:`~mrinversion.linear_model.SmoothLasso.predict` method of the object as
+You may also evaluate the residuals corresponding to the solution using the
+:meth:`~mrinversion.linear_model.SmoothLasso.residuals` method of the object as
 follows,
 
 .. plot::
@@ -379,31 +364,29 @@ follows,
     :context: close-figs
     :include-source:
 
-    >>> predicted_signal = s_lasso.predict(K)
+    >>> residuals = s_lasso.residuals(K, data_object)
 
-The argument of the `predict` method is the kernel. We provide the original
-kernel K because we desire the prediction of the original data and not the
-compressed data.
+The argument of the `residuals` method is the kernel and the signal data. We provide the
+original kernel, K, because we desire the residuals corresponding to the original data
+and not the compressed data.
 
 
 Statistical learning of tensor parameters
 -----------------------------------------
 
-The linear model trained with the combined l1 and l2 priors,
-such as the smooth LASSO estimator used here, the solution depends on the
-choice of the hyperparameters.
-The solution shown in the above figure is when :math:`\alpha=0.1` and
-:math:`\lambda=1\times 10^{-4}`. Although it's a solution, it is unknown if
-this is the best solution. For this, we employ the statistical learning-based
-model, such as the `n`-fold cross-validation.
+The solution from a linear model trained with the combined l1 and l2 priors, such as the
+smooth LASSO estimator used here, depends on the choice of the hyperparameters.
+The solution shown in the above figure is when :math:`\alpha=0.01` and
+:math:`\lambda=1\times 10^{-4}`. Although it's a solution, it is unknown if this is the
+best solution. For this, we employ the statistical learning-based model, such as the
+`n`-fold cross-validation.
 
-The :class:`~mrinversion.linear_model.SmoothLassoCV` class
-is designed to solve the smooth-lasso problem for a range of :math:`\alpha`
-and :math:`\lambda` values and determine the best solution using the `n`-fold
-cross-validation. Here, we search the best model on a :math:`10 \times 10`
-:math:`\alpha`-:math:`\lambda` grid, using a 10-fold cross-validation
-statistical learning method. The :math:`\lambda` and :math:`\alpha` values are
-sampled uniformly on a logarithmic scale as,
+The :class:`~mrinversion.linear_model.SmoothLassoCV` class is designed to solve the
+smooth-lasso problem for a range of :math:`\alpha` and :math:`\lambda` values and
+determine the best solution using the `n`-fold cross-validation. Here, we search the
+best model on a :math:`10 \times 10` pre-defined :math:`\alpha`-:math:`\lambda` grid,
+using a 10-fold cross-validation statistical learning method. The :math:`\lambda` and
+:math:`\alpha` values are sampled uniformly on a logarithmic scale as,
 
 .. plot::
     :format: doctest
@@ -416,13 +399,14 @@ sampled uniformly on a logarithmic scale as,
 Smooth-LASSO CV Setup
 '''''''''''''''''''''
 
-Setup the smooth lasso cross-validation using
+Setup the smooth lasso cross-validation as follows
 
 .. plot::
     :format: doctest
     :context: close-figs
     :include-source:
 
+    >>> from mrinversion.linear_model import SmoothLassoCV
     >>> s_lasso_cv = SmoothLassoCV(
     ...     alphas=alphas,
     ...     lambdas=lambdas,
@@ -434,10 +418,10 @@ Setup the smooth lasso cross-validation using
 
 The arguments of the :class:`~mrinversion.linear_model.SmoothLassoCV` is a list
 of the `alpha` and `lambda` values, along with the standard deviation of the
-noise, `sigma`. The value of the argument `folds` is the number of folds in the
+noise, `sigma`. The value of the argument `folds` is the number of folds used in the
 cross-validation. As before, to solve the problem, use the
 :meth:`~mrinversion.linear_model.SmoothLassoCV.fit` method, whose arguments are
-the kernel, signal, and shape of the solution.
+the kernel and signal.
 
 The optimum hyperparameters
 '''''''''''''''''''''''''''
@@ -458,7 +442,8 @@ The cross-validation surface
 ''''''''''''''''''''''''''''
 
 The cross-validation error metric is the mean square error metric. You may access this
-data using the :attr:`~mrinversion.linear_model.SmoothLassoCV.cv_map` attribute.
+data using the :attr:`~mrinversion.linear_model.SmoothLassoCV.cross_validation_curve`
+attribute.
 
 .. plot::
     :format: doctest
@@ -467,7 +452,7 @@ data using the :attr:`~mrinversion.linear_model.SmoothLassoCV.cv_map` attribute.
 
     >>> plt.figure(figsize=(5, 3.5)) # doctest: +SKIP
     >>> ax = plt.subplot(projection='csdm') # doctest: +SKIP
-    >>> ax.contour(np.log10(s_lasso_cv.cv_map), levels=25) # doctest: +SKIP
+    >>> ax.contour(np.log10(s_lasso_cv.cross_validation_curve), levels=25) # doctest: +SKIP
     >>> ax.scatter(-np.log10(s_lasso_cv.hyperparameters['alpha']),
     ...         -np.log10(s_lasso_cv.hyperparameters['lambda']),
     ...         marker='x', color='k') # doctest: +SKIP
@@ -512,13 +497,7 @@ The plot of the selected tensor parameter distribution is shown below.
 
     The figure on the left is the optimum solution selected by the 10-folds
     cross-validation method. The figure on the right is the true model of the
-    nuclear shielding tensor distribution. The ζ and η coordinates are depicted
-    as piecewise polar, where ζ is the radial dimension, and η is the angular
-    dimension, defined in Eq. :eq:`zeta_eta_def`. The region in blue and red
-    corresponds to the positive and negative values of ζ.  The radial grid lines
-    are drawn at every 20 ppm increment of ζ, and the angular grid lines are
-    drawn at every 0.2 increment of η. The `x` and `y` axis are η = 0, and the
-    diagonal is η = 1.
+    nuclear shielding tensor distribution.
 
 
 .. seealso::
@@ -543,3 +522,13 @@ The plot of the selected tensor parameter distribution is shown below.
 
 .. [#f4] Hebiri M, Sara A. Van De Geer, The Smooth-Lasso and other l1+l2-penalized
             methods, arXiv (2010). `arXiv:1003.4885v2 <https://arxiv.org/abs/1003.4885v2>`_
+
+.. [#f5] Bak M., Rasmussen J. T., Nielsen N.C., SIMPSON: A General Simulation Program for
+            Solid-State NMR Spectroscopy. J Magn Reson. **147**, 296–330, (2000).
+            `10.1006/jmre.2000.2179 <https://doi.org/10.1006/jmre.2000.2179>`_
+
+.. [#f6] Massiot D., Fayon F., Capron M., King I., Le Calvé S., Alonso B., et al. Modelling
+            one- and two-dimensional solid-state NMR spectra. Magn Reson Chem. **40**, 70–76,
+            (2002) `10.1002/mrc.984 <https://doi.org/10.1002/mrc.984>`_
+
+.. [#f7] PhySy Ltd. RMN 2.0; 2019. Available from: https://www.physyapps.com/rmn.
