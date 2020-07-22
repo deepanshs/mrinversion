@@ -1,35 +1,26 @@
 
 
-.. _kernel_api:
+.. _shielding_kernel_api:
 
-
-Kernel
-======
-
-
-.. currentmodule:: mrinversion.kernel
-
-.. autofunction:: x_y_to_zeta_eta
-
-
-Pure anisotropic Nuclear Shielding
-----------------------------------
+Pure anisotropic Nuclear Shielding Kernel
+=========================================
 
 Generalized Class
-"""""""""""""""""
+-----------------
 
 .. currentmodule:: mrinversion.kernel
 
-.. autoclass:: NuclearShieldingTensor
+.. autoclass:: NuclearShieldingLineshape
    :show-inheritance:
 
    .. automethod:: kernel
 
 Specialized Classes
-"""""""""""""""""""
+-------------------
 
 Magic Angle Flipping
 ''''''''''''''''''''
+
 .. autoclass:: MAF
    :show-inheritance:
 

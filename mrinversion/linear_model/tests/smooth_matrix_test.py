@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 from copy import deepcopy
 
 import numpy as np
 
-from mrinversion.linear_model import _get_augmented_data
-from mrinversion.linear_model import _get_cv_indexes
+from mrinversion.linear_model._base_l1l2 import _get_augmented_data
+from mrinversion.linear_model._base_l1l2 import _get_cv_indexes
 
 
 def test01():
@@ -123,9 +124,9 @@ def test03():
     KK, _ = _get_augmented_data(K, s, 1, "smooth lasso", f_shape=(4, 4))
 
     J = -1 * np.eye(4) + np.diag(np.ones(3), k=-1)
-    I = np.eye(4)
-    J1 = np.kron(J[1:], I)
-    J2 = np.kron(I, J[1:])
+    I_eye = np.eye(4)
+    J1 = np.kron(J[1:], I_eye)
+    J2 = np.kron(I_eye, J[1:])
 
     assert np.allclose(KK[5 : 5 + 12], J1)
     assert np.allclose(KK[5 + 12 :], J2)

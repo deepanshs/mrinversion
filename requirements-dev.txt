@@ -1,15 +1,22 @@
+numpy>=1.17
+matplotlib>=3.0
+csdmpy>=0.3
+joblib>=0.13.2
+mrsimulator>=0.3.0a0
+scikit-learn>=0.22
+
 # development packages
 pytest-runner>=5.0
-pytest>=4.6.3
+pytest>=5.3
+black
 pre-commit>=1.16.1
 coverage>=4.5.3
 pytest-cov
 codecov
 
-# doc build
+# Building Docs requirements
 sphinxjp.themes.basicstrap
-sphinx>=2.1.2
-sphinx-gallery
-pillow
-matplotlib
-sphinx_copybutton
+sphinx>=2.0
+sphinx-gallery>0.6.2
+pillow>=7.1.2  # for sphinx-gallery images
+sphinx_copybutton>=0.2.12
