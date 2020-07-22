@@ -28,8 +28,8 @@ Welcome to Mrinversion documentation!
             :target: https://github.com/DeepanshS/mrinversion/actions
             :alt: GitHub Workflow Status
 
-          .. image:: https://readthedocs.org/projects/mrinversion/badge/?version=stable
-            :target: https://mrinversion.readthedocs.io/en/stable/?badge=stable
+          .. image:: https://readthedocs.org/projects/mrinversion/badge/?version=latest
+            :target: https://mrinversion.readthedocs.io/en/latest/?badge=latest
             :alt: Documentation Status
 
       * - License
@@ -66,9 +66,9 @@ The ``mrinversion`` python package is based on the statistical learning techniqu
 determining the distribution of the magnetic resonance (NMR) tensor parameters
 from the two-dimensional NMR spectra correlating the isotropic to anisotropic
 resonances.
-The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
+The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/latest/>`_
 package for generating solid-state NMR lineshapes and
-`scikit-learn <https://scikit-learn.org/stable/>`_ package for statistical learning.
+`scikit-learn <https://scikit-learn.org/latest/>`_ package for statistical learning.
 
 ----
 
