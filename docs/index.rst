@@ -28,8 +28,8 @@ Welcome to Mrinversion documentation!
             :target: https://github.com/DeepanshS/mrinversion/actions
             :alt: GitHub Workflow Status
 
-          .. image:: https://readthedocs.org/projects/mrinversion/badge/?version=stable
-            :target: https://mrinversion.readthedocs.io/en/stable/?badge=stable
+          .. image:: https://readthedocs.org/projects/mrinversion/badge/?version=latest
+            :target: https://mrinversion.readthedocs.io/en/latest/?badge=latest
             :alt: Documentation Status
 
       * - License
@@ -64,10 +64,10 @@ Welcome to Mrinversion documentation!
 
 The ``mrinversion`` python package is based on the statistical learning technique for
 determining the distribution of the magnetic resonance (NMR) tensor parameters
-from the two-dimensional NMR spectra correlating the isotropic to anisotropic
-resonances.
+from two-dimensional NMR spectra correlating the isotropic to anisotropic
+frequencies.
 The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
-package for generating solid-state NMR lineshapes and
+package for generating solid-state NMR spectra and
 `scikit-learn <https://scikit-learn.org/stable/>`_ package for statistical learning.
 
 ----
@@ -78,21 +78,20 @@ The ``mrinversion`` package includes the **inversion of a two-dimensional
 solid-state NMR spectrum of dilute spin-systems to a three-dimensional distribution of
 tensor parameters**. At present, we support the inversion of
 
-- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
-  resonances to pure anisotropic resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta, \eta)`,
-  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta`
-  and :math:`\eta`, are the shielding anisotropy and asymmetry parameters,
-  respectively, defined using the Haeberlen convention.
-
 - **Magic angle turning (MAT), Phase adjusted spinning sidebands (PASS)**, and similar
   spectra correlating the isotropic chemical shift resonances to pure anisotropic
   spinning sideband resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta, \eta)`,
-  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta`
-  and :math:`\eta`, are the shielding anisotropy and asymmetry parameters,
+  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)`,
+  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta_\sigma`
+  and :math:`\eta_\sigma`, are the shielding anisotropy and asymmetry parameters,
   respectively, defined using the Haeberlen convention.
 
+- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
+  resonances to pure anisotropic resonances into a three-dimensional distribution of
+  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)`,
+  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta_\sigma`
+  and :math:`\eta_\sigma`, are the shielding anisotropy and asymmetry parameters,
+  respectively, defined using the Haeberlen convention.
 
 
 .. only:: html

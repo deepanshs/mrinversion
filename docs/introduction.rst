@@ -8,7 +8,8 @@ Objective
 ---------
 
 In ``mrinversion``, we solve for the distribution of the second-rank traceless
-symmetric tensor parameters, through an inversion of pure anisotropic NMR spectrum.
+symmetric tensor principal components, through an inversion of a pure anisotropic
+NMR spectrum.
 
 .. whose frequency
 .. contributions are assumed to arise predominantly from the second-rank traceless
@@ -19,7 +20,7 @@ symmetric tensor parameters, through an inversion of pure anisotropic NMR spectr
 In the case of the shielding tensor, this corresponds to solving for the distribution
 of anisotropy and asymmetry parameters of the second-rank traceless shielding tensor
 through an inversion of a pure anisotropic frequency spectrum. The pure anisotropic
-frequency spectra are the cross-sections of the 2D isotropic `v.s` anisotropic
+frequency spectra are the cross-sections of the 2D isotropic `vs.` anisotropic
 correlation spectrum, such as the magic-angle hopping (MAH), 2D One Pulse (TOP) MAS,
 magic-angle turning (MAT), magic-angle flipping (MAF), Variable Angle Correlation
 Spectroscopy (VACSY), phase adjusted spinning sideband (PASS), extended chemical shift
@@ -49,8 +50,6 @@ the solution to the problem in Eq. :eq:`eq_1` has a simple closed-form solution,
     :label: eq_2
 
     {\bf f} = {\bf K}^{-1} {\bf \cdot s}.
-
-But practical science isn't easy that way! Let's see how.
 
 The deciding factor whether the solution :math:`{\bf f}` exists in Eq. :eq:`eq_2`
 is whether or not the kernel :math:`{\bf K}` is invertible.
@@ -139,12 +138,13 @@ A second-rank symmetric tensor, :math:`{\bf S}`, in a three-dimensional space, i
 described by three principal components, :math:`s_{xx}`, :math:`s_{yy}`, and
 :math:`s_{zz}`, in the principal axis system (PAS). Often, depending on the context of
 the problem, the three principal components are expressed with three new parameters
-following a convention. One such convention is the Haeberlen convention, which
-defines three new parameters, :math:`\delta_\text{iso}^\text{CS}`, :math:`\zeta_\sigma`, and
-:math:`\eta_\sigma`, as the isotropic chemical shift, shielding anisotropy, and shielding
-asymmetry. Here, the parameters :math:`\zeta_\sigma` and :math:`\eta_\sigma` contribute
-to the purely anisotropic frequencies, and determining the distribution of these two
-parameters is the focus of this library.
+following a convention. One such convention is the Haeberlen convention. In the context
+of nuclear shielding tensor, the Haeberlen convention defines three parameters,
+:math:`\delta_\text{iso}^\text{CS}`, :math:`\zeta_\sigma`, and :math:`\eta_sigma`, as
+the isotropic chemical shift, shielding anisotropy, and shielding asymmetry. Here, the
+parameters :math:`\zeta_\sigma` and :math:`\eta_\sigma` contribute to the purely
+anisotropic frequencies, and determining the distribution of these two parameters is
+the focus of this library.
 
 Defining the inverse grid
 ''''''''''''''''''''''''''
@@ -152,48 +152,55 @@ Defining the inverse grid
 When solving any linear inverse problem, one needs to define an inverse grid before
 solving the problem. A familiar example is the inverse Fourier transform, where
 the inverse grid is defined following the Nyquist–Shannon sampling theorem. Unlike
-IFFT, however, there is no well-defined sampling grid for the second-rank traceless
-symmetric tensor parameters. One obvious choice is to define a two-dimensional
-:math:`\zeta_\sigma`-:math:`\eta_\sigma` Cartesian grid.
+inverse Fourier transform, however, there is no well-defined sampling grid for the
+second-rank traceless symmetric tensor parameters. One obvious choice is
+to define a two-dimensional :math:`\zeta_sigma`-:math:`\eta_sigma` Cartesian grid.
 
 As far as the inversion problem is concerned, :math:`\zeta_\sigma` and :math:`\eta_\sigma`
 are just labels for the subspectra. In simplistic terms, the inversion problem solves
 for the probability of each subspectrum, from a given pre-defined basis of subspectra,
 that describes the observed spectrum. If the subspectra basis is defined over a
 :math:`\zeta_\sigma`-:math:`\eta_\sigma` Cartesian grid, multiple
-:math:`(\zeta_\sigma, \eta_\sigma)` coordinates points to the same subspectra, therefore,
-distinguishing these coordinates from the subspectra becomes impossible.
+:math:`(\zeta_\sigma, \eta_\sigma)` coordinates points to the same subspectra. For
+example, the subspectra from coordinates :math:`(\zeta_\sigma, \eta_\sigma=1)` and
+:math:`(-\zeta_\sigma, \eta_\sigma=1)` are identical, therefore, distinguishing these
+coordinates from the subspectra becomes impossible.
 
 The issue of multiple coordinates pointing to the same object is not new. It is
 a common problem when representing polar coordinates in the Cartesian basis. Try describing
-the coordinates of the south pole using latitudes and longitudes.
-
-To resolve the issue of multiple coordinates pointing to the same subspectra, we redefine
-the :math:`\zeta_\sigma`-:math:`\eta_\sigma` parameters on an `x`-`y` Cartesian grid,
-where the basis subspectra are distinguishable.
+the coordinates of the south pole using latitudes and longitudes. You can define the latitude,
+but defining longitudes becomes problematic. A similar situation arises, in the context of
+second-rank traceless tensor parameters, when the anisotropy goes to zero. You can define
+the anisotropy as zero, but defining asymmetry becomes problematic.
 
 Introducing the :math:`x`-:math:`y` grid
 """"""""""""""""""""""""""""""""""""""""
 
-The `x`-`y` grid is a piece-wise polar grid of second-rank traceless tensor parameters,
-:math:`\zeta_\sigma` and :math:`\eta_\sigma`. The mapping of :math:`\zeta_\sigma`, and
-:math:`\eta_\sigma` coordinates onto the `x`-`y` grid is defined as
+A simple fix to this issue is to define the :math:`(\zeta_\sigma, \eta_\sigma)` coordinates
+in a polar basis. We, therefore, introduce a piece-wise polar grid representation of the
+second-rank traceless tensor parameters, :math:`\zeta_\sigma`-:math:`\eta_\sigma`, defined as
 
 .. math::
     :label: zeta_eta_def
 
-    x = \left\{ \begin{array}{l r}
-                |\zeta_\sigma|\sin\theta, & \forall \zeta_\sigma\ge0, \\
-                |\zeta_\sigma|\cos\theta, & \text{elsewhere}
-               \end{array}
-        \right. \\
-    y = \left\{ \begin{array}{l r}
-                |\zeta_\sigma|\cos\theta, & \forall \zeta_\sigma\ge0, \\
-                |\zeta_\sigma|\sin\theta, & \text{elsewhere}
-               \end{array}
-        \right.
+    r_\zeta = | \zeta_\sigma | ~~~~\text{and}~~~~
+    \theta = \left\{ \begin{array}{l r}
+                \frac{\pi}{4} \eta      &: \zeta \le 0, \\
+                \frac{\pi}{2} \left(1 - \frac{\eta}{2} \right) &: \zeta > 0.
+             \end{array}
+            \right.
 
-where :math:`\theta=\pi\eta_\sigma/4`.
+Because Cartesian grids are more managable in computation, we re-express the above polar
+piece-wise grid as the `x`-`y` Cartesian grid following,
+
+.. math::
+    :label: x_y_def
+
+    x = r_\zeta \cos\theta ~~~~\text{and}~~~~ y = r_\zeta \sin\theta.
+
+In the `x`-`y` grid system, the basis subspectra are relatively distinguishable. The
+``mrinversion`` library provides a utility function to render the piece-wise polar grid
+under your matplotlib figures. Copy-paste the following code in your script.
 
 .. plot::
     :format: doctest
@@ -203,18 +210,29 @@ where :math:`\theta=\pi\eta_\sigma/4`.
     >>> import matplotlib.pyplot as plt # doctest: +SKIP
     >>> from mrinversion.utils import get_polar_grids # doctest: +SKIP
     ...
-    >>> _ = plt.figure(figsize=(4,3.5)) # doctest: +SKIP
+    >>> plt.figure(figsize=(4, 3.5)) # doctest: +SKIP
     >>> ax=plt.gca() # doctest: +SKIP
+    >>> # add your plots/contours here.
     >>> get_polar_grids(ax) # doctest: +SKIP
     >>> ax.set_xlabel('x / ppm') # doctest: +SKIP
     >>> ax.set_ylabel('y / ppm') # doctest: +SKIP
     >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
-In the above figure, the shielding anisotropy parameter, :math:`\zeta_\sigma`, is
-the radial dimension, and the asymmetry parameter, :math:`\eta`, is the angular
-dimension, defined in Eq. :eq:`zeta_eta_def`. The region in red and blue corresponds
-to the positive and negative values of :math:`\zeta_\sigma`. The radial grid lines
-are drawn at every 0.2 ppm increments of :math:`\zeta_\sigma`, and the angular grid
-lines are drawn at every 0.2 increments of :math:`\eta_\sigma`. The `x` and `y`-axis
-are the :math:`\eta_\sigma = 0`, and the diagonal is :math:`\eta_\sigma = 1`.
+If you are familiar with the matplotlib library, you may notice that most code lines are
+the basic matplotlib statements, except for the line that says `get_polar_grids(ax)`.
+The :func:`~mrinversion.utils.get_polar_grids` is a utility function that generates
+the piece-wise polar grid for your figures.
+
+Here, the shielding anisotropy parameter, :math:`\zeta_\sigma`, is the radial dimension,
+and the asymmetry parameter, :math:`\eta`, is the angular dimension, defined using Eqs.
+:eq:`zeta_eta_def` and :eq:`x_y_def`. The region in blue and red corresponds to the
+positive and negative values of :math:`\zeta_\sigma`, where the magnitude of the anisotropy
+increases radially. The `x` and the `y`-axis are :math:`\eta=0` for the negative and positive
+:math:`\zeta`, respectively. When moving towards the diagonal from `x` or `y`-axes, the
+asymmetry parameter, :math:`\eta_\sigma`, increase, where the diagonal is
+:math:`\eta_\sigma=1`.
+
+In the above figure, the radial grid lines are drawn at every 0.2 ppm increments of
+:math:`\zeta_\sigma`, and the angular grid lines are drawn at every 0.2 increments of
+:math:`\eta_\sigma`.

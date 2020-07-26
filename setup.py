@@ -17,7 +17,7 @@ module_dir = dirname(abspath(__file__))
 install_requires = [
     "numpy>=1.17",
     "setuptools>=27.3",
-    "csdmpy>=0.3",
+    "csdmpy>=0.3.1",
     "mrsimulator>=0.3.0a0",
     "scikit-learn>=0.22",
 ]

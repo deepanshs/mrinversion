@@ -72,31 +72,31 @@ class LineShape(BaseModel):
         return zeta, eta
 
 
-class NuclearShieldingLineshape(LineShape):
+class ShieldingPALineshape(LineShape):
     """
-        A generalized class for simulating the pure anisotropic NMR nuclear shielding
-        line-shape kernel.
+    A generalized class for simulating the pure anisotropic NMR nuclear shielding
+    line-shape kernel.
 
-        Args:
-            anisotropic_dimension: A Dimension object, or an equivalent dictionary
-                    object. This dimension must represent the pure anisotropic
-                    dimension.
-            inverse_dimension: A list of two Dimension objects, or equivalent
-                    dictionary objects representing the `x`-`y` coordinate grid.
-            channel: The channel is an isotope symbol of the nuclei given as the atomic
-                number followed by the atomic symbol, for example, `1H`, `13C`, and
-                `29Si`. This nucleus must correspond to the recorded frequency
-                resonances.
-            magnetic_flux_density: The magnetic flux density of the external static
-                    magnetic field. The default value is 9.4 T.
-            rotor_angle: The angle of the sample holder (rotor) relative to the
-                    direction of the external magnetic field. The default value is
-                    54.735 deg (magic angle).
-            rotor_frequency: The effective sample spin rate. Depending on the NMR
-                    sequence, this value may be less than the physical sample rotation
-                    frequency. The default is 14 kHz.
-            number_of_sidebands: The number of sidebands to simulate along the
-                    anisotropic dimension. The default value is 1.
+    Args:
+        anisotropic_dimension: A Dimension object, or an equivalent dictionary
+                object. This dimension must represent the pure anisotropic
+                dimension.
+        inverse_dimension: A list of two Dimension objects, or equivalent
+                dictionary objects representing the `x`-`y` coordinate grid.
+        channel: The channel is an isotope symbol of the nuclei given as the atomic
+            number followed by the atomic symbol, for example, `1H`, `13C`, and
+            `29Si`. This nucleus must correspond to the recorded frequency
+            resonances.
+        magnetic_flux_density: The magnetic flux density of the external static
+                magnetic field. The default value is 9.4 T.
+        rotor_angle: The angle of the sample holder (rotor) relative to the
+                direction of the external magnetic field. The default value is
+                54.735 deg (magic angle).
+        rotor_frequency: The effective sample spin rate. Depending on the NMR
+                sequence, this value may be less than the physical sample rotation
+                frequency. The default is 14 kHz.
+        number_of_sidebands: The number of sidebands to simulate along the
+                anisotropic dimension. The default value is 1.
     """
 
     def __init__(
@@ -169,27 +169,27 @@ class NuclearShieldingLineshape(LineShape):
         return self._averaged_kernel(amp, supersampling)
 
 
-class MAF(NuclearShieldingLineshape):
+class MAF(ShieldingPALineshape):
     r"""
-        A specialized class for simulating the pure anisotropic NMR nuclear shielding
-        line-shape kernel resulting from the 2D MAF spectra.
+    A specialized class for simulating the pure anisotropic NMR nuclear shielding
+    line-shape kernel resulting from the 2D MAF spectra.
 
-        Args:
-            anisotropic_dimension: A Dimension object, or an equivalent dictionary
-                    object. This dimension must represent the pure anisotropic
-                    dimension.
-            inverse_dimension: A list of two Dimension objects, or equivalent
-                    dictionary objects representing the `x`-`y` coordinate grid.
-            channel: The isotope symbol of the nuclei given as the atomic number
-                    followed by the atomic symbol, for example, `1H`, `13C`, and
-                    `29Si`. This nucleus must correspond to the recorded frequency
-                    resonances.
-            magnetic_flux_density: The magnetic flux density of the external static
-                    magnetic field. The default value is 9.4 T.
+    Args:
+        anisotropic_dimension: A Dimension object, or an equivalent dictionary
+                object. This dimension must represent the pure anisotropic
+                dimension.
+        inverse_dimension: A list of two Dimension objects, or equivalent
+                dictionary objects representing the `x`-`y` coordinate grid.
+        channel: The isotope symbol of the nuclei given as the atomic number
+                followed by the atomic symbol, for example, `1H`, `13C`, and
+                `29Si`. This nucleus must correspond to the recorded frequency
+                resonances.
+        magnetic_flux_density: The magnetic flux density of the external static
+                magnetic field. The default value is 9.4 T.
 
-        **Assumptions:**
-        The simulated line-shapes correspond to an infinite speed spectrum spinning at
-        :math:`90^\circ`.
+    **Assumptions:**
+    The simulated line-shapes correspond to an infinite speed spectrum spinning at
+    :math:`90^\circ`.
     """
 
     def __init__(
@@ -211,29 +211,29 @@ class MAF(NuclearShieldingLineshape):
         )
 
 
-class SpinningSidebands(NuclearShieldingLineshape):
+class SpinningSidebands(ShieldingPALineshape):
     r"""
-        A specialized class for simulating the pure anisotropic spinning sideband
-        amplitudes of the nuclear shielding resonances resulting from a 2D sideband
-        separation spectra.
+    A specialized class for simulating the pure anisotropic spinning sideband
+    amplitudes of the nuclear shielding resonances resulting from a 2D sideband
+    separation spectra.
 
-        Args:
-            anisotropic_dimension: A Dimension object, or an equivalent dictionary
-                    object. This dimension must represent the pure anisotropic
-                    dimension.
-            inverse_dimension: A list of two Dimension objects, or equivalent
-                    dictionary objects representing the `x`-`y` coordinate grid.
-            channel: The isotope symbol of the nuclei given as the atomic number
-                    followed by the atomic symbol, for example, `1H`, `13C`, and
-                    `29Si`. This nucleus must correspond to the recorded frequency
-                    resonances.
-            magnetic_flux_density: The magnetic flux density of the external static
-                    magnetic field. The default value is 9.4 T.
+    Args:
+        anisotropic_dimension: A Dimension object, or an equivalent dictionary
+                object. This dimension must represent the pure anisotropic
+                dimension.
+        inverse_dimension: A list of two Dimension objects, or equivalent
+                dictionary objects representing the `x`-`y` coordinate grid.
+        channel: The isotope symbol of the nuclei given as the atomic number
+                followed by the atomic symbol, for example, `1H`, `13C`, and
+                `29Si`. This nucleus must correspond to the recorded frequency
+                resonances.
+        magnetic_flux_density: The magnetic flux density of the external static
+                magnetic field. The default value is 9.4 T.
 
-        **Assumption:**
-        The simulated line-shapes correspond to a finite speed spectrum spinning at the
-        magic angle, :math:`54.735^\circ`, where the spin rate is the increment along
-        the anisotropic dimension.
+    **Assumption:**
+    The simulated line-shapes correspond to a finite speed spectrum spinning at the
+    magic angle, :math:`54.735^\circ`, where the spin rate is the increment along
+    the anisotropic dimension.
     """
 
     def __init__(

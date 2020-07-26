@@ -21,7 +21,7 @@ import numpy as np
 from matplotlib import cm
 from pylab import rcParams
 
-from mrinversion.kernel import NuclearShieldingLineshape
+from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
 from mrinversion.linear_model import SmoothLassoCV
 from mrinversion.linear_model import TSVDCompression
@@ -141,9 +141,10 @@ inverse_dimensions = [
 # '''''''''''''''''''''
 #
 # For MAF datasets, the line-shape kernel corresponds to the pure nuclear shielding
-# anisotropy line-shapes. Use the :class:`~mrinversion.kernel.NuclearShieldingLineshape`
-# class to generate a shielding line-shape kernel.
-lineshape = NuclearShieldingLineshape(
+# anisotropy line-shapes. Use the
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class to generate a
+# shielding line-shape kernel.
+lineshape = ShieldingPALineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimensions,
     channel="29Si",
@@ -155,11 +156,11 @@ lineshape = NuclearShieldingLineshape(
 
 # %%
 # Here, ``lineshape`` is an instance of the
-# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The required arguments
-# of this class are the `anisotropic_dimension`, `inverse_dimension`, and `channel`.
-# We have already defined the first two arguments in the previous sub-section. The
-# value of the `channel` argument is the nucleus observed in the MAF experiment. In
-# this example, this value is '29Si'.
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class. The required
+# arguments of this class are the `anisotropic_dimension`, `inverse_dimension`, and
+# `channel`. We have already defined the first two arguments in the previous
+# sub-section. The value of the `channel` argument is the nucleus observed in the MAF
+# experiment. In this example, this value is '29Si'.
 # The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAF
 # spectrum was acquired. Note for the MAF measurements the rotor angle is usually
@@ -169,9 +170,9 @@ lineshape = NuclearShieldingLineshape(
 # MAF dataset, the value of this argument is generally low. Here, we calculate four
 # spinning sidebands per line-shape within in the kernel.
 #
-# Once the NuclearShieldingLineshape instance is created, use the
-# :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the instance
-# to generate the MAF line-shape kernel.
+# Once the ShieldingPALineshape instance is created, use the
+# :meth:`~mrinversion.kernel.nmr.ShieldingPALineshape.kernel` method of the
+# instance to generate the MAF line-shape kernel.
 K = lineshape.kernel(supersampling=1)
 print(K.shape)
 

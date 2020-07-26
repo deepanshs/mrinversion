@@ -18,7 +18,7 @@ import numpy as np
 from matplotlib import cm
 from pylab import rcParams
 
-from mrinversion.kernel import NuclearShieldingLineshape
+from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
@@ -118,9 +118,10 @@ inverse_dimensions = [
 # '''''''''''''''''''''
 #
 # For MAF/PASS datasets, the kernel corresponds to the pure nuclear shielding anisotropy
-# sideband spectra. Use the :class:`~mrinversion.kernel.NuclearShieldingLineshape` class
-# to generate a shielding spinning sidebands kernel.
-sidebands = NuclearShieldingLineshape(
+# sideband spectra. Use the
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class to generate a
+# shielding spinning sidebands kernel.
+sidebands = ShieldingPALineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimensions,
     channel="29Si",
@@ -132,11 +133,11 @@ sidebands = NuclearShieldingLineshape(
 
 # %%
 # Here, ``sidebands`` is an instance of the
-# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The required arguments
-# of this class are the `anisotropic_dimension`, `inverse_dimension`, and `channel`.
-# We have already defined the first two arguments in the previous sub-section. The
-# value of the `channel` argument is the nucleus observed in the MAT/PASS experiment.
-# In this example, this value is '29Si'.
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class. The required
+# arguments of this class are the `anisotropic_dimension`, `inverse_dimension`, and
+# `channel`. We have already defined the first two arguments in the previous
+# sub-section. The value of the `channel` argument is the nucleus observed in the
+# MAT/PASS experiment. In this example, this value is '29Si'.
 # The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAT/PASS
 # spectrum was acquired, which in this case corresponds to acquisition at
@@ -158,8 +159,8 @@ sidebands = NuclearShieldingLineshape(
 # usually the number of points along the sideband dimension.
 # In this example, this value is 32.
 #
-# Once the NuclearShieldingLineshape instance is created, use the kernel() method to
-# generate the spinning sideband lineshape kernel.
+# Once the ShieldingPALineshape instance is created, use the kernel()
+# method to generate the spinning sideband lineshape kernel.
 K = sidebands.kernel(supersampling=1)
 print(K.shape)
 

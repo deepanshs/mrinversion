@@ -8,9 +8,9 @@ Pure anisotropic Nuclear Shielding Kernel
 Generalized Class
 -----------------
 
-.. currentmodule:: mrinversion.kernel
+.. currentmodule:: mrinversion.kernel.nmr
 
-.. autoclass:: NuclearShieldingLineshape
+.. autoclass:: ShieldingPALineshape
    :show-inheritance:
 
    .. automethod:: kernel

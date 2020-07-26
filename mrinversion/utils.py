@@ -1,14 +1,84 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 from itertools import combinations
 from itertools import product
 
+import csdmpy as cp
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D  # lgtm [py/unused-import]
 
 
+def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
+
+    [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
+    data = csdm_object.dependent_variables[0].components[0]
+    iso = csdm_object.dimensions[2].coordinates.value
+
+    reg_x, reg_y = [csdm_object.dimensions[i].coordinates.value for i in range(2)]
+    dx = reg_x[1] - reg_x[0]
+    dy = reg_y[1] - reg_y[0]
+    sol = np.zeros((data.shape[0], zeta.count, eta.count))
+
+    bins = [zeta.count, eta.count]
+    dzeta = zeta.increment.value / 2
+    deta = eta.increment.value / 2
+    range_ = [
+        [zeta.coordinates[0].value - dzeta, zeta.coordinates[-1].value + dzeta],
+        [eta.coordinates[0] - deta, eta.coordinates[-1] + deta],
+    ]
+
+    avg_range_x = (np.arange(n) - (n - 1) / 2) * dx / n
+    avg_range_y = (np.arange(n) - (n - 1) / 2) * dy / n
+    for x_item in avg_range_x:
+        for y_item in avg_range_y:
+            x__ = np.abs(reg_x + x_item)
+            y__ = np.abs(reg_y + y_item)
+            x_, y_ = np.meshgrid(x__, y__)
+            x_ = x_.ravel()
+            y_ = y_.ravel()
+
+            zeta_grid = np.sqrt(x_ ** 2 + y_ ** 2)
+            eta_grid = np.ones(zeta_grid.shape)
+
+            index = np.where(x_ <= y_)
+            eta_grid[index] = (4 / np.pi) * np.arctan(x_[index] / y_[index])
+
+            index = np.where(x_ > y_)
+            zeta_grid[index] *= -1
+            eta_grid[index] = (4 / np.pi) * np.arctan(y_[index] / x_[index])
+
+            index = np.where(x_ == y_)
+            np.append(zeta, -zeta_grid[index])
+            np.append(eta, np.ones(index[0].size))
+            for i in range(iso.size):
+                weight = deepcopy(data[i]).ravel()
+                weight[index] /= 2
+                np.append(weight, weight[index])
+                sol_, _, _ = np.histogram2d(
+                    zeta_grid, eta_grid, weights=weight, bins=bins, range=range_,
+                )
+                sol[i] += sol_
+
+    sol /= n * n
+
+    csdm_new = cp.as_csdm(sol)
+    csdm_new.dimensions[0] = eta
+    csdm_new.dimensions[1] = zeta
+    csdm_new.dimensions[2] = csdm_object.dimensions[2]
+    return csdm_new
+
+
 def get_polar_grids(ax, ticks=None, offset=0):
+    """Generate a piece-wise polar grid of Haeberlen parameters, zeta and eta.
+
+    Args:
+        ax: Matplotlib Axes.
+        ticks: Tick coordinates where radial grids are drawn. The value can be a list
+            or a numpy array. The default value is None.
+        offset: The grid is drawn at an offset away from the origin.
+    """
     limy = ax.get_ylim()
     limx = ax.get_xlim()
     if ticks is None:
@@ -20,8 +90,8 @@ def get_polar_grids(ax, ticks=None, offset=0):
         x = np.asarray(ticks)
 
     lw = 0.3
-    t1 = plt.Polygon([[0, 0], [0, x[-1]], [x[-1], x[-1]]], color="r", alpha=0.05)
-    t2 = plt.Polygon([[0, 0], [x[-1], 0], [x[-1], x[-1]]], color="b", alpha=0.05)
+    t1 = plt.Polygon([[0, 0], [0, x[-1]], [x[-1], x[-1]]], color="b", alpha=0.05)
+    t2 = plt.Polygon([[0, 0], [x[-1], 0], [x[-1], x[-1]]], color="r", alpha=0.05)
 
     ax.add_artist(t1)
     ax.add_artist(t2)

@@ -3,7 +3,7 @@ import csdmpy as cp
 import csdmpy.statistics as stats
 import numpy as np
 
-from mrinversion.kernel import NuclearShieldingLineshape
+from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
 
@@ -23,7 +23,7 @@ inverse_dimensions = [
     cp.LinearDimension(count=25, increment="400 Hz", label="y"),  # the `y`-dimension.
 ]
 
-lineshape = NuclearShieldingLineshape(
+lineshape = ShieldingPALineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimensions,
     channel="29Si",

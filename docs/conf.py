@@ -100,7 +100,7 @@ sphinx_gallery_conf = {
     "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
     "within_subsection_order": FileNameSortKey,
     "subsection_order": ExplicitOrder(
-        ["../examples/synthetic", "../examples/MAF", "../examples/sideband"]
+        ["../examples/synthetic", "../examples/sideband", "../examples/MAF"]
     ),
     "reference_url": {
         # The module you locally document uses None
@@ -115,7 +115,7 @@ intersphinx_mapping = {
     "astropy": ("https://docs.astropy.org/en/stable/", None),
 }
 
-copybutton_prompt_text = ">>> |\\\\$ |\\[\\d*\\]: |\\.\\.\\.: |[.][.][.] "
+copybutton_prompt_text = ">>> |\\$ |\\[\\d*\\]: |\\.\\.\\.: |[.][.][.] "
 copybutton_prompt_is_regexp = True
 
 # ---------------------------------------------------------------------------- #

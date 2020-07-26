@@ -4,15 +4,12 @@ Getting started with ``mrinversion``
 ====================================
 
 We have put together a set of guidelines for using the `mrinversion` package.
-We encourage our users to follow these guidelines to promote consistency.
+We encourage our users to follow these guidelines for consistency.
 
-Considering the NMR audience, what better example to start with than a spinning
-sideband spectrum. For illustrative purposes, we use a synthetic one-dimensional
-purely anisotropic spinning sideband spectrum. You may consider this as a
+Let's examine the inversion of a purely anisotropic MAS sideband spectrum into a
+2D distribution of nuclear shielding anisotropy parameters. For illustrative purposes,
+we use a synthetic one-dimensional purely anisotropic spectrum. Think of this as a
 cross-section of your 2D MAT/PASS dataset.
-
-Okay, let's start with the prediction of the nuclear shielding tensor parameters
-from this spectrum.
 
 **Import relevant modules**
 
@@ -23,7 +20,10 @@ from this spectrum.
 
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
+    >>> from matplotlib import rcParams
     >>> from mrinversion.utils import get_polar_grids
+    ...
+    >>> rcParams['pdf.fonttype'] = 42 # for exporting figures as illustrator editable pdf.
     ...
     >>> # a function to plot the 2D tensor parameter distribution
     >>> def plot2D(ax, csdm_object, title=''):
@@ -51,9 +51,10 @@ follows,
 
 .. note::
 
-    The CSDM file-format is supported by most NMR software, such as SIMPSON [#f5]_,
-    DMFIT [#f6]_, RMN [#f7]_.
-    A python package supporting CSDM file-format, csdmpy, is also available.
+    The CSDM file-format is a new open-source universal file format for multi-dimensional
+    datasets. It is supported by NMR programs SIMPSON [#f2]_, DMFIT [#f3]_, and RMN [#f4]_.
+    A python package supporting CSDM file-format,
+    `csdmpy <https://csdmpy.readthedocs.io/en/latest/>`_, is also available.
 
 .. plot::
     :format: doctest
@@ -66,7 +67,7 @@ follows,
     >>> data_object = cp.load(filename) # load the CSDM file with the csdmpy module
 
 Here, the variable `data_object` is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
-object. In most cases, the NMR spectroscopic dimension is a frequency dimension. The NMR
+object. The NMR spectroscopic dimension is a frequency dimension. NMR
 spectroscopists, however, prefer to view the spectrum on a dimensionless scale. If the
 dataset dimension within the CSDM object is in frequency, you may convert it into `ppm`
 as follows,
@@ -79,6 +80,8 @@ as follows,
     >>> # convert the dimension coordinates from `Hz` to `ppm`.
     >>> data_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
 
+In the above code, we convert the dimension at index 0 from `Hz` to `ppm`. For multi-dimensional
+datasets, use the appropriate indexing to convert individual dimensions to `ppm`.
 
 For comparison, let's also include the true probability distribution from which the
 synthetic spinning sideband dataset is derived.
@@ -104,43 +107,29 @@ true probability distribution.
     >>> ax[0].plot(data_object) # doctest: +SKIP
     >>> ax[0].set_xlabel('frequency / ppm') # doctest: +SKIP
     >>> ax[0].invert_xaxis() # doctest: +SKIP
+    >>> ax[0].set_title('Pure anisotropic MAS spectrum') # doctest: +SKIP
     ...
     >>> plot2D(ax[1], true_data_object, title='True distribution') # doctest: +SKIP
     >>> plt.tight_layout() # doctest: +SKIP
+    >>> plt.savefig('filename.pdf') # to save figure as editable pdf # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
-
-.. _fig1_getting_started:
-.. figure:: _static/null.*
-    :align: left
-
-    The figure on the left is the synthetic spinning sideband dataset for the nuclear
-    shielding tensor distribution shown on the right. In the figure on the right, the
-    shielding anisotropy parameter, :math:`\zeta_\sigma`, is the radial dimension, and
-    the asymmetry parameter, :math:`\eta`, is the angular dimension, defined in Eq.
-    :eq:`zeta_eta_def`. The region in red and blue corresponds to the positive and
-    negative values of :math:`\zeta_\sigma`. The radial grid lines are drawn at every
-    20 ppm increments of :math:`\zeta_\sigma`, and the angular grid lines are drawn
-    at every 0.2 increments of :math:`\eta_\sigma`. The `x` and `y`-axis are the
-    :math:`\eta_\sigma = 0`, and the diagonal is :math:`\eta_\sigma = 1`.
 
 
 Dimension Setup
 ---------------
 
-For inversion, we need to define two sets of dimensions, the dimension corresponding
-to the anisotropic frequency spectrum, and the `x`-`y` dimensions. The `x` and `y`
-dimensions represents the two parameters of the second-rank traceless tensor.
-In ``mrinversion``, these dimensions are initialized with the
-`Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_ object
-from the `csdmpy <https://csdmpy.readthedocs.io/en/latest/>`_ package.
+For the inversion, we need to define (1) the coordinates associated with the pure
+anisotropic dimension, and (2) the two-dimensional x-y coordinates associated with the
+anisotropic tensor parameters, i.e., the inversion solution grid.
 
-
-**Anisotropic dimension:**
-The dimension of the dataset that holds the pure anisotropic frequency contributions.
-Because this example dataset is imported as a CSDM object, the anisotropic dimension
-is already defined as a
-`CSDM Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_
-object. For illustration, however, we re-define this dimension as follows,
+In ``mrinversion``, the anisotropic spectrum dimension is initialized with a
+`Dimension <https://csdmpy.readthedocs.io/en/latest/api/Dimensions.html>`_ object from
+the `csdmpy <https://csdmpy.readthedocs.io/en/latest/>`_ package.  This object holds the
+frequency coordinates of the pure anisotropic spectrum.  Because the example NMR dataset
+is imported as a CSDM object, the anisotropic spectrum dimension is already available as
+a CSDM Dimension object in the CSDM object and can be copied from there.
+Alternatively, we can create and initialize a anisotropic spectrum dimension using the
+csdmpy library as shown below:
 
 .. plot::
     :format: doctest
@@ -157,9 +146,8 @@ object. For illustration, however, we re-define this dimension as follows,
 Here, the anisotropic dimension is sampled at 625 Hz for 32 points with an offset of
 -10 kHz.
 
-**x-y dimensions**
-The two inverse dimensions corresponding to the `x` and `y`-axis of the `x`-`y` grid.
-Similarly, define the `x` and `y` dimensions as
+Similarly, we can create the CSDM dimensions needed for the `x`-`y` inversion grid as
+shown below:
 
 .. plot::
     :format: doctest
@@ -178,7 +166,7 @@ index 0 and 1 are the `x` and `y` dimensions, respectively.
 Generating the kernel
 ---------------------
 
-Import the :class:`~mrinversion.kernel.NuclearShieldingLineshape` class and
+Import the :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class and
 generate the kernel as follows,
 
 .. plot::
@@ -186,8 +174,8 @@ generate the kernel as follows,
     :context: close-figs
     :include-source:
 
-    >>> from mrinversion.kernel import NuclearShieldingLineshape
-    >>> lineshapes = NuclearShieldingLineshape(
+    >>> from mrinversion.kernel.nmr import ShieldingPALineshape
+    >>> lineshapes = ShieldingPALineshape(
     ...     anisotropic_dimension=anisotropic_dimension,
     ...     inverse_dimension=inverse_dimension,
     ...     channel='29Si',
@@ -198,29 +186,30 @@ generate the kernel as follows,
     ... )
 
 In the above code, the variable ``lineshapes`` is an instance of the
-:class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The three required
+:class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class. The three required
 arguments of this class are the `anisotropic_dimension`, `inverse_dimension`, and
-`channel`. We have already defined the first two arguments in the previous section. The
-value of the channel attribute is the observed nucleus.
+`channel`. We have already defined the first two arguments in the previous subsection.
+The value of the channel attribute is the observed nucleus.
 The remaining optional arguments are the metadata that describes the environment
 under which the spectrum is acquired. In this example, these arguments describe a
 :math:`^{29}\text{Si}` pure anisotropic spinning-sideband spectrum acquired at 9.4 T
 magnetic flux density and spinning at the magic angle (:math:`54.735^\circ`) at 625 Hz.
 The value of the `rotor_frequency` argument is the effective anisotropic modulation
-frequency. For measurements like PASS [#f2]_, the anisotropic modulation frequency is
-the physical rotor frequency. For other measurements like the extended chemical shift
-modulation sequences (XCS) [#f3]_, or its variants, the effective anisotropic modulation
-frequency is lower than the physical rotor frequency and should be set appropriately.
+frequency. For measurements like PASS [#f5]_, the anisotropic modulation frequency is
+the physical rotor frequency. For measurements like the extended chemical shift
+modulation sequences (XCS) [#f6]_, or its variants, where the effective anisotropic
+modulation frequency is lower than the physical rotor frequency, then it should be set
+accordingly.
 
 The argument `number_of_sidebands` is the maximum number of sidebands that will be
-computed per line-shape within the kernel. For most two-dimensional isotropic v.s. pure
-anisotropic spinning-sideband correlation measurements, the sampling along the sideband
+computed per line-shape within the kernel. For most two-dimensional isotropic vs. pure
+anisotropic spinning-sideband correlation spectra, the sampling along the sideband
 dimension is the rotor or the effective anisotropic modulation frequency. Therefore, the
-value of the `number_of_sidebands` argument is usually the number of points along the
-sideband dimension. In this example, this value is 32.
+`number_of_sidebands` argument is usually the number of points along the sideband
+dimension. In this example, this value is 32.
 
-Once the instance is created, used the
-:meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the
+Once the `ShieldingPALineshape` instance is created, use the
+:meth:`~mrinversion.kernel.nmr.ShieldingPALineshape.kernel` method of the
 instance to generate the spinning sideband kernel, as follows,
 
 .. plot::
@@ -233,7 +222,7 @@ instance to generate the spinning sideband kernel, as follows,
     (32, 625)
 
 Here, ``K`` is the :math:`32\times 625` kernel, where the 32 is the number of samples
-(sideband amplitudes), and 625 is the number of features (line-shapes) on the
+(sideband amplitudes), and 625 is the number of features (subspectra) on the
 :math:`25 \times 25` `x`-`y` grid. The argument `supersampling` is the supersampling
 factor. In a supersampling scheme, each grid cell is averaged over a :math:`n\times n`
 sub-grid, where :math:`n` is the supersampling factor. A supersampling factor of 1 is
@@ -268,7 +257,7 @@ import the :class:`~mrinversion.linear_model.TSVDCompression` class and follow,
 Here, the variable ``new_system`` is an instance of the
 :class:`~mrinversion.linear_model.TSVDCompression` class. If no truncation index is
 provided as the argument, when initializing the ``TSVDCompression`` class, an optimum
-truncation index is chosen using the maximum entropy method, which is the default
+truncation index is chosen using the maximum entropy method [#f7]_, which is the default
 behavior. The attributes :attr:`~mrinversion.linear_model.TSVDCompression.compressed_K`
 and :attr:`~mrinversion.linear_model.TSVDCompression.compressed_s` holds the
 compressed kernel and signal, respectively. The shape of the original signal `v.s.` the
@@ -286,7 +275,7 @@ compressed signal is
 Setting up the inverse problem
 ------------------------------
 
-When setting up the inversion, we solved the smooth LASSO [#f4]_ problem. Read the
+When setting up the inversion, we solved the smooth LASSO [#f8]_ problem. Read the
 :ref:`smooth_lasso_intro` section for further details.
 
 Import the :class:`~mrinversion.linear_model.SmoothLasso` class and follow,
@@ -364,7 +353,13 @@ follows,
     :context: close-figs
     :include-source:
 
-    >>> residuals = s_lasso.residuals(K, data_object)
+    >>> residuals = s_lasso.residuals(K=K, s=data_object)
+    >>> # the plot of the residuals
+    >>> plt.figure(figsize=(5, 3.5)) # doctest: +SKIP
+    >>> ax = plt.gca(projection='csdm') # doctest: +SKIP
+    >>> ax.plot(residuals, color='black') # doctest: +SKIP
+    >>> plt.tight_layout() # doctest: +SKIP
+    >>> plt.show() # doctest: +SKIP
 
 The argument of the `residuals` method is the kernel and the signal data. We provide the
 original kernel, K, because we desire the residuals corresponding to the original data
@@ -377,8 +372,8 @@ Statistical learning of tensor parameters
 The solution from a linear model trained with the combined l1 and l2 priors, such as the
 smooth LASSO estimator used here, depends on the choice of the hyperparameters.
 The solution shown in the above figure is when :math:`\alpha=0.01` and
-:math:`\lambda=1\times 10^{-4}`. Although it's a solution, it is unknown if this is the
-best solution. For this, we employ the statistical learning-based model, such as the
+:math:`\lambda=1\times 10^{-4}`. Although it's a solution, it is unlikely that this is
+the best solution. For this, we employ the statistical learning-based model, such as the
 `n`-fold cross-validation.
 
 The :class:`~mrinversion.linear_model.SmoothLassoCV` class is designed to solve the
@@ -509,26 +504,30 @@ The plot of the selected tensor parameter distribution is shown below.
 
 .. [#f1] Srivastava, D. J., Vosegaard, T., Massiot, D., Grandinetti, P. J.,
             Core Scientific Dataset Model: A lightweight and portable model and
-            file format for multi-dimensional scientific data, PLOS ONE,
+            file format for multi-dimensional scientific data. PLOS ONE,
             **15**, 1-38, (2020).
             `DOI:10.1371/journal.pone.0225953 <https://doi.org/10.1371/journal.pone.0225953>`_
 
-.. [#f2] Dixon, W. T., Spinning‐sideband‐free and spinning‐sideband‐only NMR
-            spectra in spinning samples. J. Chem. Phys, **77**, 1800, (1982).
+.. [#f2] Bak M., Rasmussen J. T., Nielsen N.C., SIMPSON: A General Simulation Program for
+            Solid-State NMR Spectroscopy. J Magn Reson. **147**, 296–330, (2000).
+            `DOI:10.1006/jmre.2000.2179 <https://doi.org/10.1006/jmre.2000.2179>`_
+
+.. [#f3] Massiot D., Fayon F., Capron M., King I., Le Calvé S., Alonso B., et al. Modelling
+            one- and two-dimensional solid-state NMR spectra. Magn Reson Chem. **40**, 70–76,
+            (2002) `DOI:10.1002/mrc.984 <https://doi.org/10.1002/mrc.984>`_
+
+.. [#f4] PhySy Ltd. RMN 2.0; 2019. Available from: https://www.physyapps.com/rmn.
+
+.. [#f5] Dixon, W. T., Spinning sideband free and spinning sideband only NMR spectra in spinning
+            samples. J. Chem. Phys, **77**, 1800, (1982).
             `DOI:10.1063/1.444076 <https://doi.org/10.1063/1.444076>`_
 
-.. [#f3] Gullion, T., Extended chemical-shift modulation, J. Mag. Res., **85**, 3, (1989).
-            `10.1016/0022-2364(89)90253-9 <https://doi.org/10.1016/0022-2364(89)90253-9>`_
+.. [#f6] Gullion, T., Extended chemical shift modulation. J. Mag. Res., **85**, 3, (1989).
+            `DOI:10.1016/0022-2364(89)90253-9 <https://doi.org/10.1016/0022-2364(89)90253-9>`_
 
-.. [#f4] Hebiri M, Sara A. Van De Geer, The Smooth-Lasso and other l1+l2-penalized
-            methods, arXiv (2010). `arXiv:1003.4885v2 <https://arxiv.org/abs/1003.4885v2>`_
+.. [#f7] Varshavsky R., Gottlieb A., Linial M., Horn D., Novel unsupervised feature filtering
+            of biological data. Bioinformatics, **22**, e507–e513, (2006).
+            `DOI:10.1093/bioinformatics/btl214 <https://doi.org/10.1093/bioinformatics/btl214>`_.
 
-.. [#f5] Bak M., Rasmussen J. T., Nielsen N.C., SIMPSON: A General Simulation Program for
-            Solid-State NMR Spectroscopy. J Magn Reson. **147**, 296–330, (2000).
-            `10.1006/jmre.2000.2179 <https://doi.org/10.1006/jmre.2000.2179>`_
-
-.. [#f6] Massiot D., Fayon F., Capron M., King I., Le Calvé S., Alonso B., et al. Modelling
-            one- and two-dimensional solid-state NMR spectra. Magn Reson Chem. **40**, 70–76,
-            (2002) `10.1002/mrc.984 <https://doi.org/10.1002/mrc.984>`_
-
-.. [#f7] PhySy Ltd. RMN 2.0; 2019. Available from: https://www.physyapps.com/rmn.
+.. [#f8] Hebiri M, Sara A. Van De Geer, The Smooth-Lasso and other l1+l2-penalized
+            methods, arXiv, (2010). `arXiv:1003.4885v2 <https://arxiv.org/abs/1003.4885v2>`_
