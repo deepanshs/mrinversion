@@ -55,7 +55,7 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset. Here, we import the dataset as the CSDM data-object.
 
 # The 2D MAF dataset in csdm format
-filename = "https://osu.box.com/shared/static/40dczkn6qwqyg0jtl8sr1jn89vmlwm0i.csdf"
+filename = "https://zenodo.org/record/3964531/files/Cs2O-4_72SiO2-MAF.csdf"
 data_object = cp.load(filename)
 
 # For inversion, we only interest ourselves with the real part of the complex dataset.
@@ -211,7 +211,6 @@ print(f"truncation_index = {new_system.truncation_index}")
 
 # # the optimum hyper-parameters, alpha and lambda, from the cross-validation.
 # print(s_lasso.hyperparameters)
-# # {'alpha': 5.62341325190349e-07, 'lambda': 3.162277660168379e-06}
 
 # # the solution
 # f_sol = s_lasso.f
@@ -226,7 +225,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 
 # Setup the smooth lasso class
 s_lasso = SmoothLasso(
-    alpha=5.62e-7, lambda1=3.16e-6, inverse_dimension=inverse_dimensions
+    alpha=8.34e-7, lambda1=6.16e-7, inverse_dimension=inverse_dimensions
 )
 # run the fit method on the compressed kernel and compressed data.
 s_lasso.fit(K=compressed_K, s=compressed_s)
