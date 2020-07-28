@@ -54,6 +54,10 @@ Welcome to Mrinversion documentation!
             :target: https://github.com/DeepanshS/mrinversion/issues
             :alt: GitHub issues
 
+      * - Citations
+        - .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3964644.svg
+            :target: https://doi.org/10.5281/zenodo.3964644
+
 .. - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?logo=github
 ..     :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
 ..     :alt: GitHub contributors
