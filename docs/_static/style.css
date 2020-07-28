@@ -15,7 +15,7 @@ h1 {
 }
 
 h2 {
-  font-size: 1.8em;
+  font-size: 1.6em;
   font-weight: 400;
   color: #70360f;
   padding-bottom: 1.2em;
@@ -25,20 +25,20 @@ h2 {
 }
 
 h3 {
-  font-size: 1.4em;
+  font-size: 1.45em;
   text-decoration: underline;
-  color: rgb(63, 63, 63);
+  color: #3f3f3f;
 }
 
 h4 {
   margin-top: 1.4em;
   font-size: 1.2em;
-  color: rgb(128, 74, 74);
+  color: #663d3d;
 }
 
 h5 {
   font-size: 1.1em;
-  color: rgb(53, 53, 53);
+  color: #353535;
 }
 
 h6 {
@@ -141,7 +141,12 @@ table caption:hover {
 .docutils.container {
   width: auto;
 }
-
+.highlighttable .code {
+  max-width: 100%;
+}
+.highlighttable .linenos {
+  width: auto;
+}
 .ui.segment[class*="bottom attached"] {
   width: 100%;
   padding: 2em;
@@ -217,7 +222,7 @@ table caption:hover {
 }
 
 .sidebar .logo img {
-  filter: invert(1) brightness(1.25);
+  filter: invert(1) brightness(1.75);
 }
 
 /* searchbar */
@@ -239,9 +244,30 @@ table caption:hover {
   padding-left: 24px;
   padding-right: 24px;
 }
-
+.sidebar.hidden-xs > h3 {
+  display: none;
+}
+.toctree-wrapper.compound > p.caption {
+  display: none;
+}
+.sidebar.hidden-xs > p.caption {
+  padding-left: 24px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  font-size: 1.1em;
+  font-weight: 500;
+  background-color: #5a5a5a;
+  color: #ffffff;
+  margin: 10px 0 0 0;
+}
 .sidebar.hidden-xs > ul {
   padding: 0;
+}
+.sidebar.hidden-xs > ul:first-child {
+  padding-top: 1em;
+  margin-top: 1em;
+}
+.sidebar.hidden-xs > ul:last-child {
   padding-bottom: 1em;
   margin-bottom: 1em;
 }

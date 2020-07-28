@@ -51,7 +51,7 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset. Here, we import the dataset as the CSDM data-object.
 
 # The 2D MAF dataset in csdm format
-filename = "https://osu.box.com/shared/static/sdyke7tu0sgjkv2m5uxwsxqir9z3bbt4.csdf"
+filename = "https://zenodo.org/record/3961836/files/CaSiO3-processed.csdf"
 data_object = cp.load(filename)
 
 # For inversion, we only interest ourselves with the real part of the complex dataset.

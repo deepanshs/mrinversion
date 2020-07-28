@@ -115,6 +115,12 @@ true probability distribution.
     >>> plt.show() # doctest: +SKIP
 
 
+.. _fig1_getting_started:
+.. figure:: _static/null.*
+
+    The figure on the left is the pure anisotropic MAS sideband amplidute dataset corresponding to the
+    nuclear shielding tensor distribution shown on the right.
+
 Dimension Setup
 ---------------
 
@@ -337,7 +343,6 @@ The plot of the solution is
 
 .. _fig2_getting_started:
 .. figure:: _static/null.*
-    :align: left
 
     The figure on the left is the guess solution of the nuclear shielding tensor distribution
     derived from the inversion of the spinning sideband dataset. The figure on the right
@@ -360,6 +365,12 @@ follows,
     >>> ax.plot(residuals, color='black') # doctest: +SKIP
     >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
+
+.. _fign_getting_started:
+.. figure:: _static/null.*
+
+    The residuals between the 1D MAS sideband spectrum and the predicted spectrum from the
+    guess shielding tensor parameter distribution.
 
 The argument of the `residuals` method is the kernel and the signal data. We provide the
 original kernel, K, because we desire the residuals corresponding to the original data
@@ -488,7 +499,6 @@ The plot of the selected tensor parameter distribution is shown below.
 
 .. _fig4_getting_started:
 .. figure:: _static/null.*
-    :align: left
 
     The figure on the left is the optimum solution selected by the 10-folds
     cross-validation method. The figure on the right is the true model of the

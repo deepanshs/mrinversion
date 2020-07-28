@@ -50,13 +50,13 @@ Welcome to Mrinversion documentation!
             :alt: Total alerts
 
       * - GitHub
-        - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?logo=github
-            :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
-            :alt: GitHub contributors
-
-          .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
+        - .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
             :target: https://github.com/DeepanshS/mrinversion/issues
             :alt: GitHub issues
+
+.. - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?logo=github
+..     :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
+..     :alt: GitHub contributors
 
 ----
 
@@ -107,23 +107,40 @@ tensor parameters**. At present, we support the inversion of
 
 ----
 
-.. only:: html
 
-	Table of Contents
-	-----------------
+
+Getting Started
+---------------
 
 .. toctree::
     :maxdepth: 2
+    :caption: Getting Started
 
     installation
     requirement
     introduction
     before_getting_started
     getting_started
-    auto_examples/index
     referenceAPI
 
+Examples
+--------
 
+.. toctree::
+    :maxdepth: 1
+    :caption: Examples
+
+    auto_examples/index
+
+Project details
+---------------
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Project details
+
+    credits/license
+    credits/acknowledgment
 
 ----
 
