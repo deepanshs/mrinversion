@@ -15,25 +15,40 @@ Before getting started
 Prepping the 2D dataset for inversion
 -------------------------------------
 
-The following are some requirements and recommendations for preparing the dataset for
-inversion.
+The following is a list of some requirements and recommendations to help prepare
+the 2D dataset for inversion.
 
-
-Spinning Sideband correlation datasets
-''''''''''''''''''''''''''''''''''''''
+Common recommendations/requirements
+'''''''''''''''''''''''''''''''''''
 
 .. list-table::
   :widths: 2 98
 
   * - |uncheck|
-    - **Dataset shear:**
-      The inversion method assumes that the spinning sideband dataset is sheared, such
-      that one of the dimensions is a pure anisotropic spinning sidebands dimension.
+    - **Dataset shear**
+
+      The inversion method assumes that the 2D dataset is sheared, such that one of the
+      dimensions corresponds to a pure anisotropic spectrum. The anisotropic
+      cross-sections are centered at 0 Hz.
 
       **Required**: Apply a shear transformation before proceeding.
 
   * - |uncheck|
-    - **Data-repeat operation:**
+    - **Calculate the noise standard deviation**
+
+      Use the noise region of your spectrum to calculate the standard deviation of the
+      noise. You will require this value when implementing cross-validation.
+
+
+Spinning Sideband correlation dataset specific recommendations
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. list-table::
+  :widths: 2 98
+
+  * - |uncheck|
+    - **Data-repeat operation**
+
       A data-repeat operation on the time-domain signal corresponding to the sideband
       dimension makes the spinning sidebands look like a stick spectrum after a
       Fourier transformation, a visual, which most NMR spectroscopists are familiar
@@ -45,31 +60,15 @@ Spinning Sideband correlation datasets
       **Strongly recommended**: Avoid data-repeat operation.
 
 
-Magic angle flipping datasets
-'''''''''''''''''''''''''''''
+Magic angle flipping dataset specific recommendations
+'''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 .. list-table::
   :widths: 2 98
 
   * - |uncheck|
-    - **Dataset shear:**
-      The inversion method assumes that the MAF dataset is sheared, such that one of
-      the dimensions is a purely anisotropic frequency dimension.
+    - **Isotropic shift correction along the anisotropic dimension**
 
-      **Required**: Apply a shear transformation before proceeding.
-
-  * - |uncheck|
-    - **Zero-fill operation:**
-      Zero filling the time domain dataset is purely cosmetic. It makes the spectrum
-      look visually appealing, but adds no information, that is, a zero-filled dataset
-      contains the same information as a non-zero filled dataset. In terms of
-      computation, however, a zero-filled spectrum will take longer to solve.
-
-      **Recommendation**: Try to keep the total number of points along the anisotropic
-      dimension in the range of 120 - 150 points.
-
-  * - |uncheck|
-    - **Isotropic shift correction along the anisotropic dimension:**
       Ordinarily, after shear, a MAF spectrum is a 2D isotropic `vs.` pure anisotropic
       frequency correlation spectrum. In certain conditions, this is not true. In a MAF
       experiment, the sample holder (rotor) physically swaps between two angles
@@ -82,5 +81,17 @@ Magic angle flipping datasets
       anisotropic dimension by adding an appropriate coordinates-offset.
 
   * - |uncheck|
-    - **Sinc wiggles artifacts:**
+    - **Zero-fill operation**
+
+      Zero filling the time domain dataset is purely cosmetic. It makes the spectrum
+      look visually appealing, but adds no information, that is, a zero-filled dataset
+      contains the same information as a non-zero filled dataset. In terms of
+      computation, however, a zero-filled spectrum will take longer to solve.
+
+      **Recommendation**: If zero-filled, try to keep the total number of points along
+      the anisotropic dimension in the range of 120 - 150 points.
+
+  * -
+    - **Sinc wiggles artifacts**
+
       Kernel correction for spectrum with sinc wiggle artifacts is coming soon.

@@ -52,8 +52,8 @@ follows,
 .. note::
 
     The CSDM file-format is a new open-source universal file format for multi-dimensional
-    datasets. It is supported by NMR programs SIMPSON [#f2]_, DMFIT [#f3]_, and RMN [#f4]_.
-    A python package supporting CSDM file-format,
+    datasets. It is supported by NMR programs such as SIMPSON [#f2]_, DMFIT [#f3]_, and
+    RMN [#f4]_. A python package supporting CSDM file-format,
     `csdmpy <https://csdmpy.readthedocs.io/en/latest/>`_, is also available.
 
 .. plot::
@@ -118,8 +118,8 @@ true probability distribution.
 .. _fig1_getting_started:
 .. figure:: _static/null.*
 
-    The figure on the left is the pure anisotropic MAS sideband amplidute dataset corresponding to the
-    nuclear shielding tensor distribution shown on the right.
+    The figure on the left is the pure anisotropic MAS sideband amplidute spectrum corresponding
+    to the nuclear shielding tensor distribution shown on the right.
 
 Dimension Setup
 ---------------
@@ -373,8 +373,8 @@ follows,
     guess shielding tensor parameter distribution.
 
 The argument of the `residuals` method is the kernel and the signal data. We provide the
-original kernel, K, because we desire the residuals corresponding to the original data
-and not the compressed data.
+original kernel, K, and signal, s, because we desire the residuals corresponding to the
+original data and not the compressed data.
 
 
 Statistical learning of tensor parameters
