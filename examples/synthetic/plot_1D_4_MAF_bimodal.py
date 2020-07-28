@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 Bimodal distribution
-=====================
+====================
 """
 # %%
 # The following example demonstrates the statistical learning based determination of
-# nuclear shielding tensor parameters from a one-dimensional cross-section of a
-# spinning sideband correlation spectrum. In this example, we use a synthetic
-# sideband amplitude spectrum from a bimodal tensor distribution.
+# the nuclear shielding tensor parameters from a one-dimensional cross-section of a
+# magic-angle flipping (MAF) spectrum. In this example, we use a synthetic MAF
+# lineshape from a bimodal tensor distribution.
 #
 # Before getting started
 # ----------------------
@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pylab import rcParams
 
-from mrinversion.kernel import NuclearShieldingLineshape
+from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import SmoothLassoCV
 from mrinversion.linear_model import TSVDCompression
@@ -53,22 +53,22 @@ def plot2D(ax, csdm_object, title=""):
 #
 # Load the dataset. Here, we import the dataset as a CSDM data-object.
 
-# the 1D spinning sideband cross-section data in csdm format
-filename = "https://osu.box.com/shared/static/wjbhb6sif76mxfgndetew8mnrq6pw4pj.csdf"
+# the 1D MAF cross-section data in csdm format
+filename = "https://osu.box.com/shared/static/6kcnou9iwqya30utlmzznnbv25iisxxj.csdf"
 data_object = cp.load(filename)
 
 # convert the data dimension from `Hz` to `ppm`.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
 
 # %%
-# The variable ``data_object`` holds the 1D dataset. For comparison, let's
+# The variable ``data_object`` holds the 1D MAF cross-section. For comparison, let's
 # also import the true tensor parameter distribution from which the synthetic 1D pure
-# anisotropic spinning sideband cross-section amplitudes is simulated.
+# anisotropic MAF cross-section line-shape is simulated.
 datafile = "https://osu.box.com/shared/static/xesah85nd2gtm9yefazmladi697khuwi.csdf"
 true_data_object = cp.load(datafile)
 
 # %%
-# The plot of the 1D sideband cross-section along with the 2D true tensor parameter
+# The plot of the 1D MAF cross-section along with the 2D true tensor parameter
 # distribution of the synthetic dataset is shown below.
 
 # the plot of the 1D MAF cross-section dataset.
@@ -89,7 +89,7 @@ plt.show()
 # '''''''''''''''
 #
 # **Anisotropic-dimension:** The dimension of the dataset that holds the pure
-# anisotropic spinning sidebands.
+# anisotropic frequency contributions, which in this case, is the only dimension.
 anisotropic_dimension = data_object.dimensions[0]
 
 # %%
@@ -104,18 +104,17 @@ inverse_dimension = [
 # Generating the kernel
 # '''''''''''''''''''''
 #
-# For sideband datasets, the line-shape kernel corresponds to the pure anisotropic
-# nuclear shielding spinning sideband spectra. Use the
-# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class to generate the sideband
-# kernel.
-lineshape = NuclearShieldingLineshape(
+# For MAF datasets, the line-shape kernel corresponds to the pure nuclear shielding
+# anisotropy line-shapes. Use the
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class to generate a
+# shielding line-shape kernel.
+lineshape = ShieldingPALineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimension,
     channel="29Si",
     magnetic_flux_density="9.4 T",
-    rotor_angle="54.735 deg",
-    rotor_frequency="625 Hz",
-    number_of_sidebands=32,
+    rotor_angle="90 deg",
+    rotor_frequency="14 kHz",
 )
 K = lineshape.kernel(supersampling=1)
 
@@ -198,7 +197,7 @@ plt.show()
 # hyperparameters.
 # The following code generates a range of :math:`\lambda` and :math:`\alpha` values
 # that are uniformly sampled on the log scale.
-lambdas = 10 ** (-5 - 1 * (np.arange(6) / 5))
+lambdas = 10 ** (-5.5 - 1 * (np.arange(6) / 5))
 alphas = 10 ** (-4 - 2 * (np.arange(6) / 5))
 
 # set up cross validation smooth lasso method

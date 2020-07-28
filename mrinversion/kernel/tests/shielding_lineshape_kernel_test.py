@@ -6,9 +6,9 @@ from mrsimulator import Site
 from mrsimulator import SpinSystem
 from mrsimulator.methods import BlochDecaySpectrum
 
-from mrinversion.kernel import MAF
-from mrinversion.kernel import NuclearShieldingLineshape
-from mrinversion.kernel import SpinningSidebands
+from mrinversion.kernel.nmr import MAF
+from mrinversion.kernel.nmr import ShieldingPALineshape
+from mrinversion.kernel.nmr import SpinningSidebands
 from mrinversion.linear_model import TSVDCompression
 
 anisotropic_dimension = [
@@ -63,7 +63,7 @@ def generate_shielding_kernel(zeta_, eta_, angle, freq, n_sidebands, to_ppm=True
 
 
 def test_zeta_eta_from_x_y():
-    ns_obj = NuclearShieldingLineshape(
+    ns_obj = ShieldingPALineshape(
         anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
         channel="29Si",
@@ -97,7 +97,7 @@ def test_zeta_eta_from_x_y():
 
 
 def test_MAF_lineshape_kernel():
-    ns_obj = NuclearShieldingLineshape(
+    ns_obj = ShieldingPALineshape(
         anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
         channel="29Si",
@@ -130,7 +130,7 @@ def test_MAF_lineshape_kernel():
 
 def test_spinning_sidebands_kernel():
     # 1
-    ns_obj = NuclearShieldingLineshape(
+    ns_obj = ShieldingPALineshape(
         anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension,
         channel="29Si",
@@ -146,7 +146,7 @@ def test_spinning_sidebands_kernel():
     assert np.allclose(K, sim_lineshape, rtol=1.0e-3, atol=1e-3)
 
     # 2
-    ns_obj = NuclearShieldingLineshape(
+    ns_obj = ShieldingPALineshape(
         anisotropic_dimension=anisotropic_dimension,
         inverse_dimension=inverse_dimension_ppm,
         channel="29Si",

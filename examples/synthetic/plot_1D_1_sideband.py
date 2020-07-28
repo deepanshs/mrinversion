@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pylab import rcParams
 
-from mrinversion.kernel import NuclearShieldingLineshape
+from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import SmoothLassoCV
 from mrinversion.linear_model import TSVDCompression
@@ -106,9 +106,9 @@ inverse_dimension = [
 #
 # For sideband datasets, the line-shape kernel corresponds to the pure anisotropic
 # nuclear shielding spinning sideband spectra. Use the
-# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class to generate the sideband
-# kernel.
-lineshape = NuclearShieldingLineshape(
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class to generate
+# the sideband kernel.
+lineshape = ShieldingPALineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimension,
     channel="29Si",
@@ -120,20 +120,20 @@ lineshape = NuclearShieldingLineshape(
 
 # %%
 # Here, ``lineshape`` is an instance of the
-# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The required arguments
-# of this class are the `anisotropic_dimension`, `inverse_dimension`, and `channel`.
-# We have already defined the first two arguments in the previous sub-section. The
-# value of the `channel` argument is the observed nucleus. In this example, this value
-# is '29Si'.
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class. The required
+# arguments of this class are the `anisotropic_dimension`, `inverse_dimension`, and
+# `channel`. We have already defined the first two arguments in the previous
+# sub-section. The value of the `channel` argument is the observed nucleus. In this
+# example, this value is '29Si'.
 # The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the spectrum
 # was acquired. Note, the rotor frequency is the effective anisotropic modulation
 # frequency, which may be less than the physical rotor frequency. The
 # number of sidebands is usually the number of points along the sideband dimension.
 #
-# Once the NuclearShieldingLineshape instance is created, use the
-# :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the instance
-# to generate the sideband kernel.
+# Once the ShieldingPALineshape instance is created, use the
+# :meth:`~mrinversion.kernel.nmr.ShieldingPALineshape.kernel` method of the
+# instance to generate the sideband kernel.
 K = lineshape.kernel(supersampling=1)
 
 # %%

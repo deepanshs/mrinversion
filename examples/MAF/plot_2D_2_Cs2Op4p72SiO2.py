@@ -21,7 +21,7 @@ import numpy as np
 from matplotlib import cm
 from pylab import rcParams
 
-from mrinversion.kernel import NuclearShieldingLineshape
+from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
@@ -55,7 +55,7 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset. Here, we import the dataset as the CSDM data-object.
 
 # The 2D MAF dataset in csdm format
-filename = "https://osu.box.com/shared/static/40dczkn6qwqyg0jtl8sr1jn89vmlwm0i.csdf"
+filename = "https://zenodo.org/record/3964531/files/Cs2O-4_72SiO2-MAF.csdf"
 data_object = cp.load(filename)
 
 # For inversion, we only interest ourselves with the real part of the complex dataset.
@@ -121,9 +121,10 @@ inverse_dimensions = [
 # '''''''''''''''''''''
 #
 # For MAF datasets, the line-shape kernel corresponds to the pure nuclear shielding
-# anisotropy line-shapes. Use the :class:`~mrinversion.kernel.NuclearShieldingLineshape`
-# class to generate a shielding line-shape kernel.
-lineshape = NuclearShieldingLineshape(
+# anisotropy line-shapes. Use the
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class to generate a
+# shielding line-shape kernel.
+lineshape = ShieldingPALineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimensions,
     channel="29Si",
@@ -135,11 +136,11 @@ lineshape = NuclearShieldingLineshape(
 
 # %%
 # Here, ``lineshape`` is an instance of the
-# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The required arguments
-# of this class are the `anisotropic_dimension`, `inverse_dimension`, and `channel`.
-# We have already defined the first two arguments in the previous sub-section. The
-# value of the `channel` argument is the nucleus observed in the MAF experiment. In
-# this example, this value is '29Si'.
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class. The required
+# arguments of this class are the `anisotropic_dimension`, `inverse_dimension`, and
+# `channel`. We have already defined the first two arguments in the previous
+# sub-section. The value of the `channel` argument is the nucleus observed in the MAF
+# experiment. In this example, this value is '29Si'.
 # The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAF
 # spectrum was acquired. Note for this particular MAF measurement, the rotor angle was
@@ -149,9 +150,9 @@ lineshape = NuclearShieldingLineshape(
 # line-shape within the kernel. Unless, you have a lot of spinning sidebands in your
 # MAF dataset, four sidebands should be enough.
 #
-# Once the NuclearShieldingLineshape instance is created, use the
-# :meth:`~mrinversion.kernel.NuclearShieldingLineshape.kernel` method of the instance
-# to generate the MAF line-shape kernel.
+# Once the ShieldingPALineshape instance is created, use the
+# :meth:`~mrinversion.kernel.nmr.ShieldingPALineshape.kernel` method of the
+# instance to generate the MAF line-shape kernel.
 K = lineshape.kernel(supersampling=1)
 print(K.shape)
 
@@ -210,7 +211,6 @@ print(f"truncation_index = {new_system.truncation_index}")
 
 # # the optimum hyper-parameters, alpha and lambda, from the cross-validation.
 # print(s_lasso.hyperparameters)
-# # {'alpha': 5.62341325190349e-07, 'lambda': 3.162277660168379e-06}
 
 # # the solution
 # f_sol = s_lasso.f
@@ -225,7 +225,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 
 # Setup the smooth lasso class
 s_lasso = SmoothLasso(
-    alpha=5.62e-7, lambda1=3.16e-6, inverse_dimension=inverse_dimensions
+    alpha=8.34e-7, lambda1=6.16e-7, inverse_dimension=inverse_dimensions
 )
 # run the fit method on the compressed kernel and compressed data.
 s_lasso.fit(K=compressed_K, s=compressed_s)

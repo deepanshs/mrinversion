@@ -7,16 +7,16 @@ def x_y_to_zeta_eta(x, y):
         following definition,
 
         .. math::
-            \left.\begin{align}
+            \left.\begin{array}{rl}
             \zeta &= \sqrt{x^2 + y^2}, \\
-            \eta &= \frac{4}{\pi} \tan^{-1} \left|\frac{x}{y}\right|
-            \end{align} {~~~~~~~~} \right\} {~~~~~~~~} |x| \le |y|
+            \eta &= \frac{4}{\pi} \tan^{-1} \left| \frac{x}{y} \right|
+            \end{array} {~~~~~~~~} \right\} {~~~~~~~~} |x| \le |y|.
 
         .. math::
-            \left.\begin{align}
+            \left.\begin{array}{rl}
             \zeta &= -\sqrt{x^2 + y^2}, \\
-            \eta &= \frac{4}{\pi} \tan^{-1} \left|\frac{y}{x}\right|
-            \end{align} {~~~~~~~~} \right\} {~~~~~~~~} |x| \gt |y|
+            \eta &= \frac{4}{\pi} \tan^{-1} \left| \frac{y}{x} \right|
+            \end{array} {~~~~~~~~} \right\} {~~~~~~~~} |x| > |y|.
 
         Args:
             x: floats or Quantity object. The coordinate x.
@@ -71,16 +71,16 @@ def zeta_eta_to_x_y(zeta, eta):
         following definition,
 
         .. math::
-            \left. \begin{align}
+            \left. \begin{array}{rl}
             x &= |\zeta| \sin\theta, \\
             y &= |\zeta| \cos\theta
-            \end{align} {~~~~~~~~} \right\} {~~~~~~~~} \zeta \ge 0
+            \end{array} {~~~~~~~~} \right\} {~~~~~~~~} \zeta \ge 0
 
         .. math::
-            \left. \begin{align}
+            \left. \begin{array}{rl}
             x &= |\zeta| \cos\theta, \\
             y &= |\zeta| \sin\theta
-            \end{align} {~~~~~~~~} \right\} {~~~~~~~~} \zeta \lt 0
+            \end{array} {~~~~~~~~} \right\} {~~~~~~~~} \zeta < 0
 
         where :math:`\theta = \frac{\pi}{4}\eta`.
 

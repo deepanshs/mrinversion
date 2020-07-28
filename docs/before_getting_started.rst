@@ -12,40 +12,64 @@
 Before getting started
 ======================
 
-Prepping the dataset
---------------------
+Prepping the 2D dataset for inversion
+-------------------------------------
 
-The following are some recommendations to help prep your dataset before subjecting to
-linear inversion.
+The following is a list of some requirements and recommendations to help prepare
+the 2D dataset for inversion.
 
-Magic angle flipping datasets
-'''''''''''''''''''''''''''''
+Common recommendations/requirements
+'''''''''''''''''''''''''''''''''''
 
 .. list-table::
-  :widths: 1 25 74
+  :widths: 2 98
 
   * - |uncheck|
-    - **Did you shear the dataset?**
-    - The inversion method assumes that the MAF dataset is sheared, such that one of
-      the dimensions is a purely anisotropic frequency dimension.
+    - **Dataset shear**
+
+      The inversion method assumes that the 2D dataset is sheared, such that one of the
+      dimensions corresponds to a pure anisotropic spectrum. The anisotropic
+      cross-sections are centered at 0 Hz.
 
       **Required**: Apply a shear transformation before proceeding.
 
+  * - |uncheck|
+    - **Calculate the noise standard deviation**
+
+      Use the noise region of your spectrum to calculate the standard deviation of the
+      noise. You will require this value when implementing cross-validation.
+
+
+Spinning Sideband correlation dataset specific recommendations
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. list-table::
+  :widths: 2 98
 
   * - |uncheck|
-    - **Did you zero-fill the time-domain dataset corresponding to the anisotropic
-      dimension?**
-    - Zero filling the time domain dataset is purely cosmetic. It makes the spectrum
-      look visually appealing, but adds no information, that is, a zero-filled dataset
-      contains the same information as a non-zero filled dataset. In terms of
-      computation, however, a zero-filled spectrum will take longer to solve.
+    - **Data-repeat operation**
 
-      **Recommendation**: Try to keep the total number of points along the anisotropic
-      dimension in the range of 120 - 150 points.
+      A data-repeat operation on the time-domain signal corresponding to the sideband
+      dimension makes the spinning sidebands look like a stick spectrum after a
+      Fourier transformation, a visual, which most NMR spectroscopists are familiar
+      from the 1D magic-angle spinning spectrum. Like a zero-fill operation, a spinning
+      sideband data-repeat operation is purely cosmetic and adds no information.
+      In terms of computation, however, a data-repeated spinning-sideband spectrum will
+      take longer to solve.
+
+      **Strongly recommended**: Avoid data-repeat operation.
+
+
+Magic angle flipping dataset specific recommendations
+'''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. list-table::
+  :widths: 2 98
 
   * - |uncheck|
-    - **Did you correct for the isotropic offset along the anisotropic dimension?**
-    - Ordinarily, after shear, a MAF spectrum is a 2D isotropic `v.s` pure anisotropic
+    - **Isotropic shift correction along the anisotropic dimension**
+
+      Ordinarily, after shear, a MAF spectrum is a 2D isotropic `vs.` pure anisotropic
       frequency correlation spectrum. In certain conditions, this is not true. In a MAF
       experiment, the sample holder (rotor) physically swaps between two angles
       (:math:`90^\circ \leftrightarrow 54.735^\circ`). It is possible to have a
@@ -57,30 +81,17 @@ Magic angle flipping datasets
       anisotropic dimension by adding an appropriate coordinates-offset.
 
   * - |uncheck|
-    - **Are there sinc wiggles in your spectrum?**
-    - Kernel correction for spectrum with sinc wiggle artifacts is coming soon.
+    - **Zero-fill operation**
 
-Spinning Sideband correlation datasets
-''''''''''''''''''''''''''''''''''''''
+      Zero filling the time domain dataset is purely cosmetic. It makes the spectrum
+      look visually appealing, but adds no information, that is, a zero-filled dataset
+      contains the same information as a non-zero filled dataset. In terms of
+      computation, however, a zero-filled spectrum will take longer to solve.
 
-.. list-table::
-  :widths: 1 25 74
+      **Recommendation**: If zero-filled, try to keep the total number of points along
+      the anisotropic dimension in the range of 120 - 150 points.
 
-  * - |uncheck|
-    - **Did you shear the dataset?**
-    - The inversion method assumes that the spinning sideband dataset is sheared, such that
-      one of the dimensions is a pure anisotropic spinning sidebands dimension.
+  * -
+    - **Sinc wiggles artifacts**
 
-      **Required**: Apply a shear transformation before proceeding.
-
-  * - |uncheck|
-    - **Did you data-repeat the time-domain signal corresponding to the sideband dimension?**
-    - A data-repeat operation on the time-domain signal corresponding to the sideband
-      dimension makes the spinning sidebands look like a stick spectrum after a
-      Fourier transformation, a visual, which most NMR spectroscopists are familiar
-      from the 1D magic-angle spinning spectrum. Like a zero-fill operation, a spinning
-      sideband data-repeat operation is also purely cosmetic and adds no information.
-      In terms of computation, however, a data-repeated spinning-sideband spectrum will
-      take longer to solve.
-
-      **Strongly recommended**: Avoid data-repeat operation.
+      Kernel correction for spectrum with sinc wiggle artifacts is coming soon.

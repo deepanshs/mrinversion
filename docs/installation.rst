@@ -17,6 +17,12 @@ See :ref:`requirements` for a full list of requirements.
 Make sure you have the required version of python by typing the following in the
 terminal,
 
+.. tip::
+    You may also click the copy-button located at the top-right corner of the code cell
+    area in the HTML docs, to copy the code lines without the prompts and then paste it
+    as usual.
+    Thanks to `Sphinx-copybutton <https://sphinx-copybutton.readthedocs.io/en/latest/>`_)
+
 .. code-block:: shell
 
       $ python --version
@@ -26,6 +32,21 @@ For `Mac` users, python version 3 may be installed under the name `python3`. You
 
 Installing ``mrinversion``
 --------------------------
+
+On Google Colab Notebook
+''''''''''''''''''''''''
+
+Colaboratory is a Google research project. It is a Jupyter notebook environment that
+runs entirely in the cloud. Launch a new notebook on
+`Colab <http://colab.research.google.com>`_. To install the mrinversion package, type
+
+.. code-block:: shell
+
+    !pip install mrinversion
+
+in the first cell, and execute. All done! You may now proceed to the next section and
+start using the library.
+
 
 On Local machine (Using pip)
 ''''''''''''''''''''''''''''
@@ -61,16 +82,3 @@ To upgrade, type the following in the terminal/Prompt,
 .. code-block:: bash
 
     $ pip install mrinversion -U
-
-On Google Colab Notebook
-''''''''''''''''''''''''
-
-Colaboratory is a Google research project. It is a Jupyter notebook environment that
-runs entirely in the cloud. Launch a new notebook on
-`Colab <http://colab.research.google.com>`_. To install the mrinversion package, type
-
-.. code-block:: shell
-
-    !pip install mrinversion
-
-in the first cell, and execute. All done! You may now start using the library.

@@ -18,7 +18,7 @@ import numpy as np
 from matplotlib import cm
 from pylab import rcParams
 
-from mrinversion.kernel import NuclearShieldingLineshape
+from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
@@ -52,7 +52,7 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset. Here, we import the dataset as the CSDM data-object.
 
 # The 2D MAT dataset in csdm format
-filename = "https://osu.box.com/shared/static/6l1gqljd2odh5ctommhhoqcnx3iak59c.csdf"
+filename = "https://zenodo.org/record/3964531/files/KMg0_5-4SiO2-MAT.csdf"
 data_object = cp.load(filename)
 
 # For inversion, we only interest ourselves with the real part of the complex dataset.
@@ -118,9 +118,10 @@ inverse_dimensions = [
 # '''''''''''''''''''''
 #
 # For MAF/PASS datasets, the kernel corresponds to the pure nuclear shielding anisotropy
-# sideband spectra. Use the :class:`~mrinversion.kernel.NuclearShieldingLineshape` class
-# to generate a shielding spinning sidebands kernel.
-sidebands = NuclearShieldingLineshape(
+# sideband spectra. Use the
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class to generate a
+# shielding spinning sidebands kernel.
+sidebands = ShieldingPALineshape(
     anisotropic_dimension=anisotropic_dimension,
     inverse_dimension=inverse_dimensions,
     channel="29Si",
@@ -132,11 +133,11 @@ sidebands = NuclearShieldingLineshape(
 
 # %%
 # Here, ``sidebands`` is an instance of the
-# :class:`~mrinversion.kernel.NuclearShieldingLineshape` class. The required arguments
-# of this class are the `anisotropic_dimension`, `inverse_dimension`, and `channel`.
-# We have already defined the first two arguments in the previous sub-section. The
-# value of the `channel` argument is the nucleus observed in the MAT/PASS experiment.
-# In this example, this value is '29Si'.
+# :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class. The required
+# arguments of this class are the `anisotropic_dimension`, `inverse_dimension`, and
+# `channel`. We have already defined the first two arguments in the previous
+# sub-section. The value of the `channel` argument is the nucleus observed in the
+# MAT/PASS experiment. In this example, this value is '29Si'.
 # The remaining arguments, such as the `magnetic_flux_density`, `rotor_angle`,
 # and `rotor_frequency`, are set to match the conditions under which the 2D MAT/PASS
 # spectrum was acquired, which in this case corresponds to acquisition at
@@ -158,8 +159,8 @@ sidebands = NuclearShieldingLineshape(
 # usually the number of points along the sideband dimension.
 # In this example, this value is 32.
 #
-# Once the NuclearShieldingLineshape instance is created, use the kernel() method to
-# generate the spinning sideband lineshape kernel.
+# Once the ShieldingPALineshape instance is created, use the kernel()
+# method to generate the spinning sideband lineshape kernel.
 K = sidebands.kernel(supersampling=1)
 print(K.shape)
 
@@ -219,7 +220,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 
 # # the optimum hyper-parameters, alpha and lambda, from the cross-validation.
 # print(s_lasso.hyperparameters)
-# # {'alpha': 3.7926901907322535e-06, 'lambda': 1.8329807108324375e-06}
+# # {'alpha': 3.7926901907322535e-06, 'lambda': 1.1288378916846883e-05}
 
 # # the solution
 # f_sol = s_lasso.f
@@ -232,7 +233,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 
 # Setup the smooth lasso class
 s_lasso = SmoothLasso(
-    alpha=3.79e-6, lambda1=1.83e-6, inverse_dimension=inverse_dimensions
+    alpha=3.79e-6, lambda1=11.3e-6, inverse_dimension=inverse_dimensions
 )
 # run the fit method on the compressed kernel and compressed data.
 s_lasso.fit(K=compressed_K, s=compressed_s)

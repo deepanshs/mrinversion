@@ -50,13 +50,13 @@ Welcome to Mrinversion documentation!
             :alt: Total alerts
 
       * - GitHub
-        - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?logo=github
-            :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
-            :alt: GitHub contributors
-
-          .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
+        - .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
             :target: https://github.com/DeepanshS/mrinversion/issues
             :alt: GitHub issues
+
+.. - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?logo=github
+..     :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
+..     :alt: GitHub contributors
 
 ----
 
@@ -64,11 +64,11 @@ Welcome to Mrinversion documentation!
 
 The ``mrinversion`` python package is based on the statistical learning technique for
 determining the distribution of the magnetic resonance (NMR) tensor parameters
-from the two-dimensional NMR spectra correlating the isotropic to anisotropic
-resonances.
-The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/latest/>`_
-package for generating solid-state NMR lineshapes and
-`scikit-learn <https://scikit-learn.org/latest/>`_ package for statistical learning.
+from two-dimensional NMR spectra correlating the isotropic to anisotropic
+frequencies.
+The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
+package for generating solid-state NMR spectra and
+`scikit-learn <https://scikit-learn.org/stable/>`_ package for statistical learning.
 
 ----
 
@@ -78,21 +78,20 @@ The ``mrinversion`` package includes the **inversion of a two-dimensional
 solid-state NMR spectrum of dilute spin-systems to a three-dimensional distribution of
 tensor parameters**. At present, we support the inversion of
 
-- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
-  resonances to pure anisotropic resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta, \eta)`,
-  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta`
-  and :math:`\eta`, are the shielding anisotropy and asymmetry parameters,
-  respectively, defined using the Haeberlen convention.
-
 - **Magic angle turning (MAT), Phase adjusted spinning sidebands (PASS)**, and similar
   spectra correlating the isotropic chemical shift resonances to pure anisotropic
   spinning sideband resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta, \eta)`,
-  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta`
-  and :math:`\eta`, are the shielding anisotropy and asymmetry parameters,
+  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)`,
+  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta_\sigma`
+  and :math:`\eta_\sigma`, are the shielding anisotropy and asymmetry parameters,
   respectively, defined using the Haeberlen convention.
 
+- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
+  resonances to pure anisotropic resonances into a three-dimensional distribution of
+  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)`,
+  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta_\sigma`
+  and :math:`\eta_\sigma`, are the shielding anisotropy and asymmetry parameters,
+  respectively, defined using the Haeberlen convention.
 
 
 .. only:: html
@@ -108,23 +107,40 @@ tensor parameters**. At present, we support the inversion of
 
 ----
 
-.. only:: html
 
-	Table of Contents
-	-----------------
+
+Getting Started
+---------------
 
 .. toctree::
     :maxdepth: 2
+    :caption: Getting Started
 
     installation
     requirement
     introduction
     before_getting_started
     getting_started
-    auto_examples/index
     referenceAPI
 
+Examples
+--------
 
+.. toctree::
+    :maxdepth: 1
+    :caption: Examples
+
+    auto_examples/index
+
+Project details
+---------------
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Project details
+
+    credits/license
+    credits/acknowledgment
 
 ----
 

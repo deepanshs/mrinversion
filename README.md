@@ -9,10 +9,10 @@
 
 The `mrinversion` python package is based on the statistical learning technique for
 determining the distribution of the magnetic resonance (NMR) tensor parameters
-from the two-dimensional NMR spectra correlating the isotropic to anisotropic
-resonances.
+from two-dimensional NMR spectra correlating the isotropic to anisotropic
+frequencies.
 The library utilizes the [mrsimulator](https://mrsimulator.readthedocs.io/en/latest/)
-package for generating solid-state NMR lineshapes and
+package for generating solid-state NMR spectra and
 [scikit-learn](https://scikit-learn.org/latest/) package for statistical learning.
 
 ---
@@ -23,14 +23,14 @@ The `mrinversion` package includes the **inversion of a two-dimensional
 solid-state NMR spectrum of dilute spin-systems to a three-dimensional distribution of
 tensor parameters**. At present, we support the inversion of
 
-- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
-  resonances to pure anisotropic resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters---isotropic chemical shift, shielding
-  anisotropy and asymmetry parameters---defined using the Haeberlen convention.
-
 - **Magic angle turning (MAT), Phase adjusted spinning sidebands (PASS)**, and similar
   spectra correlating the isotropic chemical shift resonances to pure anisotropic
   spinning sideband resonances into a three-dimensional distribution of
+  nuclear shielding tensor parameters---isotropic chemical shift, shielding
+  anisotropy and asymmetry parameters---defined using the Haeberlen convention.
+
+- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
+  resonances to pure anisotropic resonances into a three-dimensional distribution of
   nuclear shielding tensor parameters---isotropic chemical shift, shielding
   anisotropy and asymmetry parameters---defined using the Haeberlen convention.
 
