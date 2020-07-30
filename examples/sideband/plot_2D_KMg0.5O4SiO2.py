@@ -161,7 +161,7 @@ sidebands = ShieldingPALineshape(
 #
 # Once the ShieldingPALineshape instance is created, use the kernel()
 # method to generate the spinning sideband lineshape kernel.
-K = sidebands.kernel(supersampling=1)
+K = sidebands.kernel(supersampling=2)
 print(K.shape)
 
 # %%
