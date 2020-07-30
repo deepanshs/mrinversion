@@ -20,7 +20,7 @@ from pylab import rcParams
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
-from mrinversion.linear_model import SmoothLasso
+from mrinversion.linear_model import SmoothLassoCV
 from mrinversion.linear_model import TSVDCompression
 from mrinversion.utils import plot_3d
 
@@ -188,62 +188,68 @@ print(f"truncation_index = {new_system.truncation_index}")
 # Smooth LASSO cross-validation
 # '''''''''''''''''''''''''''''
 #
-# Solve the smooth-lasso problem. Ordinarily, one should use the statistical learning
-# method to solve the inverse problem over a range of α and λ values and then determine
-# the best nuclear shielding tensor parameter distribution for the given 2D MAT/PASS
-# dataset. Considering the limited build time for the documentation, we skip this step
-# and evaluate the distribution at pre-optimized α and λ values. The optimum values are
-# :math:`\alpha = 3.79\times 10^{-6}` and :math:`\lambda = 1.83\times 10^{-6}`.
-# The following commented code was used in determining the optimum α and λ values.
+# Solve the smooth-lasso problem. Use the statistical learning ``SmoothLassoCV``
+# method to solve the inverse problem over a range of α and λ values and determine
+# the best nuclear shielding tensor parameter distribution for the given 2D MAF
+# dataset. Considering the limited build time for the documentation, we'll perform
+# the cross-validation over a smaller :math:`5 \times 5` `x`-`y` grid. You may
+# increase the grid resolution for your problem if desired.
 
-# %%
+# setup the pre-defined range of alpha and lambda values
+lambdas = 10 ** (-4.4 - 1 * (np.arange(5) / 4))
+alphas = 10 ** (-4.5 - 1.5 * (np.arange(5) / 4))
 
-# from mrinversion.linear_model import SmoothLassoCV
-
-# # setup the pre-defined range of alpha and lambda values
-# lambdas = 10 ** (-4 - 3 * (np.arange(20) / 19))
-# alphas = 10 ** (-4 - 3 * (np.arange(20) / 19))
-
-# # setup the smooth lasso cross-validation class
-# s_lasso = SmoothLassoCV(
-#     alphas=alphas,  # A numpy array of alpha values.
-#     lambdas=lambdas,  # A numpy array of lambda values.
-#     sigma=0.00070,  # The standard deviation of noise from the MAF data.
-#     folds=10,  # The number of folds in n-folds cross-validation.
-#     inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
-#     verbose=1,  # If non-zero, prints the progress as the computation proceeds.
-#     max_iterations=20000,  # The maximum number of allowed interations.
-# )
-
-# # run fit using the compressed kernel and compressed data.
-# s_lasso.fit(compressed_K, compressed_s)
-
-# # the optimum hyper-parameters, alpha and lambda, from the cross-validation.
-# print(s_lasso.hyperparameters)
-# # {'alpha': 3.7926901907322535e-06, 'lambda': 1.1288378916846883e-05}
-
-# # the solution
-# f_sol = s_lasso.f
-
-# # the cross-validation error curve
-# CV_metric = s_lasso.cross_validation_curve
-
-# %%
-# If you use the above ``SmoothLassoCV`` method, skip the following code-block.
-
-# Setup the smooth lasso class
-s_lasso = SmoothLasso(
-    alpha=3.79e-6, lambda1=11.3e-6, inverse_dimension=inverse_dimensions
+# setup the smooth lasso cross-validation class
+s_lasso = SmoothLassoCV(
+    alphas=alphas,  # A numpy array of alpha values.
+    lambdas=lambdas,  # A numpy array of lambda values.
+    sigma=0.00070,  # The standard deviation of noise from the MAF data.
+    folds=10,  # The number of folds in n-folds cross-validation.
+    inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
+    verbose=1,  # If non-zero, prints the progress as the computation proceeds.
+    max_iterations=20000,  # The maximum number of allowed interations.
 )
-# run the fit method on the compressed kernel and compressed data.
-s_lasso.fit(K=compressed_K, s=compressed_s)
+
+# run fit using the compressed kernel and compressed data.
+s_lasso.fit(compressed_K, compressed_s)
+
+# %%
+# The optimum hyper-parameters
+# ''''''''''''''''''''''''''''
+#
+# Use the :attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameters` attribute of
+# the instance for the optimum hyper-parameters, :math:`\alpha` and :math:`\lambda`,
+# determined from the cross-validation.
+print(s_lasso.hyperparameters)
+
+# %%
+# The cross-validation surface
+# ''''''''''''''''''''''''''''
+#
+# Optionally, you may want to visualize the cross-validation error curve/surface. Use
+# the :attr:`~mrinversion.linear_model.SmoothLassoCV.cross_validation_curve` attribute
+# of the instance, as follows
+CV_metric = s_lasso.cross_validation_curve  # `CV_metric` is a CSDM object.
+
+# plot of the cross validation surface
+plt.figure(figsize=(5, 3.5))
+ax = plt.subplot(projection="csdm")
+ax.contour(np.log10(CV_metric), levels=25)
+ax.scatter(
+    -np.log10(s_lasso.hyperparameters["alpha"]),
+    -np.log10(s_lasso.hyperparameters["lambda"]),
+    marker="x",
+    color="k",
+)
+plt.tight_layout(pad=0.5)
+plt.show()
 
 # %%
 # The optimum solution
 # ''''''''''''''''''''
 #
-# The :attr:`~mrinversion.linear_model.SmoothLasso.f` attribute of the instance holds
-# the solution,
+# The :attr:`~mrinversion.linear_model.SmoothLassoCV.f` attribute of the instance holds
+# the solution corresponding to the optimum hyper-parameters,
 f_sol = s_lasso.f  # f_sol is a CSDM object.
 
 # %%
