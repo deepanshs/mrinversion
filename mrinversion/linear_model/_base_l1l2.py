@@ -121,22 +121,13 @@ class GeneralL2Lasso:
             copy_X=True,
             max_iter=self.max_iterations,
             tol=self.tolerance,
-            warm_start=False,
+            warm_start=True,
             random_state=None,
             selection="random",
             positive=self.positive,
         )
         estimator.fit(Ks, ss)
-        f = estimator.coef_.copy()
-        if s_.shape[1] > 1:
-            f.shape = (s_.shape[1],) + self.f_shape
-            f[:, :, 0] /= 2.0
-            f[:, 0, :] /= 2.0
-        else:
-            f.shape = self.f_shape
-            f[:, 0] /= 2.0
-            f[0, :] /= 2.0
-
+        f = self._get_coeff_shape(estimator.coef_.copy(), s_)
         f *= self.scale
 
         if isinstance(s, cp.CSDM):
@@ -144,12 +135,36 @@ class GeneralL2Lasso:
 
             if len(s.dimensions) > 1:
                 f.dimensions[2] = s.dimensions[1]
-            f.dimensions[1] = self.inverse_dimension[1]
-            f.dimensions[0] = self.inverse_dimension[0]
+
+            if len(self.f_shape) == 1:
+                f.dimensions[0] = self.inverse_dimension[0]
+            if len(self.f_shape) == 2:
+                f.dimensions[1] = self.inverse_dimension[1]
+                f.dimensions[0] = self.inverse_dimension[0]
 
         self.estimator = estimator
         self.f = f
         self.n_iter = estimator.n_iter_
+
+    def _get_coeff_shape(self, f, s_):
+        if len(self.f_shape) == 1:
+            if s_.shape[1] > 1:
+                f.shape = (s_.shape[1],) + self.f_shape
+                f[:, 0] /= 2.0
+            else:
+                f.shape = self.f_shape
+                f[0] /= 2.0
+
+        if len(self.f_shape) == 2:
+            if s_.shape[1] > 1:
+                f.shape = (s_.shape[1],) + self.f_shape
+                f[:, :, 0] /= 2.0
+                f[:, 0, :] /= 2.0
+            else:
+                f.shape = self.f_shape
+                f[:, 0] /= 2.0
+                f[0, :] /= 2.0
+        return f
 
     def predict(self, K):
         r"""
@@ -263,7 +278,7 @@ class GeneralL2LassoCV:
         self.inverse_dimension = inverse_dimension
         self.f_shape = tuple([item.count for item in inverse_dimension])[::-1]
 
-    def fit(self, K, s):
+    def fit(self, K, s, scoring="neg_mean_squared_error"):
         r"""
         Fit the model using the coordinate descent method from scikit-learn for
         all alpha anf lambda values using the `n`-folds cross-validation technique.
@@ -326,7 +341,7 @@ class GeneralL2LassoCV:
             tol=self.tolerance,
             copy_X=True,
             positive=self.positive,
-            random_state=None,
+            random_state=3,
             warm_start=True,
             selection="random",
         )
@@ -341,7 +356,7 @@ class GeneralL2LassoCV:
         for alpha_ratio_ in alpha_ratio:
             Ks[start_index:] *= alpha_ratio_
             jobs = (
-                delayed(cv)(l1_array[i], Ks, ss, cv_indexes)
+                delayed(cv)(l1_array[i], Ks, ss, cv_indexes, scoring)
                 for i in range(self.cv_lambdas.size)
             )
             self.cv_map[j] = Parallel(
@@ -360,12 +375,15 @@ class GeneralL2LassoCV:
         # cv_map contains negated mean square errors, therefore multiply by -1.
         self.cv_map *= -1
         # subtract the variance.
-        self.cv_map -= self.sigma ** 2
+        if scoring == "neg_mean_squared_error":
+            self.cv_map -= self.sigma ** 2
+            index = np.where(self.cv_map < 0)
+            self.cv_map[index] = np.nan
 
-        # After subtracting the variance, any negative values in the cv grid is a
-        # result of fitting noise. Take the absolute value of cv to avoid such
-        # models.
-        self.cv_map = np.abs(self.cv_map)
+            # After subtracting the variance, any negative values in the cv grid is a
+            # result of fitting noise. Take the absolute value of cv to avoid such
+            # models.
+            # self.cv_map = np.abs(self.cv_map)
 
         # The argmin of the minimum value is the selected model as it has the least
         # prediction error.
@@ -452,13 +470,13 @@ class GeneralL2LassoCV:
         return self.cv_map
 
 
-def cv(l1, X, y, cv):
+def cv(l1, X, y, cv, scoring="neg_mean_squared_error"):
     """Return the cross-validation score as negative of mean square error."""
     return cross_validate(
         l1,
         X=X,
         y=y,
-        scoring="neg_mean_squared_error",  # 'neg_mean_absolute_error",
+        scoring=scoring,  # 'neg_mean_absolute_error",
         cv=cv,
         fit_params={"check_input": False},
         n_jobs=1,

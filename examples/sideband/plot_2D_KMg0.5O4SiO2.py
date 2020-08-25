@@ -196,8 +196,8 @@ print(f"truncation_index = {new_system.truncation_index}")
 # increase the grid resolution for your problem if desired.
 
 # setup the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-5.4 - 1 * (np.arange(5) / 4))
-alphas = 10 ** (-4.5 - 1.5 * (np.arange(5) / 4))
+lambdas = 10 ** (-4.6 - 1 * (np.arange(5) / 4))
+alphas = 10 ** (-4.8 - 1.5 * (np.arange(5) / 4))
 
 # setup the smooth lasso cross-validation class
 s_lasso = SmoothLassoCV(
@@ -397,7 +397,7 @@ ax = plt.gca(projection="csdm")
 ax.plot(f_sol_iso, "--k", label="tensor")
 ax.plot(Q4_region_iso, "r", label="Q4")
 ax.plot(Q3_region_iso, "b", label="Q3")
-ax.plot(data_iso, "-k", label="MAF")
+ax.plot(data_iso, "-k", label="MAT")
 ax.plot(data_iso - f_sol_iso - 0.1, "gray", label="residuals")
 ax.set_title("Isotropic projection")
 ax.invert_xaxis()
