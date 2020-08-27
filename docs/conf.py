@@ -224,7 +224,7 @@ html_theme_options = {
 
 
 # Theme options
-# html_logo = "_static/csdmpy.png"
+html_logo = "_static/mrinversion.png"
 html_style = "style.css"
 html_title = f"mrinversion:doc v{__version__}"
 html_last_updated_fmt = ""
