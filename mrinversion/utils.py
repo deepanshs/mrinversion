@@ -77,6 +77,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
 
     sol /= n * n
 
+    del zeta_grid, eta_grid, index, x_, y_, avg_range_x, avg_range_y
     csdm_new = cp.as_csdm(sol)
     csdm_new.dimensions[0] = eta
     csdm_new.dimensions[1] = zeta

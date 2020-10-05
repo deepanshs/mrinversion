@@ -296,7 +296,7 @@ plt.show()
 # :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)` distribution as follows.
 
 # Create the zeta and eta dimensions,, as shown below.
-zeta = cp.as_dimension(np.arange(60) * 5 - 150, unit="ppm", label="zeta")
+zeta = cp.as_dimension(np.arange(40) * 8 - 150, unit="ppm", label="zeta")
 eta = cp.as_dimension(np.arange(16) / 15, label="eta")
 
 # Use the `to_Haeberlen_grid` function to convert the tensor parameter distribution.
