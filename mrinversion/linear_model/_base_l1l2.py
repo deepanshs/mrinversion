@@ -351,53 +351,6 @@ class GeneralL2LassoCV:
         )
         start_index = K.shape[0]
 
-        # The factor 0.5 for alpha in the Lasso/LassoLars problem is to compensate
-        # 1/(2 * n_sample) factor in OLS term.
-        # if self.method == "multi-task":
-        #     l1 = MultiTaskLasso(
-        #         alpha=self.cv_lambdas[0] / 2.0,
-        #         fit_intercept=False,
-        #         normalize=False,
-        #         # precompute=True,
-        #         max_iter=self.max_iterations,
-        #         tol=self.tolerance,
-        #         copy_X=True,
-        #         # positive=self.positive,
-        #         random_state=None,
-        #         warm_start=True,
-        #         selection="random",
-        #     )
-
-        # if self.method == "gradient_decent":
-        #     l1 = Lasso(
-        #         alpha=self.cv_lambdas[0] / 2.0,
-        #         fit_intercept=False,
-        #         normalize=False,
-        #         precompute=True,
-        #         max_iter=self.max_iterations,
-        #         tol=self.tolerance,
-        #         copy_X=True,
-        #         positive=self.positive,
-        #         random_state=None,
-        #         warm_start=True,
-        #         selection="random",
-        #     )
-
-        # if self.method == "lars":
-        #     l1 = LassoLars(
-        #         alpha=self.cv_lambdas[0] / 2.0,
-        #         fit_intercept=False,
-        #         verbose=True,
-        #         normalize=False,
-        #         precompute="auto",
-        #         max_iter=self.max_iterations,
-        #         eps=2.220446049250313e-16,
-        #         copy_X=True,
-        #         fit_path=False,
-        #         positive=self.positive,
-        #         jitter=None,
-        #         random_state=None,
-        #     )
         l1 = self._get_minimizer()
         # l1.fit(Ks, ss)
 
@@ -475,6 +428,8 @@ class GeneralL2LassoCV:
 
     def _get_minimizer(self):
         """Return the estimator for the method"""
+        # The factor 0.5 for alpha in the Lasso/LassoLars problem is to compensate
+        # 1/(2 * n_sample) factor in OLS term.
         if self.method == "multi-task":
             return MultiTaskLasso(
                 alpha=self.cv_lambdas[0] / 2.0,

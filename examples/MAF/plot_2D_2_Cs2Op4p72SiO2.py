@@ -26,6 +26,7 @@ from mrinversion.kernel.utils import x_y_to_zeta_eta
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
 from mrinversion.utils import plot_3d
+from mrinversion.utils import to_Haeberlen_grid
 
 # sphinx_gallery_thumbnail_number = 5
 
@@ -475,10 +476,35 @@ print(
 #      - 89.0 ppm
 #      - 0 (fixed)
 #
+
+# %%
+# Convert the 3D tensor distribution in Haeberlen parameters
+# ----------------------------------------------------------
+# You may re-bin the 3D tensor parameter distribution from a
+# :math:`\rho(\delta_\text{iso}, x, y)` distribution to
+# :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)` distribution as follows.
+
+# Create the zeta and eta dimensions,, as shown below.
+zeta = cp.as_dimension(np.arange(40) * 4 - 40, unit="ppm", label="zeta")
+eta = cp.as_dimension(np.arange(16) / 15, label="eta")
+
+# Use the `to_Haeberlen_grid` function to convert the tensor parameter distribution.
+fsol_Hae = to_Haeberlen_grid(f_sol, zeta, eta)
+
+# %%
+# The 3D plot
+# '''''''''''
+plt.figure(figsize=(5, 4.4))
+ax = plt.gca(projection="3d")
+plot_3d(ax, fsol_Hae, x_lim=[0, 1], y_lim=[-40, 120], z_lim=[-50, -150], alpha=0.2)
+plt.tight_layout()
+plt.show()
+
+# %%
 # References
 # ----------
 #
 # .. [#f1]  Alvarez, D. J., Sanders, K. J., Phyo, P. A., Baltisberger, J. H.,
 #       Grandinetti, P. J. Cluster formation of network-modifier cations in cesium
-#       silicate glasses, J. Chem. Phys. 148, 094502,  (2018).
+#       silicate glasses, J. Chem. Phys. **148**, 094502, (2018).
 #       `doi:10.1063/1.5020986 <https://doi.org/10.1063/1.5020986>`_

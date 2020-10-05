@@ -12,4 +12,5 @@ Utils
 .. currentmodule:: mrinversion.utils
 
 .. autofunction:: get_polar_grids
+.. autofunction:: to_Haeberlen_grid
 .. autofunction:: plot_3d

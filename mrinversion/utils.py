@@ -11,7 +11,21 @@ from mpl_toolkits.mplot3d import Axes3D  # lgtm [py/unused-import]
 
 
 def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
+    """Convert the three-dimensional p(iso, x, y) to p(iso, zeta, eta) tensor
+    distribution.
 
+    Args
+    ----
+
+    csdm_object: CSDM
+        A CSDM object containing the 3D p(iso, x, y) distribution.
+    zeta: CSDM.Dimension
+        A CSDM dimension object describing the zeta dimension.
+    eta: CSDM.Dimension
+        A CSDM dimension object describing the eta dimension.
+    n: int
+        An interger used in linear interpolation of the data. The default is 5.
+    """
     [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
     data = csdm_object.dependent_variables[0].components[0]
     iso = csdm_object.dimensions[2].coordinates.value
@@ -42,7 +56,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
             zeta_grid = np.sqrt(x_ ** 2 + y_ ** 2)
             eta_grid = np.ones(zeta_grid.shape)
 
-            index = np.where(x_ <= y_)
+            index = np.where(x_ < y_)
             eta_grid[index] = (4 / np.pi) * np.arctan(x_[index] / y_[index])
 
             index = np.where(x_ > y_)
@@ -134,7 +148,7 @@ def plot_3d(
     box=False,
     clip_percent=0.0,
     linewidth=1,
-    alpha_factor=7.5,
+    alpha=0.15,
 ):
     r"""Generate a 3D density plot with 2D contour and 1D projections.
 
@@ -161,7 +175,8 @@ def plot_3d(
         clip_percent: (Optional) The amplitudes of the dataset below the given percent
             is made transparent for the volumetric plot.
         linewidth: (Optional) The linewidth of the 2D countours, 1D plots and box.
-        alpha_factor: (Optional) The factor to scale the alpha channel of the 3D volume.
+        alpha: (Optional) The amount of alpha(transparency) applied in rendering the 3D
+            volume.
     """
 
     if max_2d is None:
@@ -183,7 +198,7 @@ def plot_3d(
     clr = cmap
     ck = cmap(0)
     facecolors = cmap(f)
-    facecolors[:, :, :, -1] = f / alpha_factor
+    facecolors[:, :, :, -1] = f * alpha
     index = np.where(f < clip_percent / 100)
     facecolors[:, :, :, -1][index] = 0
     facecolors.shape = (f.size, 4)
