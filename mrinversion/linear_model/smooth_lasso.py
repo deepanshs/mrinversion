@@ -61,8 +61,6 @@ class SmoothLasso(GeneralL2Lasso):
         positive values, else the solution may contain positive and negative amplitudes.
         The default is True.
 
-    .. rubric:: Attribute documentation
-
     Attributes
     ----------
 
@@ -82,6 +80,7 @@ class SmoothLasso(GeneralL2Lasso):
         max_iterations=10000,
         tolerance=1e-5,
         positive=True,
+        method="gradient_decent",
     ):
         super().__init__(
             alpha=alpha,
@@ -91,6 +90,7 @@ class SmoothLasso(GeneralL2Lasso):
             positive=positive,
             regularizer="smooth lasso",
             inverse_dimension=inverse_dimension,
+            method=method,
         )
 
 
@@ -133,8 +133,8 @@ class SmoothLassoCV(GeneralL2LassoCV):
 
     The cross-validation is carried out using a stratified splitting of the signal.
 
-    Args
-    ----
+    Parameters
+    ----------
 
     alphas: ndarray
         A list of :math:`\alpha` hyperparameters.
@@ -156,8 +156,20 @@ class SmoothLassoCV(GeneralL2LassoCV):
         The default is True.
     sigma: float
         The standard deviation of the noise in the signal. The default is 0.0.
+    sigma: float
+        The standard deviation of the noise in the signal. The default is 0.0.
+    randomize: bool
+        If true, the folds are created by randomly assigning the samples to each fold.
+        If false, a stratified sampled is used to generate folds. The default is False.
+    times: int
+        The number of times to randomized n-folds are created. Only applicable when
+        `randomize` attribute is True.
+    verbose: bool
+        If true, prints the process.
+    n_jobs: int
+        The number of CPUs used for computation. The default is -1, that is, all
+        available CPUs are used.
 
-    .. rubric:: Attribute documentation
 
     Attributes
     ----------
@@ -187,6 +199,7 @@ class SmoothLassoCV(GeneralL2LassoCV):
         times=2,
         verbose=False,
         n_jobs=-1,
+        method="gradient_decent",
     ):
         super().__init__(
             alphas=alphas,
@@ -202,4 +215,5 @@ class SmoothLassoCV(GeneralL2LassoCV):
             times=times,
             verbose=verbose,
             n_jobs=n_jobs,
+            method=method,
         )

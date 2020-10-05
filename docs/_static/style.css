@@ -221,10 +221,6 @@ table caption:hover {
   padding-right: 1.5em; */
 }
 
-.sidebar .logo img {
-  filter: invert(1) brightness(1.75);
-}
-
 /* searchbar */
 #searchbox > h3,
 #searchbox > p {

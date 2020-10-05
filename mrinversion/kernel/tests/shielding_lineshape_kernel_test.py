@@ -42,7 +42,7 @@ def generate_shielding_kernel(zeta_, eta_, angle, freq, n_sidebands, to_ppm=True
 
     spin_systems = [
         SpinSystem(
-            sites=[Site(isotope="29Si", shielding_symmetric={"zeta": z, "eta": e},)]
+            sites=[Site(isotope="29Si", shielding_symmetric={"zeta": z, "eta": e})]
         )
         for z, e in zip(zeta_, eta_)
     ]

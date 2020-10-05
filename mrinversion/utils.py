@@ -57,7 +57,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
                 weight[index] /= 2
                 np.append(weight, weight[index])
                 sol_, _, _ = np.histogram2d(
-                    zeta_grid, eta_grid, weights=weight, bins=bins, range=range_,
+                    zeta_grid, eta_grid, weights=weight, bins=bins, range=range_
                 )
                 sol[i] += sol_
 
@@ -230,7 +230,7 @@ def plot_3d(
     dist /= max_2d[2]
 
     ax.contour(
-        x1, y1, dist, zdir="z", offset=offz_n, cmap=clr, levels=levels, linewidths=lw,
+        x1, y1, dist, zdir="z", offset=offz_n, cmap=clr, levels=levels, linewidths=lw
     )
 
     # 2D x-z contour projection
@@ -266,7 +266,7 @@ def plot_3d(
         max_2d[0] = dist.max()
     dist_ = dist / max_2d[0]
     ax.contour(
-        dist_, x1, y1, zdir="x", offset=offx, cmap=clr, levels=levels, linewidths=lw,
+        dist_, x1, y1, zdir="x", offset=offx, cmap=clr, levels=levels, linewidths=lw
     )
 
     # 1D y-axis projection

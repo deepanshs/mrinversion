@@ -6,6 +6,8 @@ import numpy as np
 from joblib import delayed
 from joblib import Parallel
 from sklearn.linear_model import Lasso
+from sklearn.linear_model import LassoLars
+from sklearn.linear_model import MultiTaskLasso
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 
@@ -17,39 +19,38 @@ __email__ = "srivastava.89@osu.edu"
 
 class GeneralL2Lasso:
     r"""
-        The Minimizer class solves the following equation,
+    The Minimizer class solves the following equation,
 
-        .. math::
-            {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \frac{1}{m} \|
-                        {\bf Kf - s} \|^2_2 +
-                        \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2 +
-                        \lambda  \| {\bf f} \|_1 \right),
+    .. math::
+        {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \frac{1}{m} \|
+                    {\bf Kf - s} \|^2_2 +
+                    \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2 +
+                    \lambda  \| {\bf f} \|_1 \right),
 
-        where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
-        :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known signal
-        containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
-        is the desired solution matrix.
+    where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
+    :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known signal
+    containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
+    is the desired solution matrix.
 
 
-        Based on the regularization literal, the above problem is constraint
+    Based on the regularization literal, the above problem is constraint
 
-        Args:
-            alpha: Float, the hyperparameter, :math:`\alpha`.
-            lambda1: Float, the hyperparameter, :math:`\lambda`.
-            max_iterations: Interger, the maximum number of iterations allowed when
-                            solving the problem. The default value is 10000.
-            tolerance: Float, the tolerance at which the solution is
-                       considered converged. The default value is 1e-5.
-            positive: Boolean. If True, the amplitudes in the solution,
-                      :math:`{\bf f}` is all positive, else the solution may contain
-                      positive and negative amplitudes. The default is True.
-            regularizer: String, a literal specifying the form of matrix
-                         :math:`{\bf J}_i`. The allowed literals are `smooth lasso`
-                         and `sparse ridge fusion`.
-            f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
-                            (n1, n2, ..., nd)
-        Attributes:
-
+    Args:
+        alpha: Float, the hyperparameter, :math:`\alpha`.
+        lambda1: Float, the hyperparameter, :math:`\lambda`.
+        max_iterations: Interger, the maximum number of iterations allowed when
+                        solving the problem. The default value is 10000.
+        tolerance: Float, the tolerance at which the solution is
+                   considered converged. The default value is 1e-5.
+        positive: Boolean. If True, the amplitudes in the solution,
+                  :math:`{\bf f}` is all positive, else the solution may contain
+                  positive and negative amplitudes. The default is True.
+        regularizer: String, a literal specifying the form of matrix
+                     :math:`{\bf J}_i`. The allowed literals are `smooth lasso`
+                     and `sparse ridge fusion`.
+        f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
+                        (n1, n2, ..., nd)
+    Attributes:
     """
 
     def __init__(
@@ -61,6 +62,7 @@ class GeneralL2Lasso:
         positive=True,
         regularizer=None,
         inverse_dimension=None,
+        method="gradient_decent",
     ):
 
         self.hyperparameters = {"lambda": lambda1, "alpha": alpha}
@@ -70,6 +72,7 @@ class GeneralL2Lasso:
         self.regularizer = regularizer
         self.inverse_dimension = inverse_dimension
         self.f_shape = tuple([item.count for item in inverse_dimension])[::-1]
+        self.method = method
 
         # attributes
         self.f = None
@@ -113,19 +116,50 @@ class GeneralL2Lasso:
             f_shape=self.f_shape,
         )
 
-        # The factor 0.5 for alpha in the Lasso problem is to compensate
+        # The factor 0.5 for alpha in the Lasso/LassoLars problem is to compensate
         # 1/(2 * n_sample) factor in OLS term
-        estimator = Lasso(
-            alpha=self.hyperparameters["lambda"] / 2.0,
-            fit_intercept=False,
-            copy_X=True,
-            max_iter=self.max_iterations,
-            tol=self.tolerance,
-            warm_start=False,
-            random_state=None,
-            selection="random",
-            positive=self.positive,
-        )
+        if self.method == "multi-task":
+            estimator = MultiTaskLasso(
+                alpha=self.hyperparameters["lambda"] / 2.0,
+                fit_intercept=False,
+                copy_X=True,
+                max_iter=self.max_iterations,
+                tol=self.tolerance,
+                warm_start=False,
+                random_state=None,
+                selection="random",
+                # positive=self.positive,
+            )
+
+        if self.method == "gradient_decent":
+            estimator = Lasso(
+                alpha=self.hyperparameters["lambda"] / 2.0,
+                fit_intercept=False,
+                copy_X=True,
+                max_iter=self.max_iterations,
+                tol=self.tolerance,
+                warm_start=False,
+                random_state=None,
+                selection="random",
+                positive=self.positive,
+            )
+
+        if self.method == "lars":
+            estimator = LassoLars(
+                alpha=self.hyperparameters["lambda"] / 2.0,
+                fit_intercept=False,
+                verbose=True,
+                normalize=False,
+                precompute=True,
+                max_iter=self.max_iterations,
+                eps=2.220446049250313e-16,
+                copy_X=True,
+                fit_path=False,
+                positive=True,
+                jitter=None,
+                random_state=None,
+            )
+
         estimator.fit(Ks, ss)
         f = estimator.coef_.copy()
         if s_.shape[1] > 1:
@@ -201,7 +235,7 @@ class GeneralL2Lasso:
             s_ = s.dependent_variables[0].components[0].T
         else:
             s_ = s
-        predict = self.estimator.predict(K) * self.scale
+        predict = np.squeeze(self.estimator.predict(K)) * self.scale
         residue = s_ - predict
 
         if not isinstance(s, cp.CSDM):
@@ -235,6 +269,7 @@ class GeneralL2LassoCV:
         verbose=False,
         inverse_dimension=None,
         n_jobs=-1,
+        method="gradient_decent",
     ):
 
         if alphas is None:
@@ -247,6 +282,7 @@ class GeneralL2LassoCV:
         else:
             self.cv_lambdas = np.asarray(lambdas).ravel()
 
+        self.method = method
         self.folds = folds
 
         self.n_jobs = n_jobs
@@ -282,8 +318,7 @@ class GeneralL2LassoCV:
         else:
             s_ = s
 
-        if s_.ndim == 1:
-            s_ = s_[:, np.newaxis]
+        s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
         prod = np.asarray(self.f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
@@ -304,7 +339,8 @@ class GeneralL2LassoCV:
         self.cv_map = np.zeros((self.cv_alphas.size, self.cv_lambdas.size))
 
         alpha_ratio = np.ones(self.cv_alphas.size)
-        alpha_ratio[1:] = np.sqrt(self.cv_alphas[1:] / self.cv_alphas[:-1])
+        if self.cv_alphas.size != 1 and self.cv_alphas[0] != 0:
+            alpha_ratio[1:] = np.sqrt(self.cv_alphas[1:] / self.cv_alphas[:-1])
 
         Ks, ss = _get_augmented_data(
             K=K,
@@ -315,22 +351,55 @@ class GeneralL2LassoCV:
         )
         start_index = K.shape[0]
 
-        # The factor 0.5 for alpha in the Lasso problem is to compensate
+        # The factor 0.5 for alpha in the Lasso/LassoLars problem is to compensate
         # 1/(2 * n_sample) factor in OLS term.
-        l1 = Lasso(
-            alpha=self.cv_lambdas[0] / 2.0,
-            fit_intercept=False,
-            normalize=True,
-            precompute=True,
-            max_iter=self.max_iterations,
-            tol=self.tolerance,
-            copy_X=True,
-            positive=self.positive,
-            random_state=None,
-            warm_start=True,
-            selection="random",
-        )
-        l1.fit(Ks, ss)
+        # if self.method == "multi-task":
+        #     l1 = MultiTaskLasso(
+        #         alpha=self.cv_lambdas[0] / 2.0,
+        #         fit_intercept=False,
+        #         normalize=False,
+        #         # precompute=True,
+        #         max_iter=self.max_iterations,
+        #         tol=self.tolerance,
+        #         copy_X=True,
+        #         # positive=self.positive,
+        #         random_state=None,
+        #         warm_start=True,
+        #         selection="random",
+        #     )
+
+        # if self.method == "gradient_decent":
+        #     l1 = Lasso(
+        #         alpha=self.cv_lambdas[0] / 2.0,
+        #         fit_intercept=False,
+        #         normalize=False,
+        #         precompute=True,
+        #         max_iter=self.max_iterations,
+        #         tol=self.tolerance,
+        #         copy_X=True,
+        #         positive=self.positive,
+        #         random_state=None,
+        #         warm_start=True,
+        #         selection="random",
+        #     )
+
+        # if self.method == "lars":
+        #     l1 = LassoLars(
+        #         alpha=self.cv_lambdas[0] / 2.0,
+        #         fit_intercept=False,
+        #         verbose=True,
+        #         normalize=False,
+        #         precompute="auto",
+        #         max_iter=self.max_iterations,
+        #         eps=2.220446049250313e-16,
+        #         copy_X=True,
+        #         fit_path=False,
+        #         positive=self.positive,
+        #         jitter=None,
+        #         random_state=None,
+        #     )
+        l1 = self._get_minimizer()
+        # l1.fit(Ks, ss)
 
         l1_array = []
         for lambda_ in self.cv_lambdas:
@@ -339,7 +408,8 @@ class GeneralL2LassoCV:
 
         j = 0
         for alpha_ratio_ in alpha_ratio:
-            Ks[start_index:] *= alpha_ratio_
+            if alpha_ratio_ != 0:
+                Ks[start_index:] *= alpha_ratio_
             jobs = (
                 delayed(cv)(l1_array[i], Ks, ss, cv_indexes)
                 for i in range(self.cv_lambdas.size)
@@ -383,6 +453,7 @@ class GeneralL2LassoCV:
             positive=self.positive,
             regularizer=self.regularizer,
             inverse_dimension=self.inverse_dimension,
+            method=self.method,
         )
         self.opt.fit(K, s)
         self.f = self.opt.f
@@ -401,6 +472,54 @@ class GeneralL2LassoCV:
             self.cv_map.dimensions[1] = d1
         else:
             self.cv_map.dimensions[0] = d1
+
+    def _get_minimizer(self):
+        """Return the estimator for the method"""
+        if self.method == "multi-task":
+            return MultiTaskLasso(
+                alpha=self.cv_lambdas[0] / 2.0,
+                fit_intercept=False,
+                normalize=False,
+                # precompute=True,
+                max_iter=self.max_iterations,
+                tol=self.tolerance,
+                copy_X=True,
+                # positive=self.positive,
+                random_state=None,
+                warm_start=True,
+                selection="random",
+            )
+
+        if self.method == "gradient_decent":
+            return Lasso(
+                alpha=self.cv_lambdas[0] / 2.0,
+                fit_intercept=False,
+                normalize=False,
+                precompute=True,
+                max_iter=self.max_iterations,
+                tol=self.tolerance,
+                copy_X=True,
+                positive=self.positive,
+                random_state=None,
+                warm_start=True,
+                selection="random",
+            )
+
+        if self.method == "lars":
+            return LassoLars(
+                alpha=self.cv_lambdas[0] / 2.0,
+                fit_intercept=False,
+                verbose=True,
+                normalize=False,
+                precompute="auto",
+                max_iter=self.max_iterations,
+                eps=2.220446049250313e-16,
+                copy_X=True,
+                fit_path=False,
+                positive=self.positive,
+                jitter=None,
+                random_state=None,
+            )
 
     def predict(self, K):
         r"""
@@ -454,16 +573,22 @@ class GeneralL2LassoCV:
 
 def cv(l1, X, y, cv):
     """Return the cross-validation score as negative of mean square error."""
-    return cross_validate(
+    if isinstance(l1, (Lasso, MultiTaskLasso)):
+        fit_params = {"check_input": False}
+    if isinstance(l1, LassoLars):
+        fit_params = None  # {"Xy": np.dot(X.T, y)}
+
+    cv_score = cross_validate(
         l1,
         X=X,
         y=y,
         scoring="neg_mean_squared_error",  # 'neg_mean_absolute_error",
         cv=cv,
-        fit_params={"check_input": False},
+        fit_params=fit_params,
         n_jobs=1,
         verbose=0,
-    )["test_score"].mean()
+    )
+    return cv_score["test_score"].mean()
 
 
 def _get_smooth_size(f_shape, regularizer, max_size):
@@ -545,6 +670,9 @@ def generate_J_i(Ai, alpha, f_shape):
 
 def _get_augmented_data(K, s, alpha, regularizer, f_shape=None):
     """Creates a smooth kernel, K, with alpha regularization parameter."""
+    if alpha == 0:
+        return np.asfortranarray(K), np.asfortranarray(s)
+
     ks0, ks1 = K.shape
     ss0, ss1 = s.shape
 

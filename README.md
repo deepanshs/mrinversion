@@ -6,7 +6,7 @@
 | Build Status | [![Travis (.org)](https://img.shields.io/travis/deepanshs/mrinversion?logo=travis)](https://travis-ci.org/github/DeepanshS/mrinversion) [![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI%20(pip)?logo=GitHub>)](https://github.com/DeepanshS/mrinversion/actions) [![Read the Docs](https://img.shields.io/readthedocs/mrinversion)](https://mrinversion.readthedocs.io/en/latest/)                                     |
 | License      | [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)                                                                                                                                                                                                                                                                                                                                                 |
 | Metrics      | [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/DeepanshS/mrinversion.svg?logo=lgtm)](https://lgtm.com/projects/g/DeepanshS/mrinversion/context:python) [![codecov](https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg)](https://codecov.io/gh/DeepanshS/mrinversion) [![Total alerts](https://img.shields.io/lgtm/alerts/g/DeepanshS/mrinversion.svg?logo=lgtm)](https://lgtm.com/projects/g/DeepanshS/mrinversion/alerts/) |
-| Citations    | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3964644.svg)](https://doi.org/10.5281/zenodo.3964644)                                                                                                                                                                                                                                                                                                                                                                 |
+| Citations    | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3964644.svg)](https://doi.org/10.5281/zenodo.3964644) [![DOI](https://img.shields.io/badge/JCP-10.1063/5.0023345-Purple?s=small)](https://doi.org/10.1063/5.0023345)                                                                                                                                                                                                                                                  |
 
 The `mrinversion` python package is based on the statistical learning technique for
 determining the distribution of the magnetic resonance (NMR) tensor parameters
@@ -47,3 +47,9 @@ For more information, refer to the
     $ pip install mrinversion
 
 Please read our [installation document](https://mrinversion.readthedocs.io/en/latest/installation.html) for details.
+
+## Publication
+
+- Srivastava, D. J.; Grandinetti P. J., Statistical learning of NMR tensors from 2D
+  isotropic/anisotropic correlation nuclear magnetic resonance spectra, J. Chem. Phys.
+  **153**, 134201 (2020). [DOI:10.1063/5.0023345](https://doi.org/10.1063/5.0023345).

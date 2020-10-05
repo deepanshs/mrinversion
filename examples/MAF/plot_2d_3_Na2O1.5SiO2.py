@@ -281,9 +281,7 @@ f_sol /= f_sol.max()
 # The 3D plot of the solution
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
-plot_3d(
-    ax, f_sol, elev=25, azim=-50, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-60, -120],
-)
+plot_3d(ax, f_sol, elev=25, azim=-50, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-60, -120])
 plt.tight_layout()
 plt.show()
 

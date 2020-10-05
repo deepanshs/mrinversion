@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
+
 from mrsimulator import Simulator
 from mrsimulator import SpinSystem
 from mrsimulator.methods import BlochDecaySpectrum
@@ -6,6 +8,8 @@ from mrsimulator.methods import BlochDecaySpectrum
 from .utils import _x_y_to_zeta_eta_distribution
 from mrinversion.kernel.base import _check_dimension_type
 from mrinversion.kernel.base import BaseModel
+
+# from mrsimulator.methods import BlochDecayCentralTransitionSpectrum
 
 
 class LineShape(BaseModel):
@@ -56,12 +60,9 @@ class LineShape(BaseModel):
             "spectral_dimensions": spectral_dimensions,
         }
 
+        self.number_of_sidebands = number_of_sidebands
         if number_of_sidebands is None:
-            number_of_sidebands = dim.count
-
-        self.simulator = Simulator()
-        self.simulator.config.number_of_sidebands = number_of_sidebands
-        self.simulator.config.decompose_spectrum = "spin_system"
+            self.number_of_sidebands = dim.count
 
     def _get_zeta_eta(self, supersampling):
         """Return zeta and eta coordinates over x-y grid"""
@@ -129,9 +130,9 @@ class ShieldingPALineshape(LineShape):
         Returns:
             A numpy array containing the line-shape kernel.
         """
-
-        method = BlochDecaySpectrum.parse_dict_with_units(self.method_args)
-        isotope = self.method_args["channels"][0]
+        args_ = deepcopy(self.method_args)
+        method = BlochDecaySpectrum.parse_dict_with_units(args_)
+        isotope = args_["channels"][0]
         zeta, eta = self._get_zeta_eta(supersampling)
 
         x_csdm = self.inverse_kernel_dimension[0]
@@ -160,12 +161,15 @@ class ShieldingPALineshape(LineShape):
         if dim.origin_offset == 0:
             dim.origin_offset = larmor_frequency * 1e6  # in Hz
 
-        self.simulator.spin_systems = spin_systems
-        self.simulator.methods = [method]
-        self.simulator.run(pack_as_csdm=False)
+        sim = Simulator()
+        sim.config.number_of_sidebands = self.number_of_sidebands
+        sim.config.decompose_spectrum = "spin_system"
 
-        amp = self.simulator.methods[0].simulation
+        sim.spin_systems = spin_systems
+        sim.methods = [method]
+        sim.run(pack_as_csdm=False)
 
+        amp = sim.methods[0].simulation
         return self._averaged_kernel(amp, supersampling)
 
 
