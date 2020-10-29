@@ -146,6 +146,7 @@ Project details
     :maxdepth: 1
     :caption: Project details
 
+    changelog
     credits/license
     credits/acknowledgment
 

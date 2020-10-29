@@ -13,7 +13,6 @@ pre-commit>=1.16.1
 coverage>=4.5.3
 pytest-cov
 codecov
-numexpr>=2.7.0
 
 # Building Docs requirements
 sphinxjp.themes.basicstrap

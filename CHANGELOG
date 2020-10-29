@@ -1,0 +1,8 @@
+v0.1.1
+------
+
+What's new!
+'''''''''''
+
+- Added :func:`~mrinversion.utils.to_Haeberlen_grid` function to convert the 3D :math:`\rho(\delta_\text{iso}, x, y)`
+  distribution to :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)` distribution.

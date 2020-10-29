@@ -5,72 +5,7 @@ from mrsimulator import Simulator
 from mrsimulator import SpinSystem
 from mrsimulator.methods import BlochDecaySpectrum
 
-from .utils import _x_y_to_zeta_eta_distribution
-from mrinversion.kernel.base import _check_dimension_type
-from mrinversion.kernel.base import BaseModel
-
-# from mrsimulator.methods import BlochDecayCentralTransitionSpectrum
-
-
-class LineShape(BaseModel):
-    """Base line-shape kernel generation class."""
-
-    def __init__(
-        self,
-        kernel_dimension,
-        inverse_kernel_dimension,
-        channel,
-        magnetic_flux_density="9.4 T",
-        rotor_angle="54.735 deg",
-        rotor_frequency=None,
-        number_of_sidebands=None,
-    ):
-        super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 2)
-
-        kernel = self.__class__.__name__
-        dim_types = ["frequency", "dimensionless"]
-        _check_dimension_type(self.kernel_dimension, "anisotropic", dim_types, kernel)
-        _check_dimension_type(
-            self.inverse_kernel_dimension, "inverse", dim_types, kernel
-        )
-
-        dim = self.kernel_dimension
-
-        spectral_width = dim.increment * dim.count
-        reference_offset = dim.coordinates_offset
-        if dim.complex_fft is False:
-            reference_offset = dim.coordinates_offset + spectral_width / 2.0
-
-        spectral_dimensions = [
-            dict(
-                count=dim.count,
-                reference_offset=str(reference_offset),
-                spectral_width=str(spectral_width),
-            )
-        ]
-
-        if rotor_frequency is None:
-            rotor_frequency = str(dim.increment)
-
-        self.method_args = {
-            "channels": [channel],
-            "magnetic_flux_density": magnetic_flux_density,
-            "rotor_angle": rotor_angle,
-            "rotor_frequency": rotor_frequency,
-            "spectral_dimensions": spectral_dimensions,
-        }
-
-        self.number_of_sidebands = number_of_sidebands
-        if number_of_sidebands is None:
-            self.number_of_sidebands = dim.count
-
-    def _get_zeta_eta(self, supersampling):
-        """Return zeta and eta coordinates over x-y grid"""
-
-        zeta, eta = _x_y_to_zeta_eta_distribution(
-            self.inverse_kernel_dimension, supersampling
-        )
-        return zeta, eta
+from mrinversion.kernel.base import LineShape
 
 
 class ShieldingPALineshape(LineShape):

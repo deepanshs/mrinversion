@@ -150,8 +150,9 @@ def plot_3d(
     clip_percent=0.0,
     linewidth=1,
     alpha=0.15,
+    **kwargs,
 ):
-    r"""Generate a 3D density plot with 2D contour and 1D projections.
+    """Generate a 3D density plot with 2D contour and 1D projections.
 
     Args:
         ax: Matplotlib Axes to render the plot.
@@ -187,14 +188,30 @@ def plot_3d(
 
     lw = linewidth
 
-    f = csdm_object.dependent_variables[0].components[0].T
-    label = csdm_object.description
+    if isinstance(csdm_object, cp.CSDM):
+        f = csdm_object.dependent_variables[0].components[0].T
+        label = csdm_object.description
 
-    a_, b_, c_ = [item for item in csdm_object.dimensions]
+        a_, b_, c_ = [item for item in csdm_object.dimensions]
 
-    a = a_.coordinates.value
-    b = b_.coordinates.value
-    c = c_.coordinates.value
+        a = a_.coordinates.value
+        b = b_.coordinates.value
+        c = c_.coordinates.value
+
+        xlabel = f"{a_.axis_label} - 0"
+        ylabel = f"{b_.axis_label} - 1"
+        zlabel = f"{c_.axis_label} - 2"
+
+    else:
+        f = csdm_object
+        label = ""
+        a = np.arange(f.shape[0])
+        b = np.arange(f.shape[1])
+        c = np.arange(f.shape[2])
+
+        xlabel = "x"
+        ylabel = "y"
+        zlabel = "z"
 
     clr = cmap
     ck = cmap(0)
@@ -302,12 +319,15 @@ def plot_3d(
     else:
         ax.set_zlim(z_lim)
 
-    ax.set_xlabel(f"{a_.axis_label} - 0")
-    ax.set_ylabel(f"{b_.axis_label} - 1")
-    ax.set_zlabel(f"{c_.axis_label} - 2")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_zlabel(zlabel)
 
     x, y, z = np.meshgrid(a, b, c, indexing="ij")
-    ax.scatter(x.flat, y.flat, z.flat, marker="X", s=300, c=facecolors)
+
+    if "s" not in kwargs:
+        kwargs["s"] = 300
+    ax.scatter(x.flat, y.flat, z.flat, marker="X", c=facecolors, **kwargs)
 
     # full box
     da = a[1] - a[0]

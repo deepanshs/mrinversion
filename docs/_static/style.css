@@ -45,6 +45,10 @@ h6 {
   font-size: 1em;
 }
 
+pre {
+  line-height: 143%;
+}
+
 .sphx-glr-timing {
   padding-top: 1em;
 }
@@ -166,6 +170,7 @@ table caption:hover {
 
 #navbar-related {
   border-radius: 0;
+  display: none;
 }
 
 .navbar.navbar-fixed-top {
@@ -248,20 +253,15 @@ table caption:hover {
 }
 .sidebar.hidden-xs > p.caption {
   padding-left: 24px;
-  padding-top: 3px;
-  padding-bottom: 3px;
-  font-size: 1.1em;
-  font-weight: 500;
-  background-color: #5a5a5a;
-  color: #ffffff;
-  margin: 10px 0 0 0;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: 1.11em;
+  font-weight: 400;
+  color: #6e6e6e;
+  margin: 10px 0 0;
 }
 .sidebar.hidden-xs > ul {
   padding: 0;
-}
-.sidebar.hidden-xs > ul:first-child {
-  padding-top: 1em;
-  margin-top: 1em;
 }
 .sidebar.hidden-xs > ul:last-child {
   padding-bottom: 1em;
@@ -292,8 +292,8 @@ table caption:hover {
 
 .sidebar > ul > li > a {
   display: block;
-  padding-top: 0.25em;
-  padding-bottom: 0.25em;
+  padding-top: 0.15em;
+  padding-bottom: 0.15em;
   padding-left: 24px;
   padding-right: 24px;
   color: rgb(209, 209, 209);
@@ -327,11 +327,10 @@ table caption:hover {
 /* selected list item's sub-list's item a tags */
 .sidebar > ul > li.current > ul > li > a {
   display: block;
-  padding: 0.25em;
   padding-left: 48px;
   padding-right: 48px;
-  padding-top: 0.25em;
-  padding-bottom: 0.25em;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
   color: rgb(58, 58, 58);
   text-decoration: none;
   cursor: pointer;
@@ -340,10 +339,6 @@ table caption:hover {
 .sidebar > ul > li.current > ul > li > a.current {
   color: black;
   font-weight: 500;
-}
-
-#navbar-related {
-  display: none;
 }
 
 ul.this-page-menu {
@@ -385,10 +380,12 @@ footer .flex {
 footer .flex a {
   text-decoration: none;
 }
-footer a {
+footer a,
+footer a:visited {
   color: rgb(255, 166, 94);
 }
-footer a:hover {
+footer a:hover,
+footer a:active {
   color: rgb(255, 205, 164);
 }
 

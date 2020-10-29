@@ -120,4 +120,3 @@ venv.bak/
 __main__.py
 *.csdf
 *.pdf
-*.ipynb
