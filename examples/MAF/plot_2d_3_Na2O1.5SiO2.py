@@ -16,6 +16,7 @@
 # Import all relevant packages.
 import csdmpy as cp
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import cm
 from pylab import rcParams
 
@@ -23,6 +24,7 @@ from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
 from mrinversion.utils import plot_3d
+from mrinversion.utils import to_Haeberlen_grid
 
 # sphinx_gallery_thumbnail_number = 5
 
@@ -281,9 +283,7 @@ f_sol /= f_sol.max()
 # The 3D plot of the solution
 plt.figure(figsize=(5, 4.4))
 ax = plt.gca(projection="3d")
-plot_3d(
-    ax, f_sol, elev=25, azim=-50, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-60, -120],
-)
+plot_3d(ax, f_sol, elev=25, azim=-50, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-60, -120])
 plt.tight_layout()
 plt.show()
 
@@ -365,11 +365,34 @@ plt.tight_layout()
 plt.show()
 
 # %%
+# Convert the 3D tensor distribution in Haeberlen parameters
+# ----------------------------------------------------------
+# You may re-bin the 3D tensor parameter distribution from a
+# :math:`\rho(\delta_\text{iso}, x, y)` distribution to
+# :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)` distribution as follows.
+
+# Create the zeta and eta dimensions,, as shown below.
+zeta = cp.as_dimension(np.arange(40) * 4 - 40, unit="ppm", label="zeta")
+eta = cp.as_dimension(np.arange(16) / 15, label="eta")
+
+# Use the `to_Haeberlen_grid` function to convert the tensor parameter distribution.
+fsol_Hae = to_Haeberlen_grid(f_sol, zeta, eta)
+
+# %%
+# The 3D plot
+# '''''''''''
+plt.figure(figsize=(5, 4.4))
+ax = plt.gca(projection="3d")
+plot_3d(ax, fsol_Hae, x_lim=[0, 1], y_lim=[-40, 120], z_lim=[-60, -120], alpha=0.1)
+plt.tight_layout()
+plt.show()
+
+# %%
 # References
 # ----------
 #
 # .. [#f1] Zhang, P., Dunlap, C., Florian, P., Grandinetti, P. J., Farnan, I., Stebbins
 #       , J. F. Silicon site distributions in an alkali silicate glass derived by
-#       two-dimensional 29Si nuclear magnetic resonance, J. Non. Cryst. Solids 204
-#       294–300 (1996). `doi:10.1016/S0022-3093(96)00601-1
+#       two-dimensional 29Si nuclear magnetic resonance, J. Non. Cryst. Solids, **204**,
+#       (1996), 294–300. `doi:10.1016/S0022-3093(96)00601-1
 #       <https://doi.org/doi:10.1016/S0022-3093(96)00601-1>`_.

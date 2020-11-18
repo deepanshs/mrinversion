@@ -11,7 +11,21 @@ from mpl_toolkits.mplot3d import Axes3D  # lgtm [py/unused-import]
 
 
 def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
+    """Convert the three-dimensional p(iso, x, y) to p(iso, zeta, eta) tensor
+    distribution.
 
+    Args
+    ----
+
+    csdm_object: CSDM
+        A CSDM object containing the 3D p(iso, x, y) distribution.
+    zeta: CSDM.Dimension
+        A CSDM dimension object describing the zeta dimension.
+    eta: CSDM.Dimension
+        A CSDM dimension object describing the eta dimension.
+    n: int
+        An interger used in linear interpolation of the data. The default is 5.
+    """
     [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
     data = csdm_object.dependent_variables[0].components[0]
     iso = csdm_object.dimensions[2].coordinates.value
@@ -42,7 +56,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
             zeta_grid = np.sqrt(x_ ** 2 + y_ ** 2)
             eta_grid = np.ones(zeta_grid.shape)
 
-            index = np.where(x_ <= y_)
+            index = np.where(x_ < y_)
             eta_grid[index] = (4 / np.pi) * np.arctan(x_[index] / y_[index])
 
             index = np.where(x_ > y_)
@@ -57,12 +71,13 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
                 weight[index] /= 2
                 np.append(weight, weight[index])
                 sol_, _, _ = np.histogram2d(
-                    zeta_grid, eta_grid, weights=weight, bins=bins, range=range_,
+                    zeta_grid, eta_grid, weights=weight, bins=bins, range=range_
                 )
                 sol[i] += sol_
 
     sol /= n * n
 
+    del zeta_grid, eta_grid, index, x_, y_, avg_range_x, avg_range_y
     csdm_new = cp.as_csdm(sol)
     csdm_new.dimensions[0] = eta
     csdm_new.dimensions[1] = zeta
@@ -134,9 +149,10 @@ def plot_3d(
     box=False,
     clip_percent=0.0,
     linewidth=1,
-    alpha_factor=7.5,
+    alpha=0.15,
+    **kwargs,
 ):
-    r"""Generate a 3D density plot with 2D contour and 1D projections.
+    """Generate a 3D density plot with 2D contour and 1D projections.
 
     Args:
         ax: Matplotlib Axes to render the plot.
@@ -161,7 +177,8 @@ def plot_3d(
         clip_percent: (Optional) The amplitudes of the dataset below the given percent
             is made transparent for the volumetric plot.
         linewidth: (Optional) The linewidth of the 2D countours, 1D plots and box.
-        alpha_factor: (Optional) The factor to scale the alpha channel of the 3D volume.
+        alpha: (Optional) The amount of alpha(transparency) applied in rendering the 3D
+            volume.
     """
 
     if max_2d is None:
@@ -171,19 +188,35 @@ def plot_3d(
 
     lw = linewidth
 
-    f = csdm_object.dependent_variables[0].components[0].T
-    label = csdm_object.description
+    if isinstance(csdm_object, cp.CSDM):
+        f = csdm_object.dependent_variables[0].components[0].T
+        label = csdm_object.description
 
-    a_, b_, c_ = [item for item in csdm_object.dimensions]
+        a_, b_, c_ = [item for item in csdm_object.dimensions]
 
-    a = a_.coordinates.value
-    b = b_.coordinates.value
-    c = c_.coordinates.value
+        a = a_.coordinates.value
+        b = b_.coordinates.value
+        c = c_.coordinates.value
+
+        xlabel = f"{a_.axis_label} - 0"
+        ylabel = f"{b_.axis_label} - 1"
+        zlabel = f"{c_.axis_label} - 2"
+
+    else:
+        f = csdm_object
+        label = ""
+        a = np.arange(f.shape[0])
+        b = np.arange(f.shape[1])
+        c = np.arange(f.shape[2])
+
+        xlabel = "x"
+        ylabel = "y"
+        zlabel = "z"
 
     clr = cmap
     ck = cmap(0)
     facecolors = cmap(f)
-    facecolors[:, :, :, -1] = f / alpha_factor
+    facecolors[:, :, :, -1] = f * alpha
     index = np.where(f < clip_percent / 100)
     facecolors[:, :, :, -1][index] = 0
     facecolors.shape = (f.size, 4)
@@ -230,7 +263,7 @@ def plot_3d(
     dist /= max_2d[2]
 
     ax.contour(
-        x1, y1, dist, zdir="z", offset=offz_n, cmap=clr, levels=levels, linewidths=lw,
+        x1, y1, dist, zdir="z", offset=offz_n, cmap=clr, levels=levels, linewidths=lw
     )
 
     # 2D x-z contour projection
@@ -249,14 +282,14 @@ def plot_3d(
     if max_1d[0] is None:
         max_1d[0] = proj_x.max()
     proj_x /= max_1d[0]
-    ax.plot(a, sign * 14 * proj_x + offz, offy, zdir="y", c=ck, linewidth=lw)
+    ax.plot(a, 4 * sign * proj_x + offz, offy, zdir="y", c=ck, linewidth=lw)
 
     # 1D z-axis projection from 2D x-z projection
     proj_z = dist.sum(axis=0)
     if max_1d[2] is None:
         max_1d[2] = proj_z.max()
     proj_z /= max_1d[2]
-    ax.plot(-20 * proj_z + offy_n, c, offx, zdir="x", c=ck, linewidth=lw)
+    ax.plot(sign * proj_z / 4 + offy_n, c, offx, zdir="x", c=ck, linewidth=lw)
     ax.set_xlim(z_lim)
 
     # 2D y-z contour projection
@@ -266,7 +299,7 @@ def plot_3d(
         max_2d[0] = dist.max()
     dist_ = dist / max_2d[0]
     ax.contour(
-        dist_, x1, y1, zdir="x", offset=offx, cmap=clr, levels=levels, linewidths=lw,
+        dist_, x1, y1, zdir="x", offset=offx, cmap=clr, levels=levels, linewidths=lw
     )
 
     # 1D y-axis projection
@@ -275,7 +308,7 @@ def plot_3d(
         max_1d[1] = proj_y.max()
     proj_y /= max_1d[1]
     ax.plot(
-        b, sign * 14 * proj_y + offz, offx, zdir="x", c=ck, linewidth=lw, label=label
+        b, sign * proj_y * 4 + offz, offx, zdir="x", c=ck, linewidth=lw, label=label
     )
 
     ax.set_xlim(x_lim)
@@ -286,12 +319,15 @@ def plot_3d(
     else:
         ax.set_zlim(z_lim)
 
-    ax.set_xlabel(f"{a_.axis_label} - 0")
-    ax.set_ylabel(f"{b_.axis_label} - 1")
-    ax.set_zlabel(f"{c_.axis_label} - 2")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_zlabel(zlabel)
 
     x, y, z = np.meshgrid(a, b, c, indexing="ij")
-    ax.scatter(x.flat, y.flat, z.flat, marker="X", s=300, c=facecolors)
+
+    if "s" not in kwargs:
+        kwargs["s"] = 300
+    ax.scatter(x.flat, y.flat, z.flat, marker="X", c=facecolors, **kwargs)
 
     # full box
     da = a[1] - a[0]

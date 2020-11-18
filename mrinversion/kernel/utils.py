@@ -130,9 +130,7 @@ def _x_y_to_zeta_eta_distribution(grid, supersampling):
         # y_coordinates = (y_coordinates * dimension.larmor_frequency).to("").value
         # offset = grid.x.coordinates_offset.to("").value
 
-    x_mesh, y_mesh = np.meshgrid(
-        np.abs(x_coordinates), np.abs(y_coordinates), indexing="xy"
-    )
+    x_mesh, y_mesh = np.meshgrid(x_coordinates, y_coordinates, indexing="xy")
 
     # y_offset = y_coordinates[0]
     # x_offset = x_coordinates[0]

@@ -16,12 +16,14 @@
 # Import all relevant packages.
 import csdmpy as cp
 import matplotlib.pyplot as plt
+import numpy as np
 from pylab import rcParams
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
 from mrinversion.utils import plot_3d
+from mrinversion.utils import to_Haeberlen_grid
 
 # sphinx_gallery_thumbnail_number = 4
 
@@ -286,6 +288,28 @@ plot_3d(ax, f_sol, x_lim=[0, 140], y_lim=[0, 140], z_lim=[-50, -120])
 plt.tight_layout()
 plt.show()
 
+# %%
+# Convert the 3D tensor distribution in Haeberlen parameters
+# ----------------------------------------------------------
+# You may re-bin the 3D tensor parameter distribution from a
+# :math:`\rho(\delta_\text{iso}, x, y)` distribution to
+# :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)` distribution as follows.
+
+# Create the zeta and eta dimensions,, as shown below.
+zeta = cp.as_dimension(np.arange(40) * 8 - 150, unit="ppm", label="zeta")
+eta = cp.as_dimension(np.arange(16) / 15, label="eta")
+
+# Use the `to_Haeberlen_grid` function to convert the tensor parameter distribution.
+fsol_Hae = to_Haeberlen_grid(f_sol, zeta, eta)
+
+# %%
+# The 3D plot
+# '''''''''''
+plt.figure(figsize=(5, 4.4))
+ax = plt.gca(projection="3d")
+plot_3d(ax, fsol_Hae, x_lim=[0, 1], y_lim=[-150, 150], z_lim=[-50, -120], alpha=0.05)
+plt.tight_layout()
+plt.show()
 
 # %%
 # References

@@ -10,6 +10,7 @@ def find_optimum_singular_value(s):
     s2 = s ** 2.0
     sj = s2 / s2.sum()
     T = sj * np.log10(sj)
+    T[np.where(np.isnan(T))] = 0
     logn = np.log10(length)
     lognm1 = np.log10(length - 1.0)
     entropy = (-1.0 / logn) * T.sum()

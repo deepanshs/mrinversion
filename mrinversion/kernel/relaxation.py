@@ -7,17 +7,16 @@ from mrinversion.kernel.base import BaseModel
 
 class T2(BaseModel):
     r"""
-        A class for simulating the kernel of T2 decaying functions,
+    A class for simulating the kernel of T2 decaying functions,
 
-        .. math::
-                y = \exp(-x/x_\text{inv}).
+    .. math::
+            y = \exp(-x/x_\text{inv}).
 
-        Args:
-            kernel_dimension: A Dimension object, or an equivalent dictionary
-                    object. This dimension must represent the pure anisotropic
-                    dimension.
-            inverse_dimension: A list of two Dimension objects, or equivalent
-                    dictionary objects representing the `x`-`y` coordinate grid.
+    Args:
+        kernel_dimension: A Dimension object, or an equivalent dictionary object. This
+            dimension must represent the T2 decay dimension.
+        inverse_kernel_dimension: A list of two Dimension objects, or equivalent
+            dictionary objects representing the `x`-`y` coordinate grid.
     """
 
     def __init__(self, kernel_dimension, inverse_dimension):
@@ -47,17 +46,16 @@ class T2(BaseModel):
 
 class T1(BaseModel):
     r"""
-        A class for simulating the kernel of T1 recovery functions,
+    A class for simulating the kernel of T1 recovery functions,
 
-        .. math::
-                y = 1 - \exp(-x/x_\text{inv}).
+    .. math::
+            y = 1 - \exp(-x/x_\text{inv}).
 
-        Args:
-            kernel_dimension: A Dimension object, or an equivalent dictionary
-                    object. This dimension must represent the pure anisotropic
-                    dimension.
-            inverse_dimension: A list of two Dimension objects, or equivalent
-                    dictionary objects representing the `x`-`y` coordinate grid.
+    Args:
+        kernel_dimension: A Dimension object, or an equivalent dictionary object.
+        This dimension must represent the T2 decay dimension.
+        inverse_kernel_dimension: A list of two Dimension objects, or equivalent
+                dictionary objects representing the `x`-`y` coordinate grid.
     """
 
     def __init__(self, kernel_dimension, inverse_dimension):

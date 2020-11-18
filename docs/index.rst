@@ -58,6 +58,9 @@ Welcome to Mrinversion documentation!
         - .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3964644.svg
             :target: https://doi.org/10.5281/zenodo.3964644
 
+          .. image:: https://img.shields.io/badge/JCP-10.1063/5.0023345-Purple?s=small
+            :target: https://doi.org/10.1063/5.0023345
+
 .. - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?logo=github
 ..     :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
 ..     :alt: GitHub contributors
@@ -143,8 +146,16 @@ Project details
     :maxdepth: 1
     :caption: Project details
 
+    changelog
     credits/license
     credits/acknowledgment
+
+Publication
+-----------
+
+- Srivastava, D. J.; Grandinetti P. J., Statistical learning of NMR tensors from 2D
+  isotropic/anisotropic correlation nuclear magnetic resonance spectra, J. Chem. Phys.
+  **153**, 134201 (2020). `DOI:10.1063/5.0023345 <https://doi.org/10.1063/5.0023345>`_.
 
 ----
 

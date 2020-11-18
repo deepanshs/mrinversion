@@ -42,7 +42,7 @@ def generate_shielding_kernel(zeta_, eta_, angle, freq, n_sidebands, to_ppm=True
 
     spin_systems = [
         SpinSystem(
-            sites=[Site(isotope="29Si", shielding_symmetric={"zeta": z, "eta": e},)]
+            sites=[Site(isotope="29Si", shielding_symmetric={"zeta": z, "eta": e})]
         )
         for z, e in zip(zeta_, eta_)
     ]
@@ -107,7 +107,6 @@ def test_MAF_lineshape_kernel():
         number_of_sidebands=1,
     )
     zeta, eta = ns_obj._get_zeta_eta(supersampling=1)
-    print("zeta", zeta.size, "eta", eta.size)
     K = ns_obj.kernel(supersampling=1)
     sim_lineshape = generate_shielding_kernel(zeta, eta, np.pi / 2, 14000, 1).T
     assert np.allclose(K, sim_lineshape, rtol=1.0e-3, atol=1e-3)

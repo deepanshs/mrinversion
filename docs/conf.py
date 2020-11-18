@@ -106,6 +106,24 @@ sphinx_gallery_conf = {
         # The module you locally document uses None
         "mrinversion": None,
     },
+    "first_notebook_cell": (
+        "# This cell is added by sphinx-gallery\n\n"
+        "%matplotlib inline\n\n"
+        "import mrinversion\n"
+        "print(f'You are using mrinversion v{mrinversion.__version__}')"
+    ),
+    "binder": {
+        # Required keys
+        "org": "DeepanshS",
+        "repo": "mrinversion",
+        "branch": "master",
+        "binderhub_url": "https://mybinder.org",
+        "dependencies": "../requirements.txt",
+        # Optional keys
+        "filepath_prefix": "docs/_build/html",
+        "notebooks_dir": "../../notebooks",
+        "use_jupyter_lab": True,
+    },
 }
 
 intersphinx_mapping = {
@@ -224,7 +242,7 @@ html_theme_options = {
 
 
 # Theme options
-# html_logo = "_static/csdmpy.png"
+html_logo = "_static/mrinversion.png"
 html_style = "style.css"
 html_title = f"mrinversion:doc v{__version__}"
 html_last_updated_fmt = ""
