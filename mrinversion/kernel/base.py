@@ -3,6 +3,7 @@ from copy import deepcopy
 
 import csdmpy as cp
 import numpy as np
+from mrsimulator.methods import BlochDecaySpectrum
 
 from .utils import _x_y_to_zeta_eta_distribution
 
@@ -108,10 +109,25 @@ class LineShape(BaseModel):
 
         dim = self.kernel_dimension
 
+        temp_method = BlochDecaySpectrum.parse_dict_with_units(
+            {"channels": [channel], "magnetic_flux_density": magnetic_flux_density}
+        )
+        # larmor frequency from method.
+        B0 = temp_method.spectral_dimensions[0].events[0].magnetic_flux_density  # in T
+        gamma = temp_method.channels[0].gyromagnetic_ratio  # in MHz/T
+        self.larmor_frequency = -gamma * B0  # in MHz
+
         spectral_width = dim.increment * dim.count
         reference_offset = dim.coordinates_offset
         if dim.complex_fft is False:
             reference_offset = dim.coordinates_offset + spectral_width / 2.0
+
+        if dim.increment.unit.physical_type == "dimensionless":
+            lf = abs(self.larmor_frequency)
+            val = spectral_width.to("ppm")
+            spectral_width = f"{val.value * lf} Hz"
+            val = reference_offset.to("ppm")
+            reference_offset = f"{val.value * lf} Hz"
 
         spectral_dimensions = [
             dict(
@@ -122,7 +138,10 @@ class LineShape(BaseModel):
         ]
 
         if rotor_frequency is None:
-            rotor_frequency = str(dim.increment)
+            if dim.increment.unit.physical_type == "dimensionless":
+                rotor_frequency = f"{dim.increment.to('ppm').value * lf} Hz"
+            else:
+                rotor_frequency = str(dim.increment)
 
         self.method_args = {
             "channels": [channel],

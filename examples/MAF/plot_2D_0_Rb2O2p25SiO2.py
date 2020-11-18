@@ -209,7 +209,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # increase the grid resolution for your problem if desired.
 
 # setup the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-5.2 - 0.35 * (np.arange(5) / 4))
+lambdas = 10 ** (-5.2 - 1.25 * (np.arange(5) / 4))
 alphas = 10 ** (-5.5 - 1.25 * (np.arange(5) / 4))
 
 # setup the smooth lasso cross-validation class
