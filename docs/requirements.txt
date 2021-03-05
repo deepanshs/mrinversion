@@ -3,4 +3,4 @@ sphinx>=2.1.2
 sphinx-gallery
 pillow
 matplotlib
-scikit-learn>=0.22
+scikit-learn>=0.24.1

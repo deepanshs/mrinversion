@@ -18,8 +18,8 @@ install_requires = [
     "numpy>=1.17",
     "setuptools>=27.3",
     "csdmpy>=0.3.1",
-    "mrsimulator>=0.3.0a0",
-    "scikit-learn>=0.22",
+    "mrsimulator>=0.5",
+    "scikit-learn>=0.24.1",
 ]
 
 setup_requires = ["setuptools>=27.3"]
@@ -59,6 +59,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Scientific/Engineering",
     ],
 )
