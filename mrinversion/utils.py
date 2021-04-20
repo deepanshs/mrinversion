@@ -152,7 +152,7 @@ def plot_3d(
     alpha=0.15,
     **kwargs,
 ):
-    """Generate a 3D density plot with 2D contour and 1D projections.
+    r"""Generate a 3D density plot with 2D contour and 1D projections.
 
     Args:
         ax: Matplotlib Axes to render the plot.

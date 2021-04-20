@@ -8,5 +8,6 @@ API-Reference
     api/shielding_kernel
     api/SmoothLasso
     api/SmoothLassoCV
+    api/SmoothLassoLS
     api/TSVDCompression
     api/utils

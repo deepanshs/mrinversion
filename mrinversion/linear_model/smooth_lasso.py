@@ -8,8 +8,7 @@ __email__ = "srivastava.89@osu.edu"
 
 
 class SmoothLasso(GeneralL2Lasso):
-    r"""
-    The linear model trained with the combined l1 and l2 priors as the regularizer.
+    r"""The linear model trained with the combined l1 and l2 priors as the regularizer.
     The method minimizes the objective function,
 
     .. math::
@@ -96,9 +95,12 @@ class SmoothLasso(GeneralL2Lasso):
 
 
 class SmoothLassoCV(GeneralL2LassoCV):
-    r"""
-    The linear model trained with the combined l1 and l2 priors as the
-    regularizer. The method minimizes the objective function,
+    r"""The linear model trained with the combined l1 and l2 priors as the regularizer
+    with in-built cross-validation. The cross-validation is carried out using a
+    stratified splitting of the signal over the given range of :math:`alpha` and
+    :math:`lambda` values.
+
+    The method minimizes the objective function,
 
     .. math::
         \| {\bf Kf - s} \|^2_2 + \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2
@@ -132,8 +134,6 @@ class SmoothLassoCV(GeneralL2LassoCV):
     respective dimensions, with the constraint that :math:`\prod_{i=1}^{d}n_i = n`,
     where :math:`d` is the total number of dimensions.
 
-    The cross-validation is carried out using a stratified splitting of the signal.
-
     Parameters
     ----------
 
@@ -157,8 +157,6 @@ class SmoothLassoCV(GeneralL2LassoCV):
         The default is True.
     sigma: float
         The standard deviation of the noise in the signal. The default is 0.0.
-    sigma: float
-        The standard deviation of the noise in the signal. The default is 0.0.
     randomize: bool
         If true, the folds are created by randomly assigning the samples to each fold.
         If false, a stratified sampled is used to generate folds. The default is False.
@@ -170,7 +168,6 @@ class SmoothLassoCV(GeneralL2LassoCV):
     n_jobs: int
         The number of CPUs used for computation. The default is -1, that is, all
         available CPUs are used.
-
 
     Attributes
     ----------
@@ -221,9 +218,11 @@ class SmoothLassoCV(GeneralL2LassoCV):
 
 
 class SmoothLassoLS(GeneralL2LassoLS):
-    r"""
-    The linear model trained with the combined l1 and l2 priors as the
-    regularizer. The method minimizes the objective function,
+    r"""The linear model trained with the combined l1 and l2 priors as the regularizer
+    with in-built cross-validation. The cross-validation is carried out using a
+    stratified splitting of the signal using the least-squares analysis.
+
+    The method minimizes the objective function,
 
     .. math::
         \| {\bf Kf - s} \|^2_2 + \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2
@@ -257,15 +256,13 @@ class SmoothLassoLS(GeneralL2LassoLS):
     respective dimensions, with the constraint that :math:`\prod_{i=1}^{d}n_i = n`,
     where :math:`d` is the total number of dimensions.
 
-    The cross-validation is carried out using a stratified splitting of the signal.
-
     Parameters
     ----------
 
-    alphas: ndarray
-        A list of :math:`\alpha` hyperparameters.
-    lambdas: ndarray
-        A list of :math:`\lambda` hyperparameters.
+    alpha: float
+        A starting guess for the :math:`\alpha` hyperparameters.
+    lambda1: float
+        A starting guess for the :math:`\lambda` hyperparameters.
     inverse_dimension: list
         A list of csdmpy Dimension objects representing the inverse space.
     folds: int
@@ -282,8 +279,6 @@ class SmoothLassoLS(GeneralL2LassoLS):
         The default is True.
     sigma: float
         The standard deviation of the noise in the signal. The default is 0.0.
-    sigma: float
-        The standard deviation of the noise in the signal. The default is 0.0.
     randomize: bool
         If true, the folds are created by randomly assigning the samples to each fold.
         If false, a stratified sampled is used to generate folds. The default is False.
@@ -295,7 +290,6 @@ class SmoothLassoLS(GeneralL2LassoLS):
     n_jobs: int
         The number of CPUs used for computation. The default is -1, that is, all
         available CPUs are used.
-
 
     Attributes
     ----------
