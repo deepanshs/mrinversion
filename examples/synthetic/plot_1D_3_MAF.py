@@ -20,9 +20,7 @@ import numpy as np
 from pylab import rcParams
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
-from mrinversion.linear_model import SmoothLasso
-from mrinversion.linear_model import SmoothLassoCV
-from mrinversion.linear_model import TSVDCompression
+from mrinversion.linear_model import SmoothLasso, SmoothLassoCV, TSVDCompression
 from mrinversion.utils import get_polar_grids
 
 # Setup for the matplotlib figures

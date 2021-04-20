@@ -26,7 +26,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     n: int
         An interger used in linear interpolation of the data. The default is 5.
     """
-    [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
+    _ = [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
     data = csdm_object.dependent_variables[0].components[0]
     iso = csdm_object.dimensions[2].coordinates.value
 

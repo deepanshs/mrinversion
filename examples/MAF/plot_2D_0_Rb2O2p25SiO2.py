@@ -23,10 +23,8 @@ from pylab import rcParams
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
-from mrinversion.linear_model import SmoothLassoCV
-from mrinversion.linear_model import TSVDCompression
-from mrinversion.utils import plot_3d
-from mrinversion.utils import to_Haeberlen_grid
+from mrinversion.linear_model import SmoothLassoCV, TSVDCompression
+from mrinversion.utils import plot_3d, to_Haeberlen_grid
 
 # sphinx_gallery_thumbnail_number = 6
 

@@ -61,3 +61,4 @@ repos:
         language: python
         types: [python]
         minimum_pre_commit_version: "0.15.0"
+        exclude: (examples|setup.py)
