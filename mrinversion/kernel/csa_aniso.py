@@ -72,18 +72,12 @@ class ShieldingPALineshape(LineShape):
 
         x_csdm = self.inverse_kernel_dimension[0]
         if x_csdm.coordinates.unit.physical_type == "frequency":
-
-            # larmor frequency from method.
-            B0 = method.spectral_dimensions[0].events[0].magnetic_flux_density  # in T
-            gamma = method.channels[0].gyromagnetic_ratio  # in MHz/T
-            larmor_frequency = -gamma * B0  # in MHz
-
             # convert zeta to ppm if given in frequency units.
-            zeta /= larmor_frequency  # zeta in ppm
+            zeta /= self.larmor_frequency  # zeta in ppm
 
             for dim_i in self.inverse_kernel_dimension:
                 if dim_i.origin_offset.value == 0:
-                    dim_i.origin_offset = f"{abs(larmor_frequency)} MHz"
+                    dim_i.origin_offset = f"{abs(self.larmor_frequency)} MHz"
 
         spin_systems = [
             SpinSystem(
@@ -91,10 +85,6 @@ class ShieldingPALineshape(LineShape):
             )
             for z, e in zip(zeta, eta)
         ]
-
-        dim = method.spectral_dimensions[0]
-        if dim.origin_offset == 0:
-            dim.origin_offset = larmor_frequency * 1e6  # in Hz
 
         sim = Simulator()
         sim.config.number_of_sidebands = self.number_of_sidebands
