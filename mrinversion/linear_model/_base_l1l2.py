@@ -2,7 +2,6 @@
 from copy import deepcopy
 from typing import Any
 from typing import List
-from typing import Literal
 from typing import Union
 
 import csdmpy as cp
@@ -17,6 +16,7 @@ from sklearn.linear_model import LassoLars
 from sklearn.linear_model import MultiTaskLasso
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
+from typing_extensions import Literal
 
 from mrinversion.linear_model.tsvd_compression import TSVDCompression  # noqa: F401
 
