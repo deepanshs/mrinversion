@@ -4,6 +4,7 @@ csdmpy>=0.3.1
 joblib>=0.13.2
 mrsimulator>=0.5
 scikit-learn>=0.24.1
+pydantic>=1.8.1
 
 # development packages
 pytest-runner>=5.0
