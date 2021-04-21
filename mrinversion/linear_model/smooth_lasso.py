@@ -72,26 +72,10 @@ class SmoothLasso(GeneralL2Lasso):
         The number of iterations required to reach the specified tolerance.
     """
 
-    def __init__(
-        self,
-        alpha,
-        lambda1,
-        inverse_dimension,
-        max_iterations=10000,
-        tolerance=1e-5,
-        positive=True,
-        method="gradient_decent",
-    ):
-        super().__init__(
-            alpha=alpha,
-            lambda1=lambda1,
-            max_iterations=max_iterations,
-            tolerance=tolerance,
-            positive=positive,
-            regularizer="smooth lasso",
-            inverse_dimension=inverse_dimension,
-            method=method,
-        )
+    def __init__(self, **kwargs):
+        if "regularizer" in kwargs:
+            raise KeyError("regularizer is an immutable property of SmoothLasso")
+        super().__init__(regularizer="smooth lasso", **kwargs)
 
 
 class SmoothLassoCV(GeneralL2LassoCV):
@@ -183,38 +167,10 @@ class SmoothLassoCV(GeneralL2LassoCV):
         The cross-validation error metric determined as the mean square error.
     """
 
-    def __init__(
-        self,
-        alphas,
-        lambdas,
-        inverse_dimension,
-        folds=10,
-        max_iterations=10000,
-        tolerance=1e-5,
-        positive=True,
-        sigma=0.0,
-        randomize=False,
-        times=2,
-        verbose=False,
-        n_jobs=-1,
-        method="gradient_decent",
-    ):
-        super().__init__(
-            alphas=alphas,
-            lambdas=lambdas,
-            inverse_dimension=inverse_dimension,
-            folds=folds,
-            max_iterations=max_iterations,
-            tolerance=tolerance,
-            positive=positive,
-            sigma=sigma,
-            regularizer="smooth lasso",
-            randomize=randomize,
-            times=times,
-            verbose=verbose,
-            n_jobs=n_jobs,
-            method=method,
-        )
+    def __init__(self, **kwargs):
+        if "regularizer" in kwargs:
+            raise KeyError("regularizer is an immutable property of SmoothLasso")
+        super().__init__(regularizer="smooth lasso", **kwargs)
 
 
 class SmoothLassoLS(GeneralL2LassoLS):
@@ -305,35 +261,7 @@ class SmoothLassoLS(GeneralL2LassoLS):
         The cross-validation error metric determined as the mean square error.
     """
 
-    def __init__(
-        self,
-        alpha=1e-6,
-        lambda1=1e-6,
-        inverse_dimension=None,
-        folds=10,
-        max_iterations=10000,
-        tolerance=1e-5,
-        positive=True,
-        sigma=0.0,
-        randomize=False,
-        times=2,
-        verbose=False,
-        n_jobs=-1,
-        method="gradient_decent",
-    ):
-        super().__init__(
-            alpha=alpha,
-            lambda1=lambda1,
-            inverse_dimension=inverse_dimension,
-            folds=folds,
-            max_iterations=max_iterations,
-            tolerance=tolerance,
-            positive=positive,
-            sigma=sigma,
-            regularizer="smooth lasso",
-            randomize=randomize,
-            times=times,
-            verbose=verbose,
-            n_jobs=n_jobs,
-            method=method,
-        )
+    def __init__(self, **kwargs):
+        if "regularizer" in kwargs:
+            raise KeyError("regularizer is an immutable property of SmoothLasso")
+        super().__init__(regularizer="smooth lasso", **kwargs)

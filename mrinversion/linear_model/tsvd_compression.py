@@ -34,7 +34,7 @@ class TSVDCompression:
         self.truncation_index = r
 
         if isinstance(s, cp.CSDM):
-            signal = s.dependent_variables[0].components[0].T
+            signal = s.y[0].components[0].T
         else:
             signal = s
         (
@@ -48,7 +48,7 @@ class TSVDCompression:
 
         if isinstance(s, cp.CSDM):
             self.compressed_s = cp.as_csdm(compressed_signal.T)
-            if len(s.dimensions) > 1:
-                self.compressed_s.dimensions[1] = s.dimensions[1]
+            if len(s.x) > 1:
+                self.compressed_s.x[1] = s.x[1]
         else:
             self.compressed_s = compressed_signal
