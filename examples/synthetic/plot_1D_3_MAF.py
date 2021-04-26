@@ -216,8 +216,8 @@ plt.show()
 # hyperparameters.
 # The following code generates a range of :math:`\lambda` and :math:`\alpha` values
 # that are uniformly sampled on the log scale.
-lambdas = 10 ** (-5.2 - 1.5 * (np.arange(6) / 5))
-alphas = 10 ** (-4 - 1.5 * (np.arange(6) / 5))
+lambdas = 10 ** (-4.8 - 1.5 * (np.arange(6) / 5))
+alphas = 10 ** (-4 - 2 * (np.arange(6) / 5))
 
 # set up cross validation smooth lasso method
 s_lasso_cv = SmoothLassoCV(
@@ -259,7 +259,6 @@ ax.scatter(
     marker="x",
     color="k",
 )
-plt.legend()
 plt.tight_layout(pad=0.5)
 plt.show()
 
