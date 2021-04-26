@@ -27,227 +27,28 @@ __email__ = "srivastava.89@osu.edu"
 
 
 class Optimizer(BaseModel):
-    def _get_minimizer(self, alpha):
-        """Return the estimator for the method"""
-        # The factor 0.5 for alpha in the Lasso/LassoLars problem is to compensate
-        # 1/(2 * n_sample) factor in OLS term.
-        if self.method == "multi-task":
-            return MultiTaskLasso(
-                alpha=alpha / 2.0,  # self.cv_lambdas[0] / 2.0,
-                fit_intercept=False,
-                normalize=False,
-                # precompute=True,
-                max_iter=self.max_iterations,
-                tol=self.tolerance,
-                copy_X=True,
-                # positive=self.positive,
-                random_state=None,
-                warm_start=False,
-                selection="random",
-            )
-
-        if self.method == "gradient_decent":
-            return Lasso(
-                alpha=alpha / 2.0,
-                fit_intercept=False,
-                normalize=False,
-                precompute=True,
-                max_iter=self.max_iterations,
-                tol=self.tolerance,
-                copy_X=True,
-                positive=self.positive,
-                random_state=None,
-                warm_start=False,
-                selection="random",
-            )
-
-        if self.method == "lars":
-            return LassoLars(
-                alpha=alpha / 2.0,
-                fit_intercept=False,
-                verbose=True,
-                normalize=False,
-                precompute="auto",
-                max_iter=self.max_iterations,
-                copy_X=True,
-                fit_path=False,
-                positive=self.positive,
-                jitter=None,
-                random_state=0,
-            )
-
-    def _pre_fit_cv(self, K, s, alpha):
-        s_ = _get_proper_data(s)
-        self._scale = s_.max().real
-        s_ = s_ / self._scale
-
-        # prod = np.asarray(self.f_shape).prod()
-        # if K.shape[1] != prod:
-        #     raise ValueError(
-        #         "The product of the shape, `f_shape`, must be equal to the length of "
-        #         f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
-        #     )
-        half = False
-        if "half" in self.inverse_dimension[0].application:
-            half = self.inverse_dimension[0].application["half"]
-
-        Ks, ss = _get_augmented_data(
-            K=K,
-            s=s_,
-            alpha=s_.size * alpha,
-            regularizer=self.regularizer,
-            f_shape=self.f_shape,
-            half=half,
-        )
-
-        args = (self.folds, self.regularizer, self.f_shape, self.randomize, self.times)
-        cv_indexes = _get_cv_indexes(K, *args)
-
-        return Ks, ss, cv_indexes
-
-
-class GeneralL2Lasso(Optimizer):
-    r"""The Minimizer class solves the following equation,
-
-    .. math::
-        {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \frac{1}{m} \|
-                    {\bf Kf - s} \|^2_2 +
-                    \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2 +
-                    \lambda  \| {\bf f} \|_1 \right),
-
-    where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
-    :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known signal
-    containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
-    is the desired solution matrix.
-
-
-    Based on the regularization literal, the above problem is constraint
-
-    Args:
-        alpha: Float, the hyperparameter, :math:`\alpha`.
-        lambda1: Float, the hyperparameter, :math:`\lambda`.
-        hyperparameters: Dict, a python dictionary of hyperparameters.
-        max_iterations: Interger, the maximum number of iterations allowed when
-                        solving the problem. The default value is 10000.
-        tolerance: Float, the tolerance at which the solution is
-                   considered converged. The default value is 1e-5.
-        positive: Boolean. If True, the amplitudes in the solution,
-                  :math:`{\bf f}` is all positive, else the solution may contain
-                  positive and negative amplitudes. The default is True.
-        regularizer: String, a literal specifying the form of matrix
-                     :math:`{\bf J}_i`. The allowed literals are `smooth lasso`
-                     and `sparse ridge fusion`.
-        f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
-                        (n1, n2, ..., nd)
-    """
-
-    alpha: float = 1e-3
-    lambda1: float = 1e-6
-    hyperparameters: dict = None
     inverse_dimension: List[
         Union[cp.Dimension, cp.LinearDimension, cp.MonotonicDimension]
-    ] = []
-    max_iterations: int = 10000
+    ]
+    max_iterations: int = 20000
     tolerance: float = 1e-5
     positive: bool = True
     regularizer: Literal["smooth lasso", "sparse ridge fusion"] = "smooth lasso"
     method: Literal["multi-task", "gradient_decent", "lars"] = "gradient_decent"
+
+    folds: int = 10
+    sigma: float = 0.0
+    randomize: bool = False
+    times: int = 2
+
     f: Union[cp.CSDM, np.ndarray] = None
     n_iter: int = None
+
     _scale: float = PrivateAttr(1.0)
     _estimator: Any = PrivateAttr()
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        if self.hyperparameters is None:
-            self.hyperparameters = {"lambda": self.lambda1, "alpha": self.alpha}
-
     class Config:
         arbitrary_types_allowed = True
-
-    @property
-    def f_shape(self):
-        return tuple([item.count for item in self.inverse_dimension])[::-1]
-
-    def fit(self, K, s):
-        r"""Fit the model using the coordinate descent method from scikit-learn.
-
-        Args
-        ----
-
-        K: ndarray
-            The :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
-            shape (m, n).
-        s: ndarray or CSDM object.
-            A csdm object or an equivalent numpy array holding the signal,
-            :math:`{\bf s}`, as a :math:`m \times m_\text{count}` matrix.
-        """
-
-        s_ = _get_proper_data(s)
-        self._scale = s_.real.max()
-        s_ = s_ / self._scale
-
-        # prod = np.asarray(self.f_shape).prod()
-        # if K.shape[1] != prod:
-        #     raise ValueError(
-        #         "The product of the shape, `f_shape`, must be equal to the length of "
-        #         f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
-        #     )
-
-        half = False
-        if "half" in self.inverse_dimension[0].application:
-            half = self.inverse_dimension[0].application["half"]
-
-        Ks, ss = _get_augmented_data(
-            K=K,
-            s=s_,
-            alpha=s_.size * self.hyperparameters["alpha"],
-            regularizer=self.regularizer,
-            f_shape=self.f_shape,
-            half=half,
-        )
-
-        _estimator = self._get_minimizer(self.hyperparameters["lambda"])
-        _estimator.fit(Ks, ss)
-        f = _estimator.coef_.copy()
-
-        if half:
-            index = self.inverse_dimension[0].application["index"]
-            f_new = np.zeros((s_.shape[1], np.prod(self.f_shape)), dtype=float)
-            f_new[:, index] = f
-            f = f_new
-        if s_.shape[1] > 1:
-            f.shape = (s_.shape[1],) + self.f_shape
-            f[:, :, 0] /= 2.0
-            f[:, 0, :] /= 2.0
-        else:
-            f.shape = self.f_shape
-            f[:, 0] /= 2.0
-            f[0, :] /= 2.0
-
-        f *= self._scale
-
-        if isinstance(s, cp.CSDM):
-            f = self.pack_as_csdm(f, s)
-            # f = cp.as_csdm(f)
-
-            # if len(s.x) > 1:
-            #     f.x[2] = s.x[1]
-            # f.x[1] = self.inverse_dimension[1]
-            # f.x[0] = self.inverse_dimension[0]
-
-        self._estimator = _estimator
-        self.f = f
-        self.n_iter = _estimator.n_iter_
-
-    def pack_as_csdm(self, f, s):
-        f = cp.as_csdm(f)
-
-        if len(s.x) > 1:
-            f.x[2] = s.x[1]
-        f.x[1] = self.inverse_dimension[1]
-        f.x[0] = self.inverse_dimension[0]
-        return f
 
     def predict(self, K):
         r"""Predict the signal using the linear model.
@@ -303,23 +104,227 @@ class GeneralL2Lasso(Optimizer):
         return residue
 
     def score(self, K, s, sample_weights=None):
-        """
-        The coefficient of determination, :math:`R^2`, of the prediction.
+        """The coefficient of determination, :math:`R^2`, of the prediction.
         For more information, read scikit-learn documentation.
         """
         return self._estimator.score(K, s / self._scale, sample_weights)
 
+    def get_optimizer(self, alpha):
+        """Return the scikit-learn estimator for the method."""
+        # The factor 0.5 for alpha in the Lasso/LassoLars problem is to compensate
+        # 1/(2 * n_sample) factor in OLS term.
+        if self.method == "multi-task":
+            return MultiTaskLasso(
+                alpha=alpha / 2.0,  # self.cv_lambdas[0] / 2.0,
+                fit_intercept=False,
+                normalize=False,
+                # precompute=True,
+                max_iter=self.max_iterations,
+                tol=self.tolerance,
+                copy_X=True,
+                # positive=self.positive,
+                random_state=None,
+                warm_start=False,
+                selection="random",
+            )
+
+        kwargs = dict(
+            alpha=alpha / 2.0,
+            fit_intercept=False,
+            normalize=False,
+            max_iter=self.max_iterations,
+            copy_X=True,
+            positive=self.positive,
+            random_state=45,
+        )
+
+        if self.method == "gradient_decent":
+            return Lasso(
+                precompute=True,
+                tol=self.tolerance,
+                warm_start=False,
+                selection="random",
+                **kwargs,
+            )
+
+        if self.method == "lars":
+            return LassoLars(
+                precompute="auto",
+                fit_path=False,
+                jitter=self.sigma,
+                verbose=True,
+                **kwargs,
+            )
+
+    @property
+    def f_shape(self):
+        """Shape of solution grid"""
+        return tuple([item.count for item in self.inverse_dimension])[::-1]
+
+    def pack_solution_as_csdm(self, f, s):
+        """Pack the solution as a CSDM object.
+
+        Args:
+            np.ndarray f: Solution numpy array.
+            cp.csdm s: CSDM dataset
+        """
+        f = cp.as_csdm(f)
+
+        if len(s.x) > 1:
+            f.x[2] = s.x[1]
+        f.x[1] = self.inverse_dimension[1]
+        f.x[0] = self.inverse_dimension[0]
+        return f
+
+    def shape_solution(self, f, s_, half=False):
+        if half:
+            index = self.inverse_dimension[0].application["index"]
+            f_new = np.zeros((s_.shape[1], np.prod(self.f_shape)), dtype=float)
+            f_new[:, index] = f
+            f = f_new
+        if s_.shape[1] > 1:
+            f.shape = (s_.shape[1],) + self.f_shape
+            f[:, :, 0] /= 2.0
+            f[:, 0, :] /= 2.0
+        else:
+            f.shape = self.f_shape
+            f[:, 0] /= 2.0
+            f[0, :] /= 2.0
+
+        f *= self._scale
+        return f
+
+    def _fit_setup(self, K, s, alpha, get_cv_indexes=False):
+        """Compress the kernel and dataset, and optionally calculate the
+        cross-validation indexes (test-train sets)."""
+        s_ = _get_proper_data(s)
+        self._scale = s_.max().real
+        s_ = s_ / self._scale
+
+        # prod = np.asarray(self.f_shape).prod()
+        # if K.shape[1] != prod:
+        #     raise ValueError(
+        #         "The product of the shape, `f_shape`, must be equal to the length of "
+        #         f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
+        #     )
+        half = False
+        if "half" in self.inverse_dimension[0].application:
+            half = self.inverse_dimension[0].application["half"]
+
+        args = {"regularizer": self.regularizer, "f_shape": self.f_shape, "half": half}
+        Ks, ss = _get_augmented_data(K=K, s=s_, alpha=s_.size * alpha, **args)
+
+        if not get_cv_indexes:
+            return Ks, ss, (half, s_)
+
+        args = (self.folds, self.regularizer, self.f_shape, self.randomize, self.times)
+        cv_indexes = _get_cv_indexes(K, *args)
+
+        return Ks, ss, cv_indexes
+
+    def _get_bootstrap_cv_indexes(self, cv_indexes, n_repeats, arr_length):
+        if n_repeats == 1:
+            return [cv_indexes]
+
+        a = np.arange(arr_length)
+        np.random.shuffle(a)
+        list_ = a[:n_repeats]
+
+        return [
+            [
+                [np.delete(t_index, np.where(t_index == list_[i])) for t_index in items]
+                for items in cv_indexes
+            ]
+            for i in range(n_repeats)
+        ]
+
+
+class GeneralL2Lasso(Optimizer):
+    r"""The Minimizer class solves the following equation,
+
+    .. math::
+        {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \frac{1}{m} \|
+                    {\bf Kf - s} \|^2_2 +
+                    \alpha \sum_{i=1}^{d} \| {\bf J}_i {\bf f} \|_2^2 +
+                    \lambda  \| {\bf f} \|_1 \right),
+
+    where :math:`{\bf K} \in \mathbb{R}^{m \times n}` is the kernel,
+    :math:`{\bf s} \in \mathbb{R}^{m \times m_\text{count}}` is the known signal
+    containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
+    is the desired solution matrix.
+
+
+    Based on the regularization literal, the above problem is constraint
+
+    Args:
+        alpha: Float, the hyperparameter, :math:`\alpha`.
+        lambda1: Float, the hyperparameter, :math:`\lambda`.
+        hyperparameters: Dict, a python dictionary of hyperparameters.
+        max_iterations: Interger, the maximum number of iterations allowed when
+                        solving the problem. The default value is 10000.
+        tolerance: Float, the tolerance at which the solution is
+                   considered converged. The default value is 1e-5.
+        positive: Boolean. If True, the amplitudes in the solution,
+                  :math:`{\bf f}` is all positive, else the solution may contain
+                  positive and negative amplitudes. The default is True.
+        regularizer: String, a literal specifying the form of matrix
+                     :math:`{\bf J}_i`. The allowed literals are `smooth lasso`
+                     and `sparse ridge fusion`.
+        f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
+                        (n1, n2, ..., nd)
+    """
+
+    alpha: float = 1e-3
+    lambda1: float = 1e-6
+    hyperparameters: dict = None
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.hyperparameters is None:
+            self.hyperparameters = {"lambda": self.lambda1, "alpha": self.alpha}
+
+    def fit(self, K, s):
+        r"""Fit the model using the coordinate descent method from scikit-learn.
+
+        Args
+        ----
+
+        K: ndarray
+            The :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
+            shape (m, n).
+        s: ndarray or CSDM object.
+            A csdm object or an equivalent numpy array holding the signal,
+            :math:`{\bf s}`, as a :math:`m \times m_\text{count}` matrix.
+        """
+
+        Ks, ss, (half, s_) = self._fit_setup(K, s, self.hyperparameters["alpha"], False)
+
+        _estimator = self.get_optimizer(self.hyperparameters["lambda"])
+        _estimator.fit(Ks, ss)
+        f = _estimator.coef_.copy()
+
+        f = self.shape_solution(f, s_, half)
+
+        if isinstance(s, cp.CSDM):
+            f = self.pack_solution_as_csdm(f, s)
+            # f = cp.as_csdm(f)
+
+            # if len(s.x) > 1:
+            #     f.x[2] = s.x[1]
+            # f.x[1] = self.inverse_dimension[1]
+            # f.x[0] = self.inverse_dimension[0]
+
+        self._estimator = _estimator
+        self.f = f
+        self.n_iter = _estimator.n_iter_
+
 
 class GeneralL2LassoLS(GeneralL2Lasso):
-    folds: int = 10
-    sigma: float = 0.0
-    randomize: bool = False
-    times: int = 2
     verbose: bool = False
     n_jobs: int = -1
     _path: Any = PrivateAttr()
 
-    def fit(self, K, s, **kwargs):
+    def fit(self, K, s, n_repeats=1, **kwargs):
         r"""Fit the model using the coordinate descent method from scikit-learn for
         all alpha anf lambda values using the `n`-folds cross-validation technique.
         The cross-validation metric is the mean squared error.
@@ -329,75 +334,74 @@ class GeneralL2LassoLS(GeneralL2Lasso):
                 shape (m, n).
             s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}` as a
                 csdm object or a numpy array or shape (m, m_count).
+            n_repeats: int. Repeat the cross-validation by adding noise to the input
+                data and evaluate the mean cross-validation error.
         """
-        Ks, ss, cv_indexes = self._pre_fit_cv(K, s, self.hyperparameters["alpha"])
+        Ks, ss, cv_indexes = self._fit_setup(
+            K, s, self.hyperparameters["alpha"], get_cv_indexes=True
+        )
+        l1 = self.get_optimizer(self.hyperparameters["lambda"])
+
+        ks0 = K.shape[0]
+        new_indexes = self._get_bootstrap_cv_indexes(cv_indexes, n_repeats, ks0)
 
         self._path = []
         sigma_sq = self.sigma ** 2
-        ks0 = K.shape[0]
-        l1 = self._get_minimizer(self.hyperparameters["lambda"])
 
-        def fnc(x0):
-            self._path.append(x0)
-            Ks[ks0:] *= np.sqrt(x0[0] / self.hyperparameters["alpha"])
-            alpha = self.hyperparameters["alpha"] = x0[0]
-            l1.alpha = x0[1] / 2.0
-            mse = -cv(l1, Ks, ss, cv_indexes, alpha=alpha, n_jobs=-1)
+        def fnc(x_):
+            x = [10 ** x_[0], 10 ** x_[1]]
+            self._path.append(x)
+            Ks[ks0:] *= np.sqrt(x[0] / self.hyperparameters["alpha"])
+            l1.alpha = x[1] / 2.0
+
+            mse = np.sum(
+                [cv(l1, Ks, ss, indexes, n_jobs=self.n_jobs) for indexes in new_indexes]
+            )
+            mse /= -n_repeats
             mse -= sigma_sq
-            # mse *= 1000
             return np.sqrt(2 * mse)
 
-            # + np.mean(
-            # (l1.coef_[1:, :] - l1.coef_[:-1, :]) ** 2
-            # )
-            # for i in range(self.folds):
-            #     # print(i)
-            #     fit_ = l1.fit(Ks_[cv_indexes[i][0]], ss[cv_indexes[i][0]])
-            #     y_predict = fit_.predict(Ks_[cv_indexes[i][1]])
-            #     avg += np.sum((y_predict - ss[cv_indexes[i][1]]) ** 2)
-            # return avg
+        x0 = np.log10([self.hyperparameters["alpha"], self.hyperparameters["lambda"]])
 
-        x0 = [self.hyperparameters["alpha"], self.hyperparameters["lambda"]]
+        kwargs["xtol"] = 1e-4 if "xtol" not in kwargs else kwargs["xtol"]
+        res = least_squares(
+            fnc,
+            x0,
+            # jac="3-point",
+            # loss="cauchy",
+            # method="dogbox",
+            bounds=[(-15, -15), (-4, -4)],
+            # diff_step=[5e-5, 5e-5],
+            verbose=2,
+            **kwargs,
+        )
 
-        bounds = [(1e-15, 1e-15), (1e-4, 1e-4)]
-        # method="Powell"
-        res = least_squares(fnc, x0, bounds=bounds, verbose=2, **kwargs)
+        self.hyperparameters["alpha"] = 10 ** res.x[0]
+        self.hyperparameters["lambda"] = 10 ** res.x[1]
 
-        self.hyperparameters["alpha"] = res.x[0]
-        self.hyperparameters["lambda"] = res.x[1]
-
-        print(res.message, res.status)
+        print(res.message)
+        print(res.status)
 
         # Calculate the solution using the complete data at the optimized lambda and
         # alpha values
         super().fit(K, s)
 
+    @property
+    def path(self):
+        alpha_ = [item[0] for item in self._path]
+        lambda_ = [item[1] for item in self._path]
+        return {"alpha": alpha_, "lambda": lambda_}
+
 
 class GeneralL2LassoCV(Optimizer):
-
     alphas: Union[List[float], np.ndarray] = None
     lambdas: Union[List[float], np.ndarray] = None
     hyperparameters: dict = None
-    inverse_dimension: List[
-        Union[cp.Dimension, cp.LinearDimension, cp.MonotonicDimension]
-    ] = []
-    max_iterations: int = 10000
-    tolerance: float = 1e-5
-    positive: bool = True
-    regularizer: Literal["smooth lasso", "sparse ridge fusion"] = "smooth lasso"
-    method: Literal["multi-task", "gradient_decent", "lars"] = "gradient_decent"
 
-    folds: int = 10
-    sigma: float = 0.0
-    randomize: bool = False
-    times: int = 2
     verbose: bool = False
     n_jobs: int = -1
+    f_std: Union[cp.CSDM, np.ndarray] = None
 
-    f: Union[cp.CSDM, np.ndarray] = None
-    n_iter: int = None
-    _scale: float = PrivateAttr(1.0)
-    _opt: Any = PrivateAttr()
     _path: Any = PrivateAttr()
     _cv_alphas: Any = PrivateAttr()
     _cv_lambdas: Any = PrivateAttr()
@@ -405,10 +409,6 @@ class GeneralL2LassoCV(Optimizer):
 
     class Config:
         arbitrary_types_allowed = True
-
-    @property
-    def f_shape(self):
-        return tuple([item.count for item in self.inverse_dimension])[::-1]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -426,7 +426,53 @@ class GeneralL2LassoCV(Optimizer):
         if self.hyperparameters is None:
             self.hyperparameters = {"lambda": None, "alpha": None}
 
-    def fit(self, K, s, scoring="neg_mean_squared_error"):
+    def get_optimizer_jobs(self, Ks, ss, cv_indexes, start_index, n_repeats=1):
+        """Generate a grid of n_alpha x n_lambda optimizers (jobs) over the given
+        grid of hyperparameters.
+
+        Args:
+            np.ndarray Ks: The augmented kernel
+            cp.CSDM ss: The augmented dataset
+            (list of tuple) cv_indexes: (test, train) indexes for cross-validation
+            int start_index: The index in the augmented kernel (Ks), where the
+                smoothening matrix starts.
+            int n_repeats: Repeat the cross-validation by adding noise to the input
+                data and evaluate the mean cross-validation error.
+        """
+        # create an l1 over all lambda values
+        l1 = self.get_optimizer(self._cv_lambdas[0])
+
+        l1_array = []
+        for lambda_ in self._cv_lambdas:
+            l1_array += [deepcopy(l1)]
+            l1_array[-1].alpha = lambda_ / 2.0
+
+        # l2 optimizer per l1 over alpha values
+        alpha_ratio = np.ones(self._cv_alphas.size)
+        if self._cv_alphas.size != 1 and self._cv_alphas[0] != 0:
+            alpha_ratio[1:] = np.sqrt(self._cv_alphas[1:] / self._cv_alphas[:-1])
+
+        def alpha_lambda_grid_jobs(new_indexes):
+            """Create optimization jobs over alpha-lambda grid
+            Args:
+                ss: Augmented dataset.
+            """
+            jobs_ = []
+            for alpha_ratio_ in alpha_ratio:
+                if alpha_ratio_ != 0:
+                    Ks[start_index:] *= alpha_ratio_
+                Ks_copy = deepcopy(Ks)
+                jobs_ += [
+                    delayed(cv)(l1_, Ks_copy, ss, new_indexes) for l1_ in l1_array
+                ]
+            return jobs_
+
+        new_indexes = self._get_bootstrap_cv_indexes(cv_indexes, n_repeats, start_index)
+        return [
+            item for indexes in new_indexes for item in alpha_lambda_grid_jobs(indexes)
+        ]
+
+    def fit(self, K, s, scoring="neg_mean_squared_error", n_repeats=1):
         r"""Fit the model using the coordinate descent method from scikit-learn for
         all alpha anf lambda values using the `n`-folds cross-validation technique.
         The cross-validation metric is the mean squared error.
@@ -436,68 +482,37 @@ class GeneralL2LassoCV(Optimizer):
                 shape (m, n).
             s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}` as a
                 csdm object or a numpy array or shape (m, m_count).
+            n_repeats: int. Repeat the cross-validation by adding noise to the input
+                data and evaluate the mean cross-validation error.
         """
+        # get augmented kernel, dataset, and cv-indexes.
+        Ks, ss, cv_indexes = self._fit_setup(K, s, self._cv_alphas[0], True)
 
-        Ks, ss, cv_indexes = self._pre_fit_cv(K, s, self._cv_alphas[0])
+        # optimizers as jobs over the hyperparameter grid.
+        jobs = self.get_optimizer_jobs(Ks, ss, cv_indexes, K.shape[0], n_repeats)
 
-        self._cv_map = np.zeros((self._cv_alphas.size, self._cv_lambdas.size))
+        # start parallel processes for running jobs
+        processes = Parallel(
+            n_jobs=self.n_jobs,
+            verbose=self.verbose,
+            **{
+                "backend": {
+                    "threads": "threading",
+                    "processes": "multiprocessing",
+                    None: None,
+                }["threads"]
+            },
+        )
+        result = processes(jobs)  # run jobs
 
-        alpha_ratio = np.ones(self._cv_alphas.size)
-        if self._cv_alphas.size != 1 and self._cv_alphas[0] != 0:
-            alpha_ratio[1:] = np.sqrt(self._cv_alphas[1:] / self._cv_alphas[:-1])
+        cv_map = self.get_cv_map(result, n_repeats)  # get cross-validation error metric
 
-        start_index = K.shape[0]
-
-        l1 = self._get_minimizer(self._cv_lambdas[0])
-        l1_array = []
-
-        for lambda_ in self._cv_lambdas:
-            l1_array.append(deepcopy(l1))
-            l1_array[-1].alpha = lambda_ / 2.0
-
-        j = 0
-        for alpha_ratio_ in alpha_ratio:
-            if alpha_ratio_ != 0:
-                Ks[start_index:] *= alpha_ratio_
-            jobs = (
-                delayed(cv)(l1_, Ks, ss, cv_indexes, alpha=alpha_)
-                for l1_, alpha_ in zip(l1_array, self._cv_alphas)
-            )
-            self._cv_map[j] = Parallel(
-                n_jobs=self.n_jobs,
-                verbose=self.verbose,
-                **{
-                    "backend": {
-                        "threads": "threading",
-                        "processes": "multiprocessing",
-                        None: None,
-                    }["threads"]
-                },
-            )(jobs)
-            j += 1
-
-        # _cv_map contains negated mean square errors, therefore multiply by -1.
-        self._cv_map *= -1
-        # subtract the variance.
-        if scoring == "neg_mean_squared_error":
-            self._cv_map -= self.sigma ** 2
-            index = np.where(self._cv_map < 0)
-            self._cv_map[index] = np.nan
-
-            # After subtracting the variance, any negative values in the cv grid is a
-            # result of fitting noise. Take the absolute value of cv to avoid such
-            # models.
-            # self._cv_map = np.abs(self._cv_map)
-
-        # The argmin of the minimum value is the selected model as it has the least
-        # prediction error.
-        index = np.unravel_index(self._cv_map.argmin(), self._cv_map.shape)
-        self.hyperparameters["alpha"] = self._cv_alphas[index[0]]
-        self.hyperparameters["lambda"] = self._cv_lambdas[index[1]]
+        # find the minima of the curve to get the optimum hyperparameters.
+        self.find_optimum_hyperparameters(cv_map, scoring)
 
         # Calculate the solution using the complete data at the optimized lambda and
-        # alpha values
-        self._opt = GeneralL2Lasso(
+        # alpha values.
+        opt = GeneralL2Lasso(
             alpha=self.hyperparameters["alpha"],
             lambda1=self.hyperparameters["lambda"],
             max_iterations=self.max_iterations,
@@ -507,62 +522,65 @@ class GeneralL2LassoCV(Optimizer):
             inverse_dimension=self.inverse_dimension,
             method=self.method,
         )
-        self._opt.fit(K, s)
-        self.f = self._opt.f
+        opt.fit(K, s)
+        self._estimator = opt._estimator
+        self.f = opt.f
+        self.n_iter = opt.n_iter
 
-        # convert _cv_map to csdm
-        self._cv_map = cp.as_csdm(np.squeeze(self._cv_map.T))
-        if len(self._cv_alphas) != 1:
-            d0 = cp.as_dimension(-np.log10(self._cv_alphas), label="-log(α)")
-            self._cv_map.x[0] = d0
+    def get_cv_map(self, cv_map, n_repeats=1, scoring="neg_mean_squared_error"):
+        # cv_map = np.asarray([item["test_score"].mean() for item in result])
+        cv_map = np.asarray(cv_map)
+        cv_map.shape = (n_repeats, self._cv_alphas.size, self._cv_lambdas.size)
 
-        if len(self._cv_lambdas) == 1:
-            return
+        # cv_map contains negated mean square errors, therefore multiply by -1.
+        cv_map *= -1
 
-        d1 = cp.as_dimension(-np.log10(self._cv_lambdas), label="-log(λ)")
-        if len(self._cv_alphas) != 1:
-            self._cv_map.x[1] = d1
-        else:
-            self._cv_map.x[0] = d1
+        # subtract the variance.
+        if scoring == "neg_mean_squared_error":
+            cv_map -= self.sigma ** 2
 
-    def predict(self, K):
-        r"""Predict the signal using the linear model.
+            # After subtracting the variance, any negative values in the cv grid is a
+            # result of noise. Substitute negative values for np.nan to avoid such
+            # models.
+            index = np.where(cv_map < 0)
+            cv_map[index] = np.nan
 
-        Args:
-            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
-                shape (m, n).
+        return cv_map.mean(axis=0)
 
-        Return:
-            A numpy array of shape (m, m_count) with the predicted values.
-        """
-        return self._opt.predict(K)
-
-    def residuals(self, K, s):
-        r"""Return the residual as the difference the data and the prediced data(fit),
-        following
-
-        .. math::
-            \text{residuals} = {\bf s - Kf^*}
-
-        where :math:`{\bf f^*}` is the optimum solution.
+    def find_optimum_hyperparameters(self, cv_map, scoring="neg_mean_squared_error"):
+        """Find the global minimal of the cross-validation error metric and update
+        the hyperparameter values.
 
         Args:
-            K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
-                shape (m, n).
-            s: A csdm object or a :math:`m \times m_\text{count}` signal matrix,
-                :math:`{\bf s}`.
-        Return:
-            If `s` is a csdm object, returns a csdm object with the residuals. If `s`
-            is a numpy array, return a :math:`m \times m_\text{count}` residue matrix.
+            np.nd.array cv_map: cross-calidation error metric array.
+            str scoring: Scoring criteria for error metric.
         """
-        return self._opt.residuals(K, s)
 
-    def score(self, K, s, sample_weights=None):
+        # The argmin of the minimum value is the selected model as it has the least
+        # prediction error.
+        cv_shape = (self._cv_alphas.size, self._cv_lambdas.size)
+        index = np.unravel_index(cv_map.argmin(), cv_shape)
+        self.hyperparameters["alpha"] = self._cv_alphas[index[0]]
+        self.hyperparameters["lambda"] = self._cv_lambdas[index[1]]
+        self.pack_cv_map_as_csdm(cv_map)
+
+    def pack_cv_map_as_csdm(self, cv_map):
+        """Convert the cross-validation error metric as a CSDM object.
+
+        Args:
+            np.nd.array cv_map: cross-calidation error metric array.
         """
-        Return the coefficient of determination, :math:`R^2`, of the prediction.
-        For more information, read scikit-learn documentation.
-        """
-        return self._opt.score(K, s, sample_weights)
+        cv_map = cp.as_csdm(cv_map.T)
+        cv_map.x[0] = cp.as_dimension(-np.log10(self._cv_alphas), label="-log(α)")
+        cv_map.x[1] = cp.as_dimension(-np.log10(self._cv_lambdas), label="-log(λ)")
+
+        if self._cv_alphas.size == 1:
+            cv_map = cv_map[0]
+
+        if self._cv_lambdas.size == 1:
+            cv_map = cv_map[:, 0]
+
+        self._cv_map = cv_map
 
     @property
     def cross_validation_curve(self):
@@ -573,7 +591,7 @@ class GeneralL2LassoCV(Optimizer):
         return self._cv_map
 
 
-def cv(l1, X, y, cv, alpha=0, n_jobs=1):
+def cv(l1, X, y, cv_indexes, n_jobs=1):
     """Return the cross-validation score as negative of mean square error."""
     if isinstance(l1, (Lasso, MultiTaskLasso)):
         fit_params = {"check_input": False}
@@ -585,11 +603,11 @@ def cv(l1, X, y, cv, alpha=0, n_jobs=1):
         X=X,
         y=y,
         scoring="neg_mean_absolute_error",
-        cv=cv,
+        cv=cv_indexes,
         fit_params=fit_params,
         n_jobs=n_jobs,
         verbose=0,
-        return_estimator=True,
+        # return_estimator=True,
     )
     # estimators = cv_score["estimator"]
     # print(estimators)

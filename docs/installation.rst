@@ -27,8 +27,8 @@ terminal,
 
       $ python --version
 
-For `Mac` users, python version 3 may be installed under the name `python3`. You may replace
-`python` for `python3` in the above command and all subsequent python statements.
+For *Mac* users, python version 3 may be installed under the name *python3*. You may replace
+*python* for *python3* in the above command and all subsequent python statements.
 
 Installing ``mrinversion``
 --------------------------

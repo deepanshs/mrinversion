@@ -1,5 +1,3 @@
-.. _introduction:
-
 ============
 Introduction
 ============
@@ -11,12 +9,8 @@ In ``mrinversion``, we solve for the distribution of the second-rank traceless
 symmetric tensor principal components, through an inversion of a pure anisotropic
 NMR spectrum.
 
-.. whose frequency
-.. contributions are assumed to arise predominantly from the second-rank traceless
-.. symmetric tensors.
-
 In the case of the shielding tensors, the pure anisotropic frequency spectra corresponds
-the cross-sections of the 2D isotropic `vs.` anisotropic correlation spectrum, such as
+the cross-sections of the 2D isotropic *vs.* anisotropic correlation spectrum, such as
 the 2D One Pulse (TOP) MAS, phase adjusted spinning sidebands (PASS), magic-angle turning
 (MAT), extended chemical shift modulation (XCS), magic-angle hopping (MAH), magic-angle
 flipping (MAF), and Variable Angle Correlation Spectroscopy (VACSY). A key feature of all
@@ -76,7 +70,7 @@ The deciding factor whether the solution :math:`{\bf f}` exists in Eq. :eq:`eq_2
 is whether or not the kernel :math:`{\bf K}` is invertible.
 Often, most scientific problems with practical applications suffer from singular,
 near-singular, or ill-conditioned kernels, where :math:`{\bf K}^{-1}` doesn't exist.
-Such types of problems are termed as `ill-posed`. The inversion of a purely anisotropic
+Such types of problems are termed as *ill-posed*. The inversion of a purely anisotropic
 NMR spectrum to the distribution of the tensorial parameters is one such ill-posed
 problem.
 
@@ -95,7 +89,7 @@ methods of form
         \|{\bf K \cdot f} - {\bf s}\|^2_2 + g({\bf f})
     \right),
 
-where :math:`\|{\bf z}\|_2` is the `l-2` norm of :math:`{\bf z}`, :math:`g({\bf f})`
+where :math:`\|{\bf z}\|_2` is the *l-2* norm of :math:`{\bf z}`, :math:`g({\bf f})`
 is the regularization term, and :math:`{\bf f}^\dagger` is the regularized solution.
 The choice of the regularization term, :math:`g({\bf f})`, is often based on prior
 knowledge of the system for which the linear problem is defined. For anisotropic NMR
@@ -154,7 +148,7 @@ respective dimensions, with the constraint that :math:`\prod_{i=1}^{d}n_i = n`,
 where :math:`d` is the total number of dimensions in the solution :math:`{\bf f}`,
 and :math:`n` is the total number of features in the kernel, :math:`{\bf K}`.
 
-Understanding the `x-y` plot
+Understanding the *x-y* plot
 ----------------------------
 
 A second-rank symmetric tensor, :math:`{\bf S}`, in a three-dimensional space, is
@@ -204,7 +198,7 @@ second-rank traceless tensor parameters, :math:`\zeta`-:math:`\eta`, defined as
 .. math::
     :label: zeta_eta_def
 
-    r_\zeta = | \zeta_ | ~~~~\text{and}~~~~
+    r_\zeta = | \zeta | ~~~~\text{and}~~~~
     \theta = \left\{ \begin{array}{l r}
                 \frac{\pi}{4} \eta      &: \zeta \le 0, \\
                 \frac{\pi}{2} \left(1 - \frac{\eta}{2} \right) &: \zeta > 0.
@@ -212,14 +206,14 @@ second-rank traceless tensor parameters, :math:`\zeta`-:math:`\eta`, defined as
             \right.
 
 Because Cartesian grids are more manageable in computation, we re-express the above polar
-piece-wise grid as the `x`-`y` Cartesian grid following,
+piece-wise grid as the *x-y* Cartesian grid following,
 
 .. math::
     :label: x_y_def
 
     x = r_\zeta \cos\theta ~~~~\text{and}~~~~ y = r_\zeta \sin\theta.
 
-In the `x`-`y` grid system, the basis subspectra are relatively distinguishable. The
+In the *x-y* grid system, the basis subspectra are relatively distinguishable. The
 ``mrinversion`` library provides a utility function to render the piece-wise polar grid
 for your matplotlib figures. Copy-paste the following code in your script.
 
@@ -252,7 +246,7 @@ for your matplotlib figures. Copy-paste the following code in your script.
     and the diagonal :math:`x=y` is :math:`\eta=1`.
 
 If you are familiar with the matplotlib library, you may notice that most code lines are
-the basic matplotlib statements, except for the line that says `get_polar_grids(ax)`.
+the basic matplotlib statements, except for the line that says *get_polar_grids(ax)*.
 The :func:`~mrinversion.utils.get_polar_grids` is a utility function that generates
 the piece-wise polar grid for your figures.
 
@@ -260,7 +254,7 @@ Here, the shielding anisotropy parameter, :math:`\zeta`, is the radial dimension
 and the asymmetry parameter, :math:`\eta`, is the angular dimension, defined using Eqs.
 :eq:`zeta_eta_def` and :eq:`x_y_def`. The region in blue and red corresponds to the
 positive and negative values of :math:`\zeta`, where the magnitude of the anisotropy
-increases radially. The `x` and the `y`-axis are :math:`\eta=0` for the negative and positive
-:math:`\zeta`, respectively. When moving towards the diagonal from `x` or `y`-axes, the
+increases radially. The *x* and the *y*-axis are :math:`\eta=0` for the negative and positive
+:math:`\zeta`, respectively. When moving towards the diagonal from *x* or *y*-axes, the
 asymmetry parameter, :math:`\eta`, uniformly increase, where the diagonal is
 :math:`\eta=1`.

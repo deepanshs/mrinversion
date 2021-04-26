@@ -163,7 +163,10 @@ print(f"truncation_index = {new_system.truncation_index}")
 # accordingly.
 
 # guess alpha and lambda values.
-s_lasso = SmoothLasso(alpha=5e-5, lambda1=5e-6, inverse_dimension=inverse_dimension)
+s_lasso = SmoothLasso(
+    hyperparameters={"alpha": 5e-5, "lambda": 5e-6},
+    inverse_dimension=inverse_dimension,
+)
 s_lasso.fit(K=compressed_K, s=compressed_s)
 f_sol = s_lasso.f
 
