@@ -28,8 +28,7 @@ cross-section of your 2D MAT/PASS dataset.
     >>> # a function to plot the 2D tensor parameter distribution
     >>> def plot2D(ax, csdm_object, title=''):
     ...     # convert the dimension from `Hz` to `ppm`.
-    ...     csdm_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
-    ...     csdm_object.dimensions[1].to('ppm', 'nmr_frequency_ratio')
+    ...     _ = [item.to('ppm', 'nmr_frequency_ratio') for item in csdm_object.dimensions]
     ...
     ...     levels = (np.arange(9)+1)/10
     ...     ax.contourf(csdm_object, cmap='gist_ncar', levels=levels)
@@ -118,7 +117,7 @@ true probability distribution.
 .. _fig1_getting_started:
 .. figure:: _static/null.*
 
-    The figure on the left is the pure anisotropic MAS sideband amplidute spectrum corresponding
+    The figure on the left is the pure anisotropic MAS sideband amplitude spectrum corresponding
     to the nuclear shielding tensor distribution shown on the right.
 
 Dimension Setup
@@ -172,7 +171,7 @@ index 0 and 1 are the *x* and *y* dimensions, respectively.
 Generating the kernel
 ---------------------
 
-Import the :class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class and
+Import the :py:class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class and
 generate the kernel as follows,
 
 .. plot::
@@ -192,7 +191,7 @@ generate the kernel as follows,
     ... )
 
 In the above code, the variable ``lineshapes`` is an instance of the
-:class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class. The three required
+:py:class:`~mrinversion.kernel.nmr.ShieldingPALineshape` class. The three required
 arguments of this class are the *anisotropic_dimension*, *inverse_dimension*, and
 *channel*. We have already defined the first two arguments in the previous subsection.
 The value of the channel attribute is the observed nucleus.
@@ -215,7 +214,7 @@ dimension is the rotor or the effective anisotropic modulation frequency. Theref
 dimension. In this example, this value is 32.
 
 Once the *ShieldingPALineshape* instance is created, use the
-:meth:`~mrinversion.kernel.nmr.ShieldingPALineshape.kernel` method of the
+:py:meth:`~mrinversion.kernel.nmr.ShieldingPALineshape.kernel` method of the
 instance to generate the spinning sideband kernel, as follows,
 
 .. plot::
@@ -247,7 +246,7 @@ sub-space kernel is relatively well-defined. We refer to this sub-space
 kernel as the *compressed kernel*. Similarly, the measurement data on the
 sub-space is referred to as the *compressed signal*. The compression also
 reduces the time for further computation. To compress the kernel and the data,
-import the :class:`~mrinversion.linear_model.TSVDCompression` class and follow,
+import the :py:class:`~mrinversion.linear_model.TSVDCompression` class and follow,
 
 .. plot::
     :format: doctest
@@ -261,11 +260,11 @@ import the :class:`~mrinversion.linear_model.TSVDCompression` class and follow,
     >>> compressed_s = new_system.compressed_s
 
 Here, the variable ``new_system`` is an instance of the
-:class:`~mrinversion.linear_model.TSVDCompression` class. If no truncation index is
+:py:class:`~mrinversion.linear_model.TSVDCompression` class. If no truncation index is
 provided as the argument, when initializing the ``TSVDCompression`` class, an optimum
 truncation index is chosen using the maximum entropy method [#f7]_, which is the default
-behavior. The attributes :attr:`~mrinversion.linear_model.TSVDCompression.compressed_K`
-and :attr:`~mrinversion.linear_model.TSVDCompression.compressed_s` holds the
+behavior. The attributes :py:attr:`~mrinversion.linear_model.TSVDCompression.compressed_K`
+and :py:attr:`~mrinversion.linear_model.TSVDCompression.compressed_s` holds the
 compressed kernel and signal, respectively. The shape of the original signal *v.s.* the
 compressed signal is
 
@@ -284,7 +283,7 @@ Setting up the inverse problem
 When setting up the inversion, we solved the smooth LASSO [#f8]_ problem. Read the
 :ref:`smooth_lasso_intro` section for further details.
 
-Import the :class:`~mrinversion.linear_model.SmoothLasso` class and follow,
+Import the :py:class:`~mrinversion.linear_model.SmoothLasso` class and follow,
 
 .. plot::
     :format: doctest
@@ -295,14 +294,14 @@ Import the :class:`~mrinversion.linear_model.SmoothLasso` class and follow,
     >>> s_lasso = SmoothLasso(alpha=0.01, lambda1=1e-04, inverse_dimension=inverse_dimension)
 
 Here, the variable ``s_lasso`` is an instance of the
-:class:`~mrinversion.linear_model.SmoothLasso` class. The required arguments
+:py:class:`~mrinversion.linear_model.SmoothLasso` class. The required arguments
 of this class are *alpha* and *lambda1*, corresponding to the hyperparameters
 :math:`\alpha` and :math:`\lambda`, respectively, in the Eq. :eq:`slasso`. At the
 moment, we don't know the optimum value of the *alpha* and *lambda1* parameters.
 We start with a guess value.
 
 To solve the smooth lasso problem, use the
-:meth:`~mrinversion.linear_model.SmoothLasso.fit` method of the ``s_lasso``
+:py:meth:`~mrinversion.linear_model.SmoothLasso.fit` method of the ``s_lasso``
 instance as follows,
 
 .. plot::
@@ -312,14 +311,14 @@ instance as follows,
 
     >>> s_lasso.fit(K=compressed_K, s=compressed_s)
 
-The two arguments of the :meth:`~mrinversion.linear_model.SmoothLasso.fit` method are
+The two arguments of the :py:meth:`~mrinversion.linear_model.SmoothLasso.fit` method are
 the kernel, *K*, and the signal, *s*. In the above example, we set the value of *K* as
 ``compressed_K``, and correspondingly the value of *s* as ``compressed_s``. You may also
 use the uncompressed values of the kernel and signal in this method, if desired.
 
 
 The solution to the smooth lasso is accessed using the
-:attr:`~mrinversion.linear_model.SmoothLasso.f` attribute of the respective object.
+:py:attr:`~mrinversion.linear_model.SmoothLasso.f` attribute of the respective object.
 
 .. plot::
     :format: doctest
@@ -350,7 +349,7 @@ The plot of the solution is
 
 
 You may also evaluate the residuals corresponding to the solution using the
-:meth:`~mrinversion.linear_model.SmoothLasso.residuals` method of the object as
+:py:meth:`~mrinversion.linear_model.SmoothLasso.residuals` method of the object as
 follows,
 
 .. plot::
@@ -361,7 +360,7 @@ follows,
     >>> residuals = s_lasso.residuals(K=K, s=data_object)
     >>> # the plot of the residuals
     >>> plt.figure(figsize=(5, 3.5)) # doctest: +SKIP
-    >>> ax = plt.gca(projection='csdm') # doctest: +SKIP
+    >>> ax = plt.subplot(projection='csdm') # doctest: +SKIP
     >>> ax.plot(residuals, color='black') # doctest: +SKIP
     >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
@@ -387,7 +386,7 @@ The solution shown in the above figure is when :math:`\alpha=0.01` and
 the best solution. For this, we employ the statistical learning-based model, such as the
 *n*-fold cross-validation.
 
-The :class:`~mrinversion.linear_model.SmoothLassoCV` class is designed to solve the
+The :py:class:`~mrinversion.linear_model.SmoothLassoCV` class is designed to solve the
 smooth-lasso problem for a range of :math:`\alpha` and :math:`\lambda` values and
 determine the best solution using the *n*-fold cross-validation. Here, we search the
 best model on a :math:`10 \times 10` pre-defined :math:`\alpha`-:math:`\lambda` grid,
@@ -422,18 +421,18 @@ Setup the smooth lasso cross-validation as follows
     ... )
     >>> s_lasso_cv.fit(K=compressed_K, s=compressed_s)
 
-The arguments of the :class:`~mrinversion.linear_model.SmoothLassoCV` is a list
+The arguments of the :py:class:`~mrinversion.linear_model.SmoothLassoCV` is a list
 of the *alpha* and *lambda* values, along with the standard deviation of the
 noise, *sigma*. The value of the argument *folds* is the number of folds used in the
 cross-validation. As before, to solve the problem, use the
-:meth:`~mrinversion.linear_model.SmoothLassoCV.fit` method, whose arguments are
+:py:meth:`~mrinversion.linear_model.SmoothLassoCV.fit` method, whose arguments are
 the kernel and signal.
 
 The optimum hyperparameters
 '''''''''''''''''''''''''''
 
 The optimized hyperparameters may be accessed using the
-:attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameters` attribute of
+:py:attr:`~mrinversion.linear_model.SmoothLassoCV.hyperparameters` attribute of
 the class instance,
 
 .. plot::
@@ -448,7 +447,7 @@ The cross-validation surface
 ''''''''''''''''''''''''''''
 
 The cross-validation error metric is the mean square error metric. You may access this
-data using the :attr:`~mrinversion.linear_model.SmoothLassoCV.cross_validation_curve`
+data using the :py:attr:`~mrinversion.linear_model.SmoothLassoCV.cross_validation_curve`
 attribute.
 
 .. plot::
@@ -475,7 +474,7 @@ The optimum solution
 ''''''''''''''''''''
 
 The best model selection from the cross-validation method may be accessed using
-the :attr:`~mrinversion.linear_model.SmoothLassoCV.f` attribute.
+the :py:attr:`~mrinversion.linear_model.SmoothLassoCV.f` attribute.
 
 .. plot::
     :format: doctest

@@ -47,7 +47,7 @@ class TSVDCompression:
         print(f"compression factor = {factor}")
 
         if isinstance(s, cp.CSDM):
-            self.compressed_s = cp.as_csdm(compressed_signal.T)
+            self.compressed_s = cp.as_csdm(compressed_signal.T.copy())
             if len(s.x) > 1:
                 self.compressed_s.x[1] = s.x[1]
         else:

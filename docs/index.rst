@@ -20,11 +20,7 @@ Welcome to Mrinversion documentation!
             :alt: PyPI - Python Version
 
       * - Build Status
-        - .. image:: https://img.shields.io/travis/deepanshs/mrinversion?logo=travis
-            :target: https://travis-ci.org/DeepanshS/mrinversion
-            :alt: Build Status
-
-          .. image:: https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI%20(pip)?logo=GitHub
+        - .. image:: https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI%20(pip)?logo=GitHub
             :target: https://github.com/DeepanshS/mrinversion/actions
             :alt: GitHub Workflow Status
 
@@ -54,13 +50,6 @@ Welcome to Mrinversion documentation!
             :target: https://github.com/DeepanshS/mrinversion/issues
             :alt: GitHub issues
 
-      * - Citations
-        - .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3964644.svg
-            :target: https://doi.org/10.5281/zenodo.3964644
-
-          .. image:: https://img.shields.io/badge/JCP-10.1063/5.0023345-Purple?s=small
-            :target: https://doi.org/10.1063/5.0023345
-
 .. - .. image:: https://img.shields.io/github/contributors/DeepanshS/mrinversion.svg?logo=github
 ..     :target: https://github.com/DeepanshS/mrinversion/graphs/contributors
 ..     :alt: GitHub contributors
@@ -71,8 +60,7 @@ Welcome to Mrinversion documentation!
 
 The ``mrinversion`` python package is based on the statistical learning technique for
 determining the distribution of the magnetic resonance (NMR) tensor parameters
-from two-dimensional NMR spectra correlating the isotropic to anisotropic
-frequencies.
+from two-dimensional NMR spectra correlating the isotropic to anisotropic frequencies.
 The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
 package for generating solid-state NMR spectra and
 `scikit-learn <https://scikit-learn.org/stable/>`_ package for statistical learning.
@@ -150,12 +138,20 @@ Project details
     credits/license
     credits/acknowledgment
 
-Publication
+How to cite
 -----------
+
+If you use this work in your publication, please cite the following.
 
 - Srivastava, D. J.; Grandinetti P. J., Statistical learning of NMR tensors from 2D
   isotropic/anisotropic correlation nuclear magnetic resonance spectra, J. Chem. Phys.
-  **153**, 134201 (2020). `DOI:10.1063/5.0023345 <https://doi.org/10.1063/5.0023345>`_.
+  **153**, 134201 (2020). https://doi.org/10.1063/5.0023345.
+
+- Deepansh J. Srivastava, Maxwell Venetos, Philip J. Grandinetti, Shyam Dwaraknath, & Alexis McCarthy. (2021, May 26). mrsimulator: v0.6.0 (Version v0.6.0). Zenodo. http://doi.org/10.5281/zenodo.4814638
+
+Additionally, if you use the CSDM data model, please consider citing
+
+- Srivastava DJ, Vosegaard T, Massiot D, Grandinetti PJ (2020) Core Scientific Dataset Model: A lightweight and portable model and file format for multi-dimensional scientific data. PLOS ONE 15(1): e0225953. https://doi.org/10.1371/journal.pone.0225953
 
 ----
 

@@ -1,4 +1,3 @@
-============
 Introduction
 ============
 
@@ -10,7 +9,7 @@ symmetric tensor principal components, through an inversion of a pure anisotropi
 NMR spectrum.
 
 In the case of the shielding tensors, the pure anisotropic frequency spectra corresponds
-the cross-sections of the 2D isotropic *vs.* anisotropic correlation spectrum, such as
+the cross-sections of the 2D isotropic *v.s.* anisotropic correlation spectrum, such as
 the 2D One Pulse (TOP) MAS, phase adjusted spinning sidebands (PASS), magic-angle turning
 (MAT), extended chemical shift modulation (XCS), magic-angle hopping (MAH), magic-angle
 flipping (MAF), and Variable Angle Correlation Spectroscopy (VACSY). A key feature of all
@@ -206,14 +205,14 @@ second-rank traceless tensor parameters, :math:`\zeta`-:math:`\eta`, defined as
             \right.
 
 Because Cartesian grids are more manageable in computation, we re-express the above polar
-piece-wise grid as the *x-y* Cartesian grid following,
+piece-wise grid as the *x*-*y* Cartesian grid following,
 
 .. math::
     :label: x_y_def
 
     x = r_\zeta \cos\theta ~~~~\text{and}~~~~ y = r_\zeta \sin\theta.
 
-In the *x-y* grid system, the basis subspectra are relatively distinguishable. The
+In the *x*-*y* grid system, the basis subspectra are relatively distinguishable. The
 ``mrinversion`` library provides a utility function to render the piece-wise polar grid
 for your matplotlib figures. Copy-paste the following code in your script.
 
@@ -247,7 +246,7 @@ for your matplotlib figures. Copy-paste the following code in your script.
 
 If you are familiar with the matplotlib library, you may notice that most code lines are
 the basic matplotlib statements, except for the line that says *get_polar_grids(ax)*.
-The :func:`~mrinversion.utils.get_polar_grids` is a utility function that generates
+The :py:meth:`~mrinversion.utils.get_polar_grids` is a utility function that generates
 the piece-wise polar grid for your figures.
 
 Here, the shielding anisotropy parameter, :math:`\zeta`, is the radial dimension,

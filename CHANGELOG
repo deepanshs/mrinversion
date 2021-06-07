@@ -7,3 +7,4 @@ What's new!
 - Added :func:`~mrinversion.linear_model.SmoothLassoLS` function to evaluate optimum alpha and lambda values using least-squares analysis.
 - Added :func:`~mrinversion.utils.to_Haeberlen_grid` function to convert the 3D :math:`\rho(\delta_\text{iso}, x, y)`
   distribution to :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)` distribution.
+- Update code to comply with updated csdmpy library.

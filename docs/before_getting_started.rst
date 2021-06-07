@@ -69,7 +69,7 @@ Magic angle flipping dataset specific recommendations
   * - |uncheck|
     - **Isotropic shift correction along the anisotropic dimension**
 
-      Ordinarily, after shear, a MAF spectrum is a 2D isotropic `vs.` pure anisotropic
+      Ordinarily, after shear, a MAF spectrum is a 2D isotropic *v.s.* pure anisotropic
       frequency correlation spectrum. In certain conditions, this is not true. In a MAF
       experiment, the sample holder (rotor) physically swaps between two angles
       (:math:`90^\circ \leftrightarrow 54.735^\circ`). It is possible to have a

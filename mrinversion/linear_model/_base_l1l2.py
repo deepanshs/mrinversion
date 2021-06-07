@@ -99,7 +99,7 @@ class Optimizer(BaseModel):
         if not isinstance(s, cp.CSDM):
             return residue
 
-        residue = cp.as_csdm(residue.T)
+        residue = cp.as_csdm(residue.T.copy())
         residue._dimensions = s._dimensions
         return residue
 
@@ -570,7 +570,7 @@ class GeneralL2LassoCV(Optimizer):
         Args:
             np.nd.array cv_map: cross-calidation error metric array.
         """
-        cv_map = cp.as_csdm(cv_map.T)
+        cv_map = cp.as_csdm(cv_map.T.copy())
         cv_map.x[0] = cp.as_dimension(-np.log10(self._cv_alphas), label="-log(α)")
         cv_map.x[1] = cp.as_dimension(-np.log10(self._cv_lambdas), label="-log(λ)")
 
