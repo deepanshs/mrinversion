@@ -15,30 +15,26 @@
 #
 # Import all relevant packages.
 import csdmpy as cp
-import csdmpy.statistics as stats
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
-from pylab import rcParams
+from csdmpy import statistics as stats
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.kernel.utils import x_y_to_zeta_eta
-from mrinversion.linear_model import SmoothLassoCV
-from mrinversion.linear_model import TSVDCompression
-from mrinversion.utils import plot_3d
-from mrinversion.utils import to_Haeberlen_grid
+from mrinversion.linear_model import SmoothLassoCV, TSVDCompression
+from mrinversion.utils import plot_3d, to_Haeberlen_grid
 
 # sphinx_gallery_thumbnail_number = 6
 
 # %%
 # Setup for the matplotlib figures.
-rcParams["figure.figsize"] = 4.5, 3.5
-rcParams["font.size"] = 9
 
 
 # function for plotting 2D dataset
 def plot2D(csdm_object, **kwargs):
-    ax = plt.gca(projection="csdm")
+    plt.figure(figsize=(4.5, 3.5))
+    ax = plt.subplot(projection="csdm")
     ax.imshow(csdm_object, cmap="gist_ncar_r", aspect="auto", **kwargs)
     ax.invert_xaxis()
     ax.invert_yaxis()
@@ -313,7 +309,7 @@ f_sol /= f_sol.max()
 
 # The 3D plot of the solution
 plt.figure(figsize=(5, 4.4))
-ax = plt.gca(projection="3d")
+ax = plt.subplot(projection="3d")
 plot_3d(ax, f_sol, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-50, -150])
 plt.tight_layout()
 plt.show()
@@ -346,7 +342,7 @@ max_1d = [
 ]
 
 plt.figure(figsize=(5, 4.4))
-ax = plt.gca(projection="3d")
+ax = plt.subplot(projection="3d")
 
 # plot for the Q4 region
 plot_3d(
@@ -405,7 +401,7 @@ Q3_region_iso /= f_sol_iso_max
 
 # The plot of the different projections.
 plt.figure(figsize=(5.5, 3.5))
-ax = plt.gca(projection="csdm")
+ax = plt.subplot(projection="csdm")
 ax.plot(f_sol_iso, "--k", label="tensor")
 ax.plot(Q4_region_iso, "r", label="Q4")
 ax.plot(Q3_region_iso, "b", label="Q3")
@@ -517,7 +513,7 @@ fsol_Hae = to_Haeberlen_grid(f_sol, zeta, eta)
 # The 3D plot
 # '''''''''''
 plt.figure(figsize=(5, 4.4))
-ax = plt.gca(projection="3d")
+ax = plt.subplot(projection="3d")
 plot_3d(ax, fsol_Hae, x_lim=[0, 1], y_lim=[-40, 120], z_lim=[-50, -150], alpha=0.4)
 plt.tight_layout()
 plt.show()

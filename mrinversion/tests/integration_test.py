@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import csdmpy as cp
-import csdmpy.statistics as stats
 import numpy as np
+from csdmpy import statistics as stats
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.linear_model import SmoothLasso

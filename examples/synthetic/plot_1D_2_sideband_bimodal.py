@@ -17,26 +17,21 @@ Bimodal distribution
 import csdmpy as cp
 import matplotlib.pyplot as plt
 import numpy as np
-from pylab import rcParams
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
-from mrinversion.linear_model import SmoothLasso
-from mrinversion.linear_model import SmoothLassoCV
-from mrinversion.linear_model import TSVDCompression
+from mrinversion.linear_model import SmoothLasso, SmoothLassoCV, TSVDCompression
 from mrinversion.utils import get_polar_grids
 
 # Setup for the matplotlib figures
-rcParams["figure.figsize"] = 4.5, 3.5
-rcParams["font.size"] = 9
 
 
 # function for 2D x-y plot.
 def plot2D(ax, csdm_object, title=""):
     # convert the dimension coordinates of the csdm_object from Hz to pmm.
-    csdm_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
-    csdm_object.dimensions[1].to("ppm", "nmr_frequency_ratio")
+    _ = [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
 
     levels = (np.arange(9) + 1) / 10
+    plt.figure(figsize=(4.5, 3.5))
     ax.contourf(csdm_object, cmap="gist_ncar", levels=levels)
     ax.grid(None)
     ax.set_title(title)
@@ -175,7 +170,7 @@ residuals = s_lasso.residuals(K, data_object)
 predicted_spectrum = data_object - residuals
 
 plt.figure(figsize=(4, 3))
-plt.gca(projection="csdm")
+plt.subplot(projection="csdm")
 plt.plot(data_object, color="black", label="spectrum")  # the original spectrum
 plt.plot(predicted_spectrum, color="red", label="prediction")  # the predicted spectrum
 plt.gca().invert_xaxis()

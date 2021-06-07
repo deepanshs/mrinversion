@@ -18,25 +18,20 @@ import csdmpy as cp
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
-from pylab import rcParams
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
-from mrinversion.linear_model import SmoothLasso
-from mrinversion.linear_model import TSVDCompression
-from mrinversion.utils import plot_3d
-from mrinversion.utils import to_Haeberlen_grid
+from mrinversion.linear_model import SmoothLasso, TSVDCompression
+from mrinversion.utils import plot_3d, to_Haeberlen_grid
 
 # sphinx_gallery_thumbnail_number = 5
 
 # %%
 # Setup for the matplotlib figures.
-rcParams["figure.figsize"] = 4.5, 3.5
-rcParams["font.size"] = 9
 
 
-# function for plotting 2D dataset
 def plot2D(csdm_object, **kwargs):
-    ax = plt.gca(projection="csdm")
+    plt.figure(figsize=(4.5, 3.5))
+    ax = plt.subplot(projection="csdm")
     ax.imshow(csdm_object, cmap="gist_ncar_r", aspect="auto", **kwargs)
     ax.invert_xaxis()
     ax.invert_yaxis()
@@ -282,7 +277,7 @@ f_sol /= f_sol.max()
 
 # The 3D plot of the solution
 plt.figure(figsize=(5, 4.4))
-ax = plt.gca(projection="3d")
+ax = plt.subplot(projection="3d")
 plot_3d(ax, f_sol, elev=25, azim=-50, x_lim=[0, 150], y_lim=[0, 150], z_lim=[-60, -120])
 plt.tight_layout()
 plt.show()
@@ -322,7 +317,7 @@ max_1d = [
 ]
 
 plt.figure(figsize=(5, 4.4))
-ax = plt.gca(projection="3d")
+ax = plt.subplot(projection="3d")
 
 # plot for the Q4 region
 plot_3d(
@@ -382,7 +377,7 @@ fsol_Hae = to_Haeberlen_grid(f_sol, zeta, eta)
 # The 3D plot
 # '''''''''''
 plt.figure(figsize=(5, 4.4))
-ax = plt.gca(projection="3d")
+ax = plt.subplot(projection="3d")
 plot_3d(ax, fsol_Hae, x_lim=[0, 1], y_lim=[-40, 120], z_lim=[-60, -120], alpha=0.1)
 plt.tight_layout()
 plt.show()

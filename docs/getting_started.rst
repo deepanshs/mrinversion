@@ -3,7 +3,7 @@
 Getting started with ``mrinversion``
 ====================================
 
-We have put together a set of guidelines for using the `mrinversion` package.
+We have put together a set of guidelines for using the *mrinversion* package.
 We encourage our users to follow these guidelines for consistency.
 
 Let's examine the inversion of a purely anisotropic MAS sideband spectrum into a
@@ -28,8 +28,7 @@ cross-section of your 2D MAT/PASS dataset.
     >>> # a function to plot the 2D tensor parameter distribution
     >>> def plot2D(ax, csdm_object, title=''):
     ...     # convert the dimension from `Hz` to `ppm`.
-    ...     csdm_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
-    ...     csdm_object.dimensions[1].to('ppm', 'nmr_frequency_ratio')
+    ...     _ = [item.to('ppm', 'nmr_frequency_ratio') for item in csdm_object.dimensions]
     ...
     ...     levels = (np.arange(9)+1)/10
     ...     ax.contourf(csdm_object, cmap='gist_ncar', levels=levels)
@@ -66,10 +65,10 @@ follows,
     >>> filename = "https://osu.box.com/shared/static/xnlhecn8ifzcwx09f83gsh27rhc5i5l6.csdf"
     >>> data_object = cp.load(filename) # load the CSDM file with the csdmpy module
 
-Here, the variable `data_object` is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
+Here, the variable *data_object* is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
 object. The NMR spectroscopic dimension is a frequency dimension. NMR
 spectroscopists, however, prefer to view the spectrum on a dimensionless scale. If the
-dataset dimension within the CSDM object is in frequency, you may convert it into `ppm`
+dataset dimension within the CSDM object is in frequency, you may convert it into *ppm*
 as follows,
 
 .. plot::
@@ -80,8 +79,8 @@ as follows,
     >>> # convert the dimension coordinates from `Hz` to `ppm`.
     >>> data_object.dimensions[0].to('ppm', 'nmr_frequency_ratio')
 
-In the above code, we convert the dimension at index 0 from `Hz` to `ppm`. For multi-dimensional
-datasets, use the appropriate indexing to convert individual dimensions to `ppm`.
+In the above code, we convert the dimension at index 0 from *Hz* to *ppm*. For multi-dimensional
+datasets, use the appropriate indexing to convert individual dimensions to *ppm*.
 
 For comparison, let's also include the true probability distribution from which the
 synthetic spinning sideband dataset is derived.
@@ -361,7 +360,7 @@ follows,
     >>> residuals = s_lasso.residuals(K=K, s=data_object)
     >>> # the plot of the residuals
     >>> plt.figure(figsize=(5, 3.5)) # doctest: +SKIP
-    >>> ax = plt.gca(projection='csdm') # doctest: +SKIP
+    >>> ax = plt.subplot(projection='csdm') # doctest: +SKIP
     >>> ax.plot(residuals, color='black') # doctest: +SKIP
     >>> plt.tight_layout() # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP

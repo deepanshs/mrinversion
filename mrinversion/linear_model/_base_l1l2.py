@@ -79,8 +79,7 @@ class GeneralL2Lasso:
         self.n_iter = None
 
     def fit(self, K, s):
-        r"""
-        Fit the model using the coordinate descent method from scikit-learn.
+        r"""Fit the model using the coordinate descent method from scikit-learn.
 
         Args
         ----
@@ -241,7 +240,7 @@ class GeneralL2Lasso:
         if not isinstance(s, cp.CSDM):
             return residue
 
-        residue = cp.as_csdm(residue.T)
+        residue = cp.as_csdm(residue.T.copy())
         residue._dimensions = s._dimensions
         return residue
 
@@ -300,8 +299,7 @@ class GeneralL2LassoCV:
         self.f_shape = tuple([item.count for item in inverse_dimension])[::-1]
 
     def fit(self, K, s):
-        r"""
-        Fit the model using the coordinate descent method from scikit-learn for
+        r"""Fit the model using the coordinate descent method from scikit-learn for
         all alpha anf lambda values using the `n`-folds cross-validation technique.
         The cross-validation metric is the mean squared error.
 
@@ -412,7 +410,7 @@ class GeneralL2LassoCV:
         self.f = self.opt.f
 
         # convert cv_map to csdm
-        self.cv_map = cp.as_csdm(np.squeeze(self.cv_map.T))
+        self.cv_map = cp.as_csdm(np.squeeze(self.cv_map.T.copy()))
         if len(self.cv_alphas) != 1:
             d0 = cp.as_dimension(-np.log10(self.cv_alphas), label="-log(α)")
             self.cv_map.dimensions[0] = d0
