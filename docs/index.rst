@@ -20,7 +20,7 @@ Welcome to Mrinversion documentation!
             :alt: PyPI - Python Version
 
       * - Build Status
-        - .. image:: https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI%20(pip)?logo=GitHub
+        - .. image:: https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI?logo=GitHub
             :target: https://github.com/DeepanshS/mrinversion/actions
             :alt: GitHub Workflow Status
 
