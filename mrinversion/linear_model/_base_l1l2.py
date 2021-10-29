@@ -170,13 +170,18 @@ class Optimizer(BaseModel):
         """
         f = cp.as_csdm(f)
 
+        for i, item in enumerate(self.inverse_dimension):
+            f.x[i] = item
+
         if len(s.x) > 1:
-            f.x[2] = s.x[1]
-        f.x[1] = self.inverse_dimension[1]
-        f.x[0] = self.inverse_dimension[0]
+            f.x[i + 1] = s.x[1]
         return f
 
     def shape_solution(self, f, s_, half=False):
+        if len(self.f_shape) == 1:
+            f *= self._scale
+            return f
+
         if half:
             index = self.inverse_dimension[0].application["index"]
             f_new = np.zeros((s_.shape[1], np.prod(self.f_shape)), dtype=float)

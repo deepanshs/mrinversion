@@ -6,8 +6,7 @@ from mrinversion.kernel.base import BaseModel
 
 
 class T2(BaseModel):
-    r"""
-    A class for simulating the kernel of T2 decaying functions,
+    r"""A class for simulating the kernel of T2 decaying functions,
 
     .. math::
             y = \exp(-x/x_\text{inv}).
@@ -24,29 +23,27 @@ class T2(BaseModel):
         # inverse_dimension = inverse_dimension * cp.ScalarQuantity("s")
         super().__init__(kernel_dimension, inverse_dimension, 1, 1)
 
-    def kernel(self):
-        """
-        Return the kernel of T2 decaying functions.
+    def kernel(self, supersampling=1):
+        """Return the kernel of T2 decaying functions.
 
         Returns:
             A numpy array.
         """
         x = self.kernel_dimension.coordinates
-        x_inverse = self.inverse_kernel_dimension.coordinates
+        # x_inverse = self.inverse_kernel_dimension.coordinates
         # x = self.kernel_dimension.coordinates.to("s").value
         # self.inverse_kernel_dimension = (
         #     self.inverse_kernel_dimension / cp.ScalarQuantity("s")
         # )
-        # x_inverse = _supersampled_coordinates(
-        #     self.inverse_kernel_dimension, supersampling=supersampling
-        # )
+        x_inverse = _supersampled_coordinates(
+            self.inverse_kernel_dimension, supersampling=supersampling
+        )
         amp = np.exp(np.tensordot(-(1 / x_inverse), x, 0))
-        return self._averaged_kernel(amp, 1)
+        return self._averaged_kernel(amp, supersampling)
 
 
 class T1(BaseModel):
-    r"""
-    A class for simulating the kernel of T1 recovery functions,
+    r"""A class for simulating the kernel of T1 recovery functions,
 
     .. math::
             y = 1 - \exp(-x/x_\text{inv}).
