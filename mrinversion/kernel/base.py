@@ -15,12 +15,27 @@ __dimension_name__ = ("Dimension", "LinearDimension", "MonotonicDimension")
 class BaseModel:
     """Base kernel class."""
 
-    def __init__(self, kernel_dimension, inverse_kernel_dimension, n_dir, n_inv):
+    def __init__(
+        self,
+        kernel_dimension: list,
+        inverse_kernel_dimension: list,
+        n_dir: int,
+        n_inv: int,
+    ):
+        """Initialize the class
+
+        Args:
+            kernel_dimension: A list of kernel CSDM dimensions.
+            inverse_kernel_dimension: A list of inverse kernel CSDM dimensions.
+            n_dir: Number of kernel dimensions.
+            n_inv: Number of inverse dimensions.
+        """
         kernel = self.__class__.__name__
         message = (
             f"Exactly {n_inv} inverse dimension(s) is/are required for the "
             f"{kernel} kernel."
         )
+
         if isinstance(inverse_kernel_dimension, list):
             if len(inverse_kernel_dimension) != n_inv:
                 raise ValueError(message)
@@ -158,10 +173,9 @@ class LineShape(BaseModel):
     def _get_zeta_eta(self, supersampling):
         """Return zeta and eta coordinates over x-y grid"""
 
-        zeta, eta = _x_y_to_zeta_eta_distribution(
+        return _x_y_to_zeta_eta_distribution(
             self.inverse_kernel_dimension, supersampling
         )
-        return zeta, eta
 
 
 def _check_csdm_dimension(dimensions, dimension_id):

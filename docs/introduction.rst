@@ -8,10 +8,6 @@ In ``mrinversion``, we solve for the distribution of the second-rank traceless
 symmetric tensor principal components, through an inversion of a pure anisotropic
 NMR spectrum.
 
-.. whose frequency
-.. contributions are assumed to arise predominantly from the second-rank traceless
-.. symmetric tensors.
-
 In the case of the shielding tensors, the pure anisotropic frequency spectra corresponds
 the cross-sections of the 2D isotropic *v.s.* anisotropic correlation spectrum, such as
 the 2D One Pulse (TOP) MAS, phase adjusted spinning sidebands (PASS), magic-angle turning
@@ -201,7 +197,7 @@ second-rank traceless tensor parameters, :math:`\zeta`-:math:`\eta`, defined as
 .. math::
     :label: zeta_eta_def
 
-    r_\zeta = | \zeta_ | ~~~~\text{and}~~~~
+    r_\zeta = | \zeta | ~~~~\text{and}~~~~
     \theta = \left\{ \begin{array}{l r}
                 \frac{\pi}{4} \eta      &: \zeta \le 0, \\
                 \frac{\pi}{2} \left(1 - \frac{\eta}{2} \right) &: \zeta > 0.

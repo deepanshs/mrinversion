@@ -178,7 +178,7 @@ class SpinningSidebands(ShieldingPALineshape):
             inverse_dimension,
             channel,
             magnetic_flux_density,
-            "54.735 deg",
+            "54.7356 deg",
             None,
             None,
         )

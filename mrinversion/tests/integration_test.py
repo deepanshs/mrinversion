@@ -5,20 +5,21 @@ from csdmpy import statistics as stats
 
 from mrinversion.kernel.nmr import ShieldingPALineshape
 from mrinversion.linear_model import SmoothLasso
+from mrinversion.linear_model import SmoothLassoLS
 from mrinversion.linear_model import TSVDCompression
 
 
-def test_01():
+def setup():
     # The 2D MAF dataset in csdm format
     filename = "https://osu.box.com/shared/static/8lnwmg0dr7y6egk40c2orpkmmugh9j7c.csdf"
     data_object = cp.load(filename)
     data_object = data_object.real
-    _ = [item.to("ppm", "nmr_frequency_ratio") for item in data_object.dimensions]
+    _ = [item.to("ppm", "nmr_frequency_ratio") for item in data_object.x]
 
     data_object = data_object.T
     data_object_truncated = data_object[:, 155:180]
 
-    anisotropic_dimension = data_object_truncated.dimensions[0]
+    anisotropic_dimension = data_object_truncated.x[0]
     inverse_dimensions = [
         cp.LinearDimension(count=25, increment="400 Hz", label="x"),
         cp.LinearDimension(count=25, increment="400 Hz", label="y"),
@@ -41,19 +42,20 @@ def test_01():
 
     assert new_system.truncation_index == 87
 
-    s_lasso = SmoothLasso(
-        alpha=2.07e-7, lambda1=7.85e-6, inverse_dimension=inverse_dimensions
-    )
-    s_lasso.fit(K=compressed_K, s=compressed_s)
-    f_sol = s_lasso.f
+    return inverse_dimensions, compressed_K, compressed_s, K, data_object_truncated
 
-    residuals = s_lasso.residuals(K=K, s=data_object_truncated)
+
+def run_test(s_lasso, K, data_object_truncated):
+    residuals1 = s_lasso.residuals(K=K, s=data_object_truncated)
+    residuals2 = s_lasso.residuals(K=K, s=data_object_truncated.y[0].components[0].T)
+    assert np.allclose(residuals1.y[0].components[0].T, residuals2)
 
     # assert np.allclose(residuals.mean().value, 0.00048751)
-    np.testing.assert_almost_equal(residuals.std().value, 0.00336372, decimal=2)
+    np.testing.assert_almost_equal(residuals1.std().value, 0.00336372, decimal=2)
 
+    f_sol = s_lasso.f
     f_sol /= f_sol.max()
-    [item.to("ppm", "nmr_frequency_ratio") for item in f_sol.dimensions]
+    _ = [item.to("ppm", "nmr_frequency_ratio") for item in f_sol.x]
 
     Q4_region = f_sol[0:8, 0:8, 3:18]
     Q4_region.description = "Q4 region"
@@ -97,3 +99,23 @@ def test_01():
         np.asarray([6.138761032132587, 7.837190479891721, 4.210912435356488]),
         decimal=0,
     )
+
+
+def test_01():
+    inverse_dimensions, compressed_K, compressed_s, K, data_object_truncated = setup()
+
+    s_lasso = SmoothLasso(
+        alpha=2.07e-7, lambda1=7.85e-6, inverse_dimension=inverse_dimensions
+    )
+    s_lasso.fit(K=compressed_K, s=compressed_s)
+    run_test(s_lasso, K, data_object_truncated)
+
+
+def test_ls():
+    inverse_dimensions, compressed_K, compressed_s, K, data_object_truncated = setup()
+
+    s_lasso_ls = SmoothLassoLS(
+        alpha=2.07e-7, lambda1=7.85e-6, inverse_dimension=inverse_dimensions
+    )
+    s_lasso_ls.fit(K=compressed_K, s=compressed_s)
+    run_test(s_lasso_ls, K, data_object_truncated)

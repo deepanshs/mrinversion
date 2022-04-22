@@ -6,8 +6,7 @@ from mrinversion.kernel.base import BaseModel
 
 
 class T2(BaseModel):
-    r"""
-    A class for simulating the kernel of T2 decaying functions,
+    r"""A class for simulating the kernel of T2 decaying functions,
 
     .. math::
             y = \exp(-x/x_\text{inv}).
@@ -19,20 +18,23 @@ class T2(BaseModel):
             dictionary objects representing the `x`-`y` coordinate grid.
     """
 
-    def __init__(self, kernel_dimension, inverse_kernel_dimension):
-        super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 1)
+    def __init__(self, kernel_dimension, inverse_dimension):
+        # unit = kernel_dimension.coordinates.to('s')
+        # inverse_dimension = inverse_dimension * cp.ScalarQuantity("s")
+        super().__init__(kernel_dimension, inverse_dimension, 1, 1)
 
     def kernel(self, supersampling=1):
-        """
-        Return the kernel of T2 decaying functions.
+        """Return the kernel of T2 decaying functions.
 
-        Args:
-            supersampling: An integer. Each cell is supersampled by the factor
-                    `supersampling`.
         Returns:
             A numpy array.
         """
         x = self.kernel_dimension.coordinates
+        # x_inverse = self.inverse_kernel_dimension.coordinates
+        # x = self.kernel_dimension.coordinates.to("s").value
+        # self.inverse_kernel_dimension = (
+        #     self.inverse_kernel_dimension / cp.ScalarQuantity("s")
+        # )
         x_inverse = _supersampled_coordinates(
             self.inverse_kernel_dimension, supersampling=supersampling
         )
@@ -41,8 +43,7 @@ class T2(BaseModel):
 
 
 class T1(BaseModel):
-    r"""
-    A class for simulating the kernel of T1 recovery functions,
+    r"""A class for simulating the kernel of T1 recovery functions,
 
     .. math::
             y = 1 - \exp(-x/x_\text{inv}).
@@ -54,11 +55,12 @@ class T1(BaseModel):
                 dictionary objects representing the `x`-`y` coordinate grid.
     """
 
-    def __init__(self, kernel_dimension, inverse_kernel_dimension):
-        super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 1)
+    def __init__(self, kernel_dimension, inverse_dimension):
+        super().__init__(kernel_dimension, inverse_dimension, 1, 1)
 
     def kernel(self, supersampling=1):
         x = self.kernel_dimension.coordinates
+
         x_inverse = _supersampled_coordinates(
             self.inverse_kernel_dimension, supersampling=supersampling
         )

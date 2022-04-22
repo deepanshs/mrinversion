@@ -26,11 +26,11 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     n: int
         An interger used in linear interpolation of the data. The default is 5.
     """
-    [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
-    data = csdm_object.dependent_variables[0].components[0]
-    iso = csdm_object.dimensions[2].coordinates.value
+    _ = [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.x]
+    data = csdm_object.y[0].components[0]
+    iso = csdm_object.x[2].coordinates.value
 
-    reg_x, reg_y = [csdm_object.dimensions[i].coordinates.value for i in range(2)]
+    reg_x, reg_y = [csdm_object.x[i].coordinates.value for i in range(2)]
     dx = reg_x[1] - reg_x[0]
     dy = reg_y[1] - reg_y[0]
     sol = np.zeros((data.shape[0], zeta.count, eta.count))
@@ -79,9 +79,9 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
 
     del zeta_grid, eta_grid, index, x_, y_, avg_range_x, avg_range_y
     csdm_new = cp.as_csdm(sol)
-    csdm_new.dimensions[0] = eta
-    csdm_new.dimensions[1] = zeta
-    csdm_new.dimensions[2] = csdm_object.dimensions[2]
+    csdm_new.x[0] = eta
+    csdm_new.x[1] = zeta
+    csdm_new.x[2] = csdm_object.x[2]
     return csdm_new
 
 
@@ -152,7 +152,7 @@ def plot_3d(
     alpha=0.15,
     **kwargs,
 ):
-    """Generate a 3D density plot with 2D contour and 1D projections.
+    r"""Generate a 3D density plot with 2D contour and 1D projections.
 
     Args:
         ax: Matplotlib Axes to render the plot.
@@ -189,10 +189,10 @@ def plot_3d(
     lw = linewidth
 
     if isinstance(csdm_object, cp.CSDM):
-        f = csdm_object.dependent_variables[0].components[0].T
+        f = csdm_object.y[0].components[0].T
         label = csdm_object.description
 
-        a_, b_, c_ = [item for item in csdm_object.dimensions]
+        a_, b_, c_ = [item for item in csdm_object.x]
 
         a = a_.coordinates.value
         b = b_.coordinates.value
@@ -282,14 +282,14 @@ def plot_3d(
     if max_1d[0] is None:
         max_1d[0] = proj_x.max()
     proj_x /= max_1d[0]
-    ax.plot(a, sign * 14 * proj_x + offz, offy, zdir="y", c=ck, linewidth=lw)
+    ax.plot(a, 4 * sign * proj_x + offz, offy, zdir="y", c=ck, linewidth=lw)
 
     # 1D z-axis projection from 2D x-z projection
     proj_z = dist.sum(axis=0)
     if max_1d[2] is None:
         max_1d[2] = proj_z.max()
     proj_z /= max_1d[2]
-    ax.plot(-20 * proj_z + offy_n, c, offx, zdir="x", c=ck, linewidth=lw)
+    ax.plot(sign * proj_z / 4 + offy_n, c, offx, zdir="x", c=ck, linewidth=lw)
     ax.set_xlim(z_lim)
 
     # 2D y-z contour projection
@@ -308,7 +308,7 @@ def plot_3d(
         max_1d[1] = proj_y.max()
     proj_y /= max_1d[1]
     ax.plot(
-        b, sign * 14 * proj_y + offz, offx, zdir="x", c=ck, linewidth=lw, label=label
+        b, sign * proj_y * 4 + offz, offx, zdir="x", c=ck, linewidth=lw, label=label
     )
 
     ax.set_xlim(x_lim)

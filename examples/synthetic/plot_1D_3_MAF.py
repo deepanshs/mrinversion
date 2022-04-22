@@ -33,7 +33,8 @@ def plot2D(ax, csdm_object, title=""):
     levels = (np.arange(9) + 1) / 10
     plt.figure(figsize=(4.5, 3.5))
     ax.contourf(csdm_object, cmap="gist_ncar", levels=levels)
-    ax.grid(None)
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 100)
     ax.set_title(title)
     get_polar_grids(ax)
     ax.set_aspect("equal")
@@ -159,7 +160,10 @@ print(f"truncation_index = {new_system.truncation_index}")
 # accordingly.
 
 # guess alpha and lambda values.
-s_lasso = SmoothLasso(alpha=5e-5, lambda1=5e-6, inverse_dimension=inverse_dimension)
+s_lasso = SmoothLasso(
+    hyperparameters={"alpha": 5e-5, "lambda": 5e-6},
+    inverse_dimension=inverse_dimension,
+)
 s_lasso.fit(K=compressed_K, s=compressed_s)
 f_sol = s_lasso.f
 
@@ -209,7 +213,7 @@ plt.show()
 # hyperparameters.
 # The following code generates a range of :math:`\lambda` and :math:`\alpha` values
 # that are uniformly sampled on the log scale.
-lambdas = 10 ** (-5.2 - 1 * (np.arange(6) / 5))
+lambdas = 10 ** (-4.8 - 1.5 * (np.arange(6) / 5))
 alphas = 10 ** (-4 - 2 * (np.arange(6) / 5))
 
 # set up cross validation smooth lasso method

@@ -151,7 +151,7 @@ csdmpy library as shown below:
 Here, the anisotropic dimension is sampled at 625 Hz for 32 points with an offset of
 -10 kHz.
 
-Similarly, we can create the CSDM dimensions needed for the *x*-*y* inversion grid as
+Similarly, we can create the CSDM dimensions needed for the *x-y* inversion grid as
 shown below:
 
 .. plot::
@@ -228,7 +228,7 @@ instance to generate the spinning sideband kernel, as follows,
 
 Here, ``K`` is the :math:`32\times 625` kernel, where the 32 is the number of samples
 (sideband amplitudes), and 625 is the number of features (subspectra) on the
-:math:`25 \times 25` *x*-*y* grid. The argument *supersampling* is the supersampling
+:math:`25 \times 25` *x-y* grid. The argument *supersampling* is the supersampling
 factor. In a supersampling scheme, each grid cell is averaged over a :math:`n\times n`
 sub-grid, where :math:`n` is the supersampling factor. A supersampling factor of 1 is
 equivalent to no sub-grid averaging.
@@ -425,7 +425,7 @@ The arguments of the :py:class:`~mrinversion.linear_model.SmoothLassoCV` is a li
 of the *alpha* and *lambda* values, along with the standard deviation of the
 noise, *sigma*. The value of the argument *folds* is the number of folds used in the
 cross-validation. As before, to solve the problem, use the
-:meth:`~mrinversion.linear_model.SmoothLassoCV.fit` method, whose arguments are
+:py:meth:`~mrinversion.linear_model.SmoothLassoCV.fit` method, whose arguments are
 the kernel and signal.
 
 The optimum hyperparameters
