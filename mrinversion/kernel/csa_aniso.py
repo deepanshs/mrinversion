@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from mrsimulator import Simulator
 from mrsimulator import SpinSystem
-from mrsimulator.methods import BlochDecaySpectrum
+from mrsimulator.method.lib import BlochDecaySpectrum
 
 from mrinversion.kernel.base import LineShape
 
@@ -94,7 +94,7 @@ class ShieldingPALineshape(LineShape):
         sim.methods = [method]
         sim.run(pack_as_csdm=False)
 
-        amp = sim.methods[0].simulation
+        amp = sim.methods[0].simulation.real
         return self._averaged_kernel(amp, supersampling)
 
 
