@@ -4,7 +4,7 @@ import numpy as np
 from mrsimulator import Simulator
 from mrsimulator import Site
 from mrsimulator import SpinSystem
-from mrsimulator.methods import BlochDecaySpectrum
+from mrsimulator.method.lib import BlochDecaySpectrum
 
 from mrinversion.kernel.nmr import MAF
 from mrinversion.kernel.nmr import ShieldingPALineshape
@@ -77,7 +77,7 @@ def generate_shielding_kernel(zeta_, eta_, angle, freq, n_sidebands, to_ppm=True
     sim.config.decompose_spectrum = "spin_system"
     sim.config.number_of_sidebands = n_sidebands
     sim.run(pack_as_csdm=False)
-    sim_lineshape = sim.methods[0].simulation
+    sim_lineshape = sim.methods[0].simulation.real
     sim_lineshape = np.asarray(sim_lineshape).reshape(4, 4, 96)
     sim_lineshape = sim_lineshape / sim_lineshape[0, 0].sum()
     sim_lineshape[0, :, :] /= 2.0
