@@ -1,27 +1,41 @@
 :root {
   --max-sidebar-width: 30%;
 }
+
+@font-face {
+  font-family: "DejaVu Sans";
+  src: url("https://kendo.cdn.telerik.com/2021.2.616/styles/fonts/DejaVu/DejaVuSans.ttf") format("truetype");
+}
+
 body {
   padding-top: 4em;
   padding-bottom: 0;
+  font-family: 'DejaVu Sans', sans-serif;
 }
 
 h1 {
   font-size: 2.2em;
   font-weight: 700;
-  padding-bottom: 0.3em;
+  padding: 0 0 0.3em;
   border-bottom: 1px solid silver;
-  margin-bottom: 0.5em;
+  margin-bottom: 0.8em;
 }
 
 h2 {
   font-size: 1.6em;
-  font-weight: 400;
+  font-weight: 500;
   color: #70360f;
-  padding-bottom: 1.2em;
-  padding-bottom: 0.2em;
   border-bottom: 1px solid silver;
-  margin-bottom: 0.4em;
+  margin: 1.25em 0 0.6em;
+  padding: 8px 0;
+  /* border-radius: 8px; */
+  /* box-shadow: 0 0 1px 0 #4e4e4e57; */
+  /* background-color: #e7e7f3; */
+}
+
+.output_html.output_result h2 {
+  font-size: 1.2em;
+  color: #663d3d;
 }
 
 h3 {
@@ -251,7 +265,7 @@ table caption:hover {
 .toctree-wrapper.compound > p.caption {
   display: none;
 }
-.sidebar.hidden-xs > p.caption {
+.sidebar.hidden-xs > p:not(p.logo) {
   padding-left: 24px;
   padding-top: 2px;
   padding-bottom: 2px;
@@ -390,15 +404,10 @@ footer a:active {
 }
 
 table:not([class]):not([id]) {
-  display: flex;
-  justify-content: space-between;
+  display: block;
   font-size: small;
-  padding-right: 1em;
-  padding-bottom: 0.5em;
-  outline: 1px solid silver;
-  border-radius: 1em;
-  width: 100%;
   overflow-x: auto;
+  margin: 0;
 }
 
 tr th {
@@ -457,11 +466,6 @@ tr td {
     width: 100%;
   }
 
-  table:not([class]):not([id]) {
-    width: 100%;
-    max-width: 992px;
-  }
-
   #sidebar-wrapper {
     display: none;
   }
@@ -474,9 +478,6 @@ tr td {
   footer {
     margin-left: -15px;
     width: calc(100% + 30px);
-  }
-  table:not([class]):not([id]) {
-    width: 100%;
   }
   .bodywrapper > .body {
     margin-top: 0;
