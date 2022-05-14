@@ -51,8 +51,9 @@ class BaseModel:
 
         self.kernel_dimension = kernel_dimension
         self.inverse_kernel_dimension = inverse_kernel_dimension
+        self.inverse_dimension = self.inverse_kernel_dimension
 
-    def _averaged_kernel(self, amp, supersampling):
+    def _averaged_kernel(self, amp, supersampling, xy_grid=True):
         """Return the kernel by averaging over the supersampled grid cells."""
         shape = ()
         inverse_kernel_dimension = self.inverse_kernel_dimension
@@ -69,15 +70,16 @@ class BaseModel:
         axes = tuple([2 * i + 1 for i in range(inv_len)])
         K = K.mean(axis=axes)
 
-        section = [*[0 for i in range(inv_len)], slice(None, None, None)]
-        K /= K[tuple(section)].sum()
+        if xy_grid:
+            section = [*[0 for _ in range(inv_len)], slice(None, None, None)]
+            K /= K[tuple(section)].sum()
 
-        section = [slice(None, None, None) for _ in range(inv_len + 1)]
-        for i, item in enumerate(inverse_kernel_dimension):
-            if item.coordinates[0].value == 0:
-                section_ = deepcopy(section)
-                section_[i] = 0
-                K[tuple(section_)] /= 2.0
+            section = [slice(None, None, None) for _ in range(inv_len + 1)]
+            for i, item in enumerate(inverse_kernel_dimension):
+                if item.coordinates[0].value == 0:
+                    section_ = deepcopy(section)
+                    section_[i] = 0
+                    K[tuple(section_)] /= 2.0
 
         inv_size = np.asarray([item.count for item in inverse_kernel_dimension]).prod()
         K = K.reshape(inv_size, self.kernel_dimension.count).T
