@@ -18,8 +18,7 @@ __email__ = "srivastava.89@osu.edu"
 
 
 class GeneralL2Lasso:
-    r"""
-    The Minimizer class solves the following equation,
+    r"""The Minimizer class solves the following equation,
 
     .. math::
         {\bf f} = \underset{{\bf f}}{\text{argmin}} \left( \frac{1}{m} \|
@@ -185,8 +184,7 @@ class GeneralL2Lasso:
         self.n_iter = estimator.n_iter_
 
     def predict(self, K):
-        r"""
-        Predict the signal using the linear model.
+        r"""Predict the signal using the linear model.
 
         Args
         ----
@@ -488,8 +486,7 @@ class GeneralL2LassoCV:
         return self.opt.predict(K)
 
     def residuals(self, K, s):
-        r"""
-        Return the residual as the difference the data and the prediced data(fit),
+        r"""Return the residual as the difference the data and the prediced data(fit),
         following
 
         .. math::

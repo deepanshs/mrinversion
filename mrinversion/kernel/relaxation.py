@@ -1,11 +1,45 @@
 # -*- coding: utf-8 -*-
+import csdmpy as cp
 import numpy as np
+from csdmpy.units import string_to_quantity
 
 from .utils import _supersampled_coordinates
 from mrinversion.kernel.base import BaseModel
 
 
-class T2(BaseModel):
+class BaseRelaxation(BaseModel):
+    def __init__(self, kernel_dimension, inverse_dimension):
+        minimum = inverse_dimension["minimum"]
+        maximum = inverse_dimension["maximum"]
+        count = inverse_dimension.get("count", 32)
+        scale = inverse_dimension.get("scale", "log")
+        label = inverse_dimension.get("label", None)
+
+        unit = kernel_dimension.coordinates[0].unit
+        x_min = string_to_quantity(minimum).to(unit).value
+        x_max = string_to_quantity(maximum).to(unit).value
+        if scale == "log":
+            x_min, x_max = np.log10(x_min), np.log10(x_max)
+
+        coords = (np.arange(count) / (count - 1)) * (x_max - x_min) + x_min
+
+        if scale == "log":
+            coords = 10 ** (coords)
+
+        lbl_ = f"log({self.__class__.__name__} / {unit})" if scale == "log" else None
+        label = label if label is not None else lbl_
+        inverse_dimension = cp.as_dimension(array=coords, unit=str(unit), label=label)
+
+        check = scale == "log"
+        meta = {
+            "log": check,
+            "label": f"log({self.__class__.__name__} / {unit}" if check else None,
+        }
+        inverse_dimension.application["com.github.deepanshs.mrinversion"] = meta
+        super().__init__(kernel_dimension, inverse_dimension, 1, 1)
+
+
+class T2(BaseRelaxation):
     r"""
     A class for simulating the kernel of T2 decaying functions,
 
@@ -15,12 +49,12 @@ class T2(BaseModel):
     Args:
         kernel_dimension: A Dimension object, or an equivalent dictionary object. This
             dimension must represent the T2 decay dimension.
-        inverse_kernel_dimension: A list of two Dimension objects, or equivalent
+        inverse_dimension: A list of two Dimension objects, or equivalent
             dictionary objects representing the `x`-`y` coordinate grid.
     """
 
-    def __init__(self, kernel_dimension, inverse_kernel_dimension):
-        super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 1)
+    def __init__(self, kernel_dimension, inverse_dimension):
+        super().__init__(kernel_dimension, inverse_dimension)
 
     def kernel(self, supersampling=1):
         """
@@ -37,12 +71,11 @@ class T2(BaseModel):
             self.inverse_kernel_dimension, supersampling=supersampling
         )
         amp = np.exp(np.tensordot(-(1 / x_inverse), x, 0))
-        return self._averaged_kernel(amp, supersampling)
+        return self._averaged_kernel(amp, supersampling, xy_grid=False)
 
 
-class T1(BaseModel):
-    r"""
-    A class for simulating the kernel of T1 recovery functions,
+class T1(BaseRelaxation):
+    r"""A class for simulating the kernel of T1 recovery functions,
 
     .. math::
             y = 1 - \exp(-x/x_\text{inv}).
@@ -50,12 +83,12 @@ class T1(BaseModel):
     Args:
         kernel_dimension: A Dimension object, or an equivalent dictionary object.
         This dimension must represent the T2 decay dimension.
-        inverse_kernel_dimension: A list of two Dimension objects, or equivalent
+        inverse_dimension: A list of  Dimension objects, or equivalent
                 dictionary objects representing the `x`-`y` coordinate grid.
     """
 
-    def __init__(self, kernel_dimension, inverse_kernel_dimension):
-        super().__init__(kernel_dimension, inverse_kernel_dimension, 1, 1)
+    def __init__(self, kernel_dimension, inverse_dimension):
+        super().__init__(kernel_dimension, inverse_dimension)
 
     def kernel(self, supersampling=1):
         x = self.kernel_dimension.coordinates
@@ -63,4 +96,4 @@ class T1(BaseModel):
             self.inverse_kernel_dimension, supersampling=supersampling
         )
         amp = 1 - np.exp(np.tensordot(-(1 / x_inverse), x, 0))
-        return self._averaged_kernel(amp, supersampling)
+        return self._averaged_kernel(amp, supersampling, xy_grid=False)
