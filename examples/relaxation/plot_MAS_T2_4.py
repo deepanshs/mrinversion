@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-0.10 Cs2O • 0.90 SiO2 MAS-ETA
+0.05 K2O • 0.95 SiO2 MAS-ETA
 =============================
 """
 
@@ -36,13 +36,14 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset as a CSDM data-object.
 
 # The 2D MAF dataset in csdm format
+
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_10%25Cs2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_5%25K2O_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
 data_object = data_object.real
-sigma = 1270.825  # data standard deviation
+sigma = 1546.338  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -83,7 +84,7 @@ kernel_dimension = data_object_truncated.dimensions[0]
 relaxT2 = relaxation.T2(
     kernel_dimension=kernel_dimension,
     inverse_dimension=dict(
-        count=64, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
+        count=32, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension

@@ -98,7 +98,7 @@ kernel_dimension = data_object_truncated.dimensions[0]
 relaxT2 = relaxation.T2(
     kernel_dimension=kernel_dimension,
     inverse_dimension=dict(
-        count=64, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
+        count=32, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension

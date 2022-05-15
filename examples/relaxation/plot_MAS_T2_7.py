@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-0.05 Na2O • 0.95 SiO2 MAS-ETA
-=============================
+0.07 Cs2O • 0.02 Al2O3 • 0.001 SnO2 • 0.91 SiO2 MAS-ETA
+=======================================================
 """
 
 # %%
@@ -37,12 +37,12 @@ def plot2D(csdm_object, **kwargs):
 
 # The 2D MAF dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_5%25Na2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_7%25Cs2O_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
 data_object = data_object.real
-sigma = 1213.485  # data standard deviation
+sigma = 1270.825  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -56,7 +56,7 @@ plot2D(data_object)
 # Prepping the data for inversion
 # '''''''''''''''''''''''''''''''
 data_object = data_object.T
-data_object_truncated = data_object[:, 230:-230]
+data_object_truncated = data_object[:, 245:-245]
 plot2D(data_object_truncated)
 
 # %%

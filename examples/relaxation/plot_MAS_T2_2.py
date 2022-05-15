@@ -8,7 +8,6 @@
 # The following example is an application of the statistical learning method in
 # determining the distribution of the T2 relaxation constants in glasses.
 #
-#
 # Import all relevant packages.
 import csdmpy as cp
 import matplotlib.pyplot as plt
@@ -43,7 +42,7 @@ data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
 data_object = data_object.real
-sigma = 1270.825  # data standard deviation
+sigma = 1308.07  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -84,7 +83,7 @@ kernel_dimension = data_object_truncated.dimensions[0]
 relaxT2 = relaxation.T2(
     kernel_dimension=kernel_dimension,
     inverse_dimension=dict(
-        count=64, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
+        count=32, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
