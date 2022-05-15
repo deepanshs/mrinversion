@@ -379,7 +379,7 @@ class GeneralL2LassoCV:
         # cv_map contains negated mean square errors, therefore multiply by -1.
         self.cv_map *= -1
         # subtract the variance.
-        self.cv_map -= self.sigma ** 2
+        self.cv_map -= self.sigma**2
 
         # After subtracting the variance, any negative values in the cv grid is a
         # result of fitting noise. Take the absolute value of cv to avoid such
