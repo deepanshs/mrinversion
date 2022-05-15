@@ -31,7 +31,7 @@ ext1 = Extension(
     sources=["mrinversion/linear_model/fista/fista.f90"],
     # f2py_options=['only:', 'subroutine_name', ':'],
     # extra_f90_compile_args=['O3', 'fopenmp'],
-    libraries=["gomp", "cblas"],
+    libraries=["gomp", "blas"],
     # f2py_options=['only:', 'fista', ':'],
     language="f90",
 )
@@ -41,7 +41,7 @@ ext2 = Extension(
     sources=["mrinversion/linear_model/fista/fista_cv.f90"],
     # f2py_options=['only:', 'subroutine_name', ':'],
     # extra_f90_compile_args=['O3', 'fopenmp'],
-    libraries=["gomp", "cblas"],
+    libraries=["gomp", "blas"],
     # f2py_options=['only:', 'fista', ':'],
     language="f90",
 )

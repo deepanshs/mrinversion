@@ -118,10 +118,11 @@ use omp_lib
                         matrixcolumn, y_k_i, 1, 0.0d+0, temp_c, 1)
 
             ! temp_c = Linv*(c - temp_c)
-            call daxpby(matrixcolumn, Linv, c_i, 1, -Linv, temp_c, 1)
+            call dscal(matrixcolumn, -Linv, temp_c, 1)
+            call daxpy(matrixcolumn, Linv, c_i, 1, temp_c, 1)
 
             ! temp_c = y_k_i + temp_c
-            call daxpby(matrixcolumn, 1.0d+0, y_k_i, 1, 1.0d+0, temp_c, 1)
+            call daxpy(matrixcolumn, 1.0d+0, y_k_i, 1, temp_c, 1)
 
 
 
@@ -145,7 +146,7 @@ use omp_lib
             call dgemv('N', matrixrow, matrixcolumn, 1.0d+0, matrix, matrixrow, &
                         f_k_i, 1, 0.0d+0, temp, 1)
             ! temp = - s_temp + temp
-            call daxpby(matrixrow, -1.0d+0, s_temp, 1, 1.0d+0, temp, 1)
+            call daxpy(matrixrow, -1.0d+0, s_temp, 1, temp, 1)
             ! residue = Norm2(temp)**2
             residue_temp = residue_temp + dnrm2(matrixrow, temp, 1)**2
 
@@ -199,8 +200,9 @@ use omp_lib
             y_k_i = f_km1(:,i)
             ! call scopy(matrixcolumn, f_km1_i, 1, y_k_i, 1)
             ! y_k_i = (constantFactor + 1.0d+0) * f_k_i - constantFactor * f_km1)
-            call daxpby(matrixcolumn, constantFactor+1.0d+0, f_k_i, 1, &
-                       -constantFactor, y_k_i, 1)
+            call dscal(matrixcolumn, -constantFactor, y_k_i, 1)
+            call daxpy(matrixcolumn, constantFactor+1.0d+0, f_k_i, 1, &
+                        y_k_i, 1)
             y_k(:,i) = y_k_i
             !f_k(:,i) = f_k_i
         enddo
