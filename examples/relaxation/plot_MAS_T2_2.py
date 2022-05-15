@@ -37,9 +37,8 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset as a CSDM data-object.
 
 # The 2D MAF dataset in csdm format
-filename = (
-    "https://www.ssnmr.org/sites/default/files/mrsimulator/MAS_SE_PIETA_5%25Li2O.csdf"
-)
+domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
+filename = f"{domain}/MAS_SE_PIETA_5%25Li2O_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
@@ -57,22 +56,7 @@ plot2D(data_object)
 #
 # Prepping the data for inversion
 # '''''''''''''''''''''''''''''''
-# **Step-1: Data Alignment**
-#
-# When using the csdm objects with the ``mrinversion`` package, the dimension at index
-# 0 must be the dimension undergoing the linear inversion. In this example, we
-# invert the signal decay from relaxation, that is, dimension-1. The first step is to
-# swap the axes using a data transpose.
 data_object = data_object.T
-
-# %%
-# **Step-2: Optimization**
-#
-# Notice, that the signal from the 2D T2-MAS dataset occupies a small fraction of the
-# two-dimensional grid. Though you may choose to proceed with the inversion
-# directly onto this dataset, it is not computationally optimum. For optimum
-# performance, trim the dataset to the region of relevant signals. Use the appropriate
-# array indexing/slicing to select the signal region.
 data_object_truncated = data_object[:, 245:-245]
 plot2D(data_object_truncated)
 
@@ -171,7 +155,8 @@ levels = np.arange(10) / 10 + 0.1
 plt.figure(figsize=(4, 3))
 ax = plt.subplot(projection="csdm")
 ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
-ax.set_xlim(-3, 3)
+ax.set_ylim(-75, -130)
+ax.set_xlim(-3, 2.5)
 plt.tight_layout()
 plt.show()
 
