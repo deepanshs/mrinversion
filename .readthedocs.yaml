@@ -15,6 +15,7 @@ build:
     python: "3.8"
   apt_packages:
     - gfortran
+    - libblas-dev
 
 # Optionally build your docs in additional formats such as PDF and ePub
 formats: [pdf]
