@@ -157,10 +157,11 @@ do fold = 1, nfold
                             matrixcolumn, y_k_i, 1, 0.0d+0, temp_c, 1)
 
                 ! temp_c = Linv*(c - temp_c)
-                call daxpby(matrixcolumn, Linv, c_i, 1, -Linv, temp_c, 1)
+                call dscal(matrixcolumn, -Linv, temp_c, 1)
+                call daxpy(matrixcolumn, Linv, c_i, 1, temp_c, 1)
 
                 ! temp_c = y_k_i + temp_c
-                call daxpby(matrixcolumn, 1.0d+0, y_k_i, 1, 1.0d+0, temp_c, 1)
+                call daxpy(matrixcolumn, 1.0d+0, y_k_i, 1, temp_c, 1)
 
 
 
@@ -185,8 +186,8 @@ do fold = 1, nfold
                             matrix(:endIndex,:, fold), endIndex+1, &
                             f_k_i, 1, 0.0d+0, temp(:endIndex), 1)
                 ! temp = - s_temp + temp
-                call daxpby(endIndex+1, -1.0d+0, s_temp(:endIndex), &
-                            1, 1.0d+0, temp(:endIndex), 1)
+                call daxpy(endIndex+1, -1.0d+0, s_temp(:endIndex), &
+                            1, temp(:endIndex), 1)
                 ! residue = Norm2(temp)**2
                 residue_temp = residue_temp + dnrm2(endIndex+1, temp(:endIndex), 1)**2
 
@@ -240,8 +241,9 @@ do fold = 1, nfold
                 y_k_i = f_km1(:,i)
                 ! call scopy(matrixcolumn, f_km1_i, 1, y_k_i, 1)
                 ! y_k_i = (constantFactor + 1.0d+0) * f_k_i - constantFactor * f_km1)
-                call daxpby(matrixcolumn, constantFactor+1.0d+0, f_k_i, 1, &
-                           -constantFactor, y_k_i, 1)
+                call dscal(matrixcolumn, -constantFactor, y_k_i, 1)
+                call daxpy(matrixcolumn, constantFactor+1.0d+0, f_k_i, 1, &
+                           y_k_i, 1)
                 y_k(:,i) = y_k_i
                 !f_k(:,i) = f_k_i
             enddo
@@ -268,8 +270,8 @@ do fold = 1, nfold
                         matrixTest(:endIndexTest,:,fold), endIndexTest+1, &
                         f_k_i, 1, 0.0d+0, temp_test(:endIndexTest), 1)
             ! temp_test = - s_test_i + temp_test
-            call daxpby(endIndexTest+1, -1.0d+0, s_test_i(:endIndexTest), &
-                        1, 1.0d+0, temp_test(:endIndexTest), 1)
+            call daxpy(endIndexTest+1, -1.0d+0, s_test_i(:endIndexTest), &
+                        1, temp_test(:endIndexTest), 1)
             chi2_temp = chi2_temp + dnrm2(endIndexTest+1, temp_test(:endIndexTest), 1)**2
         enddo
         !$omp end do
