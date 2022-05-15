@@ -23,7 +23,7 @@ install_requires = [
     "scikit-learn>=0.22",
 ]
 
-setup_requires = ["setuptools>=27.3"]
+setup_requires = ["setuptools>=27.3", "numpy"]
 extras = {"matplotlib": ["matplotlib>=3.0"]}
 
 ext1 = Extension(
