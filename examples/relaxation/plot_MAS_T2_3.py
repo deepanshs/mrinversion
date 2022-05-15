@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-2D T2-MAS data of Li2O2 glass
-=============================
+0.07 Cs2O • 0.02 Al2O3 • 0.001 SnO2 • 0.91 SiO2 MAS-ETA
+=======================================================
 """
 
 # %%
@@ -21,7 +21,7 @@ from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 
 
 def plot2D(csdm_object, **kwargs):
-    plt.figure(figsize=(4.5, 3.5))
+    plt.figure(figsize=(4, 3))
     csdm_object.plot(**kwargs)
     plt.tight_layout()
     plt.show()
@@ -37,7 +37,9 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset as a CSDM data-object.
 
 # The 2D MAF dataset in csdm format
-filename = "T2MAS_5%Li2O.csdf"
+filename = (
+    "https://www.ssnmr.org/sites/default/files/mrsimulator/MAS_SE_PIETA_7%25Cs2O.csdf"
+)
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
@@ -155,7 +157,7 @@ print(s_lasso.hyperparameters)
 # %%
 # The cross-validation curve
 # ''''''''''''''''''''''''''
-plt.figure(figsize=(4.5, 3.5))
+plt.figure(figsize=(4, 3))
 s_lasso.cv_plot()
 plt.tight_layout()
 plt.show()
@@ -164,7 +166,14 @@ plt.show()
 # The optimum solution
 # ''''''''''''''''''''
 f_sol = s_lasso.f
-plot2D(f_sol, interpolation="none")
+
+levels = np.arange(10) / 10 + 0.1
+plt.figure(figsize=(4, 3))
+ax = plt.subplot(projection="csdm")
+ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
+ax.set_xlim(-3, 3)
+plt.tight_layout()
+plt.show()
 
 # %%
 # The fit residuals
