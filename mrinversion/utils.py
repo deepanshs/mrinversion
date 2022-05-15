@@ -53,7 +53,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
             x_ = x_.ravel()
             y_ = y_.ravel()
 
-            zeta_grid = np.sqrt(x_ ** 2 + y_ ** 2)
+            zeta_grid = np.sqrt(x_**2 + y_**2)
             eta_grid = np.ones(zeta_grid.shape)
 
             index = np.where(x_ < y_)

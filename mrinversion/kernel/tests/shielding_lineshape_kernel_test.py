@@ -105,7 +105,7 @@ def test_zeta_eta_from_x_y():
         eta_ = []
         for y_ in y:
             for x_ in x:
-                z = np.sqrt(x_ ** 2 + y_ ** 2)
+                z = np.sqrt(x_**2 + y_**2)
                 if x_ < y_:
                     eta_.append(factor_ * np.arctan(x_ / y_))
                     zeta_.append(z)

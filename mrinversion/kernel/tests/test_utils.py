@@ -19,7 +19,7 @@ def test_x_y_to_zeta_eta():
     zeta_ = []
     eta_ = []
     for x_, y_ in zip(x, y):
-        z = np.sqrt(x_ ** 2 + y_ ** 2)
+        z = np.sqrt(x_**2 + y_**2)
         if x_ < y_:
             eta_.append(factor_ * np.arctan(x_ / y_))
             zeta_.append(z)
@@ -59,7 +59,7 @@ def test_x_y_to_zeta_eta_distribution():
     eta_ = []
     for y_ in y:
         for x_ in x:
-            z = np.sqrt(x_ ** 2 + y_ ** 2)
+            z = np.sqrt(x_**2 + y_**2)
             if x_ < y_:
                 eta_.append(factor_ * np.arctan(x_ / y_))
                 zeta_.append(z)

@@ -7,7 +7,7 @@ __email__ = "srivastava.89@osu.edu"
 
 def find_optimum_singular_value(s):
     length = s.size
-    s2 = s ** 2.0
+    s2 = s**2.0
     sj = s2 / s2.sum()
     T = sj * np.log10(sj)
     T[np.where(np.isnan(T))] = 0
