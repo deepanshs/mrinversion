@@ -203,11 +203,11 @@ class LassoFistaCV:
 
         (
             self.cv_map,
-            std,
+            self.std,
             iteri,
             cpu_time,
             wall_time,
-            predictionerror,
+            self.predictionerror,
         ) = fista_cv.fista(
             matrix=k_train,
             s=s_train,
@@ -222,13 +222,13 @@ class LassoFistaCV:
             m=m,
         )
         # subtract the variance.
-        self.cv_map -= self.sigma ** 2
+        self.cv_map -= (self.sigma / self.scale) ** 2
         self.cv_map = np.abs(self.cv_map)
-        index = np.unravel_index(self.cv_map.argmin(), self.cv_map.shape)
 
-        # The argmin of the minimum value is the selected model as it has the least
-        # prediction error.
-        self.hyperparameters["lambda"] = self.cv_lambdas[index[0]]
+        lambdas = np.log10(self.cv_lambdas)
+        l1_index, l2_index = calculate_opt_lambda(self.cv_map, self.std)
+        lambda1, lambda2 = lambdas[l1_index], lambdas[l2_index]
+        self.hyperparameters["lambda"] = 10 ** ((lambda1 + lambda2) / 2.0)
 
         # Calculate the solution using the complete data at the optimized lambda and
         # alpha values
@@ -243,7 +243,7 @@ class LassoFistaCV:
         self.f = self.opt.f
 
         # convert cv_map to csdm
-        self.cv_map = cp.as_csdm(np.squeeze(np.log10(self.cv_map).T.copy()))
+        self.cv_map = cp.as_csdm(np.squeeze(self.cv_map.T.copy()))
         self.cv_map.y[0].component_labels = ["log10"]
         d0 = cp.as_dimension(np.log10(self.cv_lambdas), label="log(λ)")
         self.cv_map.dimensions[0] = d0
@@ -292,6 +292,40 @@ class LassoFistaCV:
             csdm object
         """
         return self.opt.residuals(K, s)
+
+    def cv_plot(self):
+        cv = self.cv_map.y[0].components[0]
+        predictionerror = self.predictionerror
+        std = self.std
+
+        l1_idx, l2_idx = calculate_opt_lambda(cv, std)
+        lambdas = np.log10(self.cv_lambdas)
+        opt_lambda = 0.5 * (lambdas[l1_idx] + lambdas[l2_idx])
+
+        plt.axhline(y=std[l1_idx] + cv[l1_idx], linestyle="--", c="r")
+        plt.plot(lambdas, predictionerror, alpha=0.5, linestyle="dotted")
+
+        kwargs = {"s": 70, "edgecolors": "k", "linewidth": 1.5}
+        plt.scatter(lambdas[l1_idx], cv[l1_idx], facecolors="b", **kwargs)
+        plt.scatter(lambdas[l2_idx], cv[l2_idx], facecolors="r", **kwargs)
+        plt.axvline(x=opt_lambda, linestyle="--", c="g", label="$\\lambda^*$")
+
+        plt.plot(lambdas, cv, c="k", alpha=1, label="CV curve")
+        plt.yscale("log")
+        # plt.errorbar(lambdas, cv, std, c='k', alpha=0.2)
+        # plt.ylim([0, cv.max()])
+        plt.legend()
+        plt.xlabel(r"log10 ($\lambda$)")
+        plt.ylabel("test error")
+
+
+def calculate_opt_lambda(cv, std):
+    l1_index = np.unravel_index(cv.argmin(), cv.shape)[0]
+    cv_std = cv[l1_index] + std[l1_index]
+    temp = np.where(cv < cv_std)[0]
+    index = np.where(temp > l1_index)[0].max()
+    l2_index = temp[index]
+    return l1_index, l2_index
 
 
 def test_train_set(X, y, folds, random=False, repeat_folds=1):
@@ -350,38 +384,3 @@ def test_train_set(X, y, folds, random=False, repeat_folds=1):
             s_test[: test_index.size, :, j * folds + i] = y[test_index]
 
     return k_train, s_train, k_test, s_test, m
-
-
-def plot(std, opt_lambda, min_index_1s_dev, predictionerror, lambdaval, cv):
-    plt.figure()
-    plt.axhline(y=std[opt_lambda] + cv[opt_lambda], linestyle="--", c="r")
-
-    plt.plot(np.log10(lambdaval), predictionerror, alpha=0.5, linestyle="dotted")
-
-    plt.scatter(
-        np.log10(lambdaval[opt_lambda]),
-        cv[opt_lambda],
-        s=70,
-        edgecolors="k",
-        facecolors="b",
-        linewidth=1.5,
-    )
-
-    plt.scatter(
-        np.log10(lambdaval[min_index_1s_dev]),
-        cv[min_index_1s_dev],
-        s=70,
-        edgecolors="k",
-        facecolors="r",
-        linewidth=1.5,
-    )
-
-    # plt.scatter(np.log10(lambdaval[midlab]), cv[midlab], \
-    #             s=70, edgecolors='k', facecolors='b', linewidth=1.5)
-    plt.plot(np.log10(lambdaval), cv, c="k", alpha=1)
-    plt.yscale("log")
-    # plt.errorbar(np.log10(lambdaval), cv, std, c='k', alpha=0.2)
-    # plt.ylim([0, cv.max()])
-    plt.xlabel(r"log10 ($\lambda$)")
-    plt.ylabel("test error")
-    plt.show()

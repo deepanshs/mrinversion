@@ -1,0 +1,2 @@
+f2py -c -m fista --f90flags='-O3 -fopenmp' -lgomp fista.f90
+f2py -c -m fista_cv --f90flags='-O3 -fopenmp' -lgomp fista_cv.f90
