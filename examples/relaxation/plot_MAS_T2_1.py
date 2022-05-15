@@ -36,9 +36,8 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset as a CSDM data-object.
 
 # The 2D MAF dataset in csdm format
-filename = (
-    "https://www.ssnmr.org/sites/default/files/mrsimulator/MAS_SE_PIETA_5%25Cs2O.csdf"
-)
+domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
+filename = f"{domain}/MAS_SE_PIETA_5%25Cs2O_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
@@ -72,7 +71,7 @@ data_object = data_object.T
 # directly onto this dataset, it is not computationally optimum. For optimum
 # performance, trim the dataset to the region of relevant signals. Use the appropriate
 # array indexing/slicing to select the signal region.
-data_object_truncated = data_object[:, 245:-241]
+data_object_truncated = data_object[:, 241:-245]
 plot2D(data_object_truncated)
 
 # %%
@@ -167,10 +166,11 @@ plt.show()
 f_sol = s_lasso.f
 
 levels = np.arange(10) / 10 + 0.1
-plt.figure(figsize=(5, 3.5))
+plt.figure(figsize=(4, 3))
 ax = plt.subplot(projection="csdm")
 ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
-ax.set_xlim(-3, 3)
+ax.set_ylim(-75, -130)
+ax.set_xlim(-3, 2.5)
 plt.tight_layout()
 plt.show()
 

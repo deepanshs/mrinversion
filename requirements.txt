@@ -4,5 +4,5 @@ numpy>=1.20; python_version > '3.6'
 matplotlib>=3.0
 csdmpy>=0.4
 joblib>=0.13.2
-mrsimulator>=0.6
+mrsimulator>=0.3
 scikit-learn>=0.24.2
