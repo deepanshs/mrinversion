@@ -25,7 +25,7 @@ class LassoFista:
         self.positive = positive
         self.inverse_dimension = inverse_dimension
 
-    def fit(self, K, s):
+    def fit(self, K, s, warm_start=False):
         if isinstance(s, cp.CSDM):
             self.s = s
             s_ = s.dependent_variables[0].components[0].T
@@ -42,6 +42,21 @@ class LassoFista:
         K_, s_ = np.asfortranarray(K), np.asfortranarray(s_)
         self.f = np.asfortranarray(np.zeros((K_.shape[1], s_.shape[1])))
         lipszit = sin_val[0] ** 2
+
+        if warm_start:
+            self.f_1 = np.asfortranarray(np.zeros((K_.shape[1], 1)))
+            zf, function, chi2, iter, cpu_time, wall_time = fista.fista(
+                matrix=K_,
+                s=s_.mean(axis=1),
+                lambd=self.hyperparameters["lambda"],
+                maxiter=self.max_iterations,
+                f_k=self.f_1,
+                nonnegative=int(self.positive),
+                linv=(1 / lipszit),
+                tol=self.tolerance,
+                npros=1,
+            )
+            self.f = np.asfortranarray(np.tile(self.f_1, s_.shape[1]))
 
         zf, function, chi2, iter, cpu_time, wall_time = fista.fista(
             matrix=K_,
