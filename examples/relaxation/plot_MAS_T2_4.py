@@ -88,7 +88,7 @@ relaxT2 = relaxation.T2(
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
-K = relaxT2.kernel(supersampling=1)
+K = relaxT2.kernel(supersampling=5)
 print(K.shape)
 
 # %%

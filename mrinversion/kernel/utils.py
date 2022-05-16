@@ -157,11 +157,27 @@ def _supersampled_coordinates(dimension, supersampling=1):
     Returns:
         An `Quantity` array of coordinates.
     """
-    array = dimension.coordinates
     if dimension.type == "linear":
         increment = dimension.increment / supersampling
         array = np.arange(dimension.count * supersampling) * increment
         array += dimension.coordinates_offset
         # shift the coordinates by half a bin for proper averaging
         array -= 0.5 * increment * (supersampling - 1)
+
+    if dimension.type == "monotonic":
+        coordinates = dimension.coordinates
+        unit = coordinates[0].unit
+        size = coordinates.size
+
+        diff = np.zeros(size)
+        diff[1:] = (coordinates[1:] - coordinates[:-1]) / supersampling
+        diff *= unit
+
+        s2 = supersampling // 2
+        eo = 0.5 if supersampling % 2 == 0 else 0
+
+        array = np.zeros(size * supersampling) * unit
+        for i in range(supersampling):
+            array[i::supersampling] = coordinates + (i - s2 + eo) * diff
+
     return array
