@@ -76,10 +76,23 @@ def test_x_y_to_zeta_eta_distribution():
     assert np.allclose(eta, np.asarray(eta_))
 
 
-def test_supersampling():
+def test_supersampling_linear():
     dim = cp.LinearDimension(count=20, coordinates_offset="0 Hz", increment="0.5 kHz")
 
     y = np.arange(20) * 0.5
+    for i in range(10):
+        oversample = i + 1
+        y_oversampled = _supersampled_coordinates(dim, supersampling=oversample)
+        y_reduced = y_oversampled.reshape(-1, oversample).mean(axis=-1)
+        assert np.allclose(y_reduced.value, y)
+
+
+def test_supersampling_monotonic():
+    dim = cp.MonotonicDimension(
+        coordinates=["100µs", "1ms", "10ms", "100ms", "1s", "10s", "100s"]
+    )
+
+    y = dim.coordinates.value
     for i in range(10):
         oversample = i + 1
         y_oversampled = _supersampled_coordinates(dim, supersampling=oversample)
