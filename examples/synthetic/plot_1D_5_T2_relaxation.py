@@ -62,7 +62,7 @@ relaxT2 = relaxation.T2(
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
-K = relaxT2.kernel(supersampling=5)
+K = relaxT2.kernel(supersampling=1)
 
 # %%
 # Data Compression
@@ -75,14 +75,11 @@ compressed_s = new_system.compressed_s
 print(f"truncation_index = {new_system.truncation_index}")
 
 # %%
-# Statistical learning of the tensors
-# -----------------------------------
-#
 # Fista LASSO cross-validation
 # '''''''''''''''''''''''''''''
 #
 # Create a guess range of values for the :math:`\lambda` hyperparameters.
-lambdas = 10 ** (-3 + 4 * (np.arange(64) / 63))
+lambdas = 10 ** (-3 + 4 * (np.arange(16) / 15))
 
 # setup the smooth lasso cross-validation class
 f_lasso_cv = LassoFistaCV(
@@ -90,7 +87,6 @@ f_lasso_cv = LassoFistaCV(
     folds=5,  # The number of folds in n-folds cross-validation.
     sigma=sigma,  # noise standard deviation
     inverse_dimension=inverse_dimension,  # previously defined inverse dimensions.
-    max_iterations=20000,
 )
 
 # run the fit method on the compressed kernel and compressed data.

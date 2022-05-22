@@ -1,7 +1,7 @@
 subroutine fista(matrix, s, matrixTest, sTest, maxiter, lambdaVal, CV, CVstd, &
                  matrixrow, matrixcolumn, nonnegative, Linv, totalappend, &
                  iter, cpu_time_, wall_time_, tol, lambda, testrow, npros, &
-                 nfold, PredictionError, m)
+                 nfold, PredictionError, m, var)
 
 use omp_lib
 
@@ -18,8 +18,8 @@ use omp_lib
     integer*4, intent(in) :: maxiter, nonnegative, totalappend, testrow, nfold
 !f2py integer*4, intent(in) :: maxiter, nonnegative, totalappend, testrow, nfold
 
-    double precision, intent(in) :: Linv, tol
-!f2py double precision, intent(in) :: Linv, tol
+    double precision, intent(in) :: Linv, tol, var
+!f2py double precision, intent(in) :: Linv, tol, var
 
 double precision, intent(out), dimension(0:lambda-1, nfold) :: PredictionError
 !f2py double precision, intent(out) :: PredictionError
@@ -45,7 +45,7 @@ double precision, intent(out), dimension(0:lambda-1) :: CV, CVstd
 
     integer*4 :: k, i, j, fold, endIndex, endIndexTest
     !double precision, dimension(0:lambda-1, nfold) :: chi2
-    double precision :: t_k, sumabs, t_kp1, previousCheckFunction, chi2_temp, residue_temp
+    double precision :: t_k, sumabs, t_kp1, previousCheckFunction, chi2_temp, residue_temp, temp_val
     double precision :: dnrm2, sumabsm1, dasum, constantFactor, normalizationFactor
     double precision, dimension(0:matrixrow-1) :: s_temp, temp
     double precision, dimension(0:testrow-1) :: s_test_i, temp_test
@@ -80,13 +80,11 @@ do fold = 1, nfold
     !$omp section
 
     !Gradient = MATMUL(TRANSPOSE(matrix), matrix)
-    Gradient = 0.0
     call dgemm('T', 'N', matrixcolumn, matrixcolumn, endIndex+1, 1.0d+0, matrix(:endIndex,:, fold),  &
                 endIndex+1, matrix(:endIndex,:, fold), endIndex+1, 0.0d+0, Gradient, matrixcolumn)
 
     !$omp section
     !c = MATMUL(TRANSPOSE(matrix), s)
-    c = 0.0
     call dgemm('T', 'N', matrixcolumn, totalappend, endIndex+1, 1.0d+0, matrix(:endIndex,:, fold),  &
                 endIndex+1, s(:endIndex,:,fold), endIndex+1, 0.0d+0, c, matrixcolumn)
 
@@ -148,7 +146,6 @@ do fold = 1, nfold
                 !temp_c = 0
                 !call dsymm('L', 'U', matrixcolumn, totalappend, 1.0d+0, Gradient, &
                 !            matrixcolumn, y_k, matrixcolumn, 0.0d+0, temp_c, matrixcolumn)
-                call dscal(matrixcolumn, 0.0d+0, temp_c, 1)
                 ! temp_c = (MATMUL(Gradient, y_k_i) + 0
                 ! call dgemv('N', matrixcolumn, matrixcolumn, 1.0d+0, Gradient, &
                 !                matrixcolumn, y_k_i, 1, 0.0d+0, temp_c, 1)
@@ -180,7 +177,6 @@ do fold = 1, nfold
                 !residue(k) = (Norm2(MATMUL(matrix, f_k_i) - s_temp)**2.0)
 
                 ! temp = 0.0d+0
-                call dscal(endIndex+1, 0.0d+0, temp(:endIndex), 1)
                 ! temp = MATMUL(matrix, f_k_i)
                 call dgemv('N', endIndex+1, matrixcolumn, 1.0d+0,&
                             matrix(:endIndex,:, fold), endIndex+1, &
@@ -205,10 +201,11 @@ do fold = 1, nfold
 
             residue(k) = residue_temp
             checkFunction(k) = residue(k) + lambdaVal(j) * sumabs
-            residue(k) = residue(k)/normalizationFactor !(1.0d0 * totalappend * (endIndex+1))
+            ! residue(k) = residue(k)/normalizationFactor !(1.0d0 * totalappend * (endIndex+1))
 
             if (k .ge. 5) then
-                if (sum(residue(k-5:k-1))/5.0 - residue(k) < tol) exit
+                temp_val = sum(residue(k-5:k-1))/5.0
+                if (abs(residue(k) - var)/var < tol) exit
 
                 !if (dnrm2(matrixcolumn, (f_k_i - f_km1_i), 1)**2/ &
                 !        dnrm2(matrixcolumn, f_k_i, 1)**2 < tol) exit
@@ -264,7 +261,6 @@ do fold = 1, nfold
         do i = 0, totalappend-1
             f_k_i = f_k(:,i)
             s_test_i = sTest(:endIndexTest,i, fold)
-            call dscal(endIndexTest+1, 0.0d+0, temp_test(:endIndexTest), 1)
             ! temp = MATMUL(matrix, f_k_i)
             call dgemv('N', endIndexTest+1, matrixcolumn, 1.0d+0, &
                         matrixTest(:endIndexTest,:,fold), endIndexTest+1, &
@@ -277,7 +273,7 @@ do fold = 1, nfold
         !$omp end do
         !$omp end parallel
 
-        PredictionError(j, fold) = chi2_temp/(endIndexTest+1)
+        PredictionError(j, fold) = chi2_temp/((endIndexTest+1) * totalappend)
         !chi2(j, fold) = chi2_temp/(endIndexTest+1)
         !CV(j) = CV(j) + chi2_temp/(endIndexTest+endIndex+2)
         !iter(j) = k-1
