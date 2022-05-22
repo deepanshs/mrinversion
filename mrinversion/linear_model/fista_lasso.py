@@ -229,7 +229,7 @@ class LassoFistaCV:
         lambdas = np.log10(self.cv_lambdas)
         l1_index, l2_index = calculate_opt_lambda(self.cv_map, self.std)
         lambda1, lambda2 = lambdas[l1_index], lambdas[l2_index]
-        self.hyperparameters["lambda"] = 10 ** ((lambda1 + 0.0 * lambda2) / 2.0)
+        self.hyperparameters["lambda"] = 10 ** ((lambda1 + lambda2) / 2.0)
 
         # Calculate the solution using the complete data at the optimized lambda and
         # alpha values
