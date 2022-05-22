@@ -204,8 +204,8 @@ do fold = 1, nfold
             ! residue(k) = residue(k)/normalizationFactor !(1.0d0 * totalappend * (endIndex+1))
 
             if (k .ge. 5) then
-                temp_val = sum(residue(k-5:k-1))/5.0
-                if (abs(residue(k) - var)/var < tol) exit
+                temp_val = residue(k)/((endIndex+1) * totalappend)
+                if (abs(temp_val - var)/var < tol) exit
 
                 !if (dnrm2(matrixcolumn, (f_k_i - f_km1_i), 1)**2/ &
                 !        dnrm2(matrixcolumn, f_k_i, 1)**2 < tol) exit
