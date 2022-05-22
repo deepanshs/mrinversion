@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+import os
+
 import csdmpy as cp
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .fista import fista
-from .fista import fista_cv
-
+from mrinversion.linear_model._base_l1l2 import prepare_signal
+from mrinversion.linear_model.fista import fista
+from mrinversion.linear_model.fista import fista_cv
 
 __author__ = "Deepansh Srivastava"
+CPU_COUNTS = os.cpu_count()
 
 
 class LassoFista:
@@ -15,7 +18,7 @@ class LassoFista:
         self,
         lambda1=1.0e-3,
         max_iterations=1000,
-        tolerance=1e-5,
+        tolerance=2e-4,
         positive=True,
         inverse_dimension=None,
     ):
@@ -26,16 +29,12 @@ class LassoFista:
         self.inverse_dimension = inverse_dimension
 
     def fit(self, K, s, warm_start=False):
-        if isinstance(s, cp.CSDM):
-            self.s = s
-            s_ = s.dependent_variables[0].components[0].T
-        else:
-            s_ = s
+        s_, self.scale = prepare_signal(s)
+        # s_ = s.dependent_variables[0].components[0].T if isinstance(s, cp.CSDM) else s
+        # s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
 
-        s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
-
-        self.scale = np.sqrt(np.sum(np.abs(s_) ** 2))
-        s_ = s_ / self.scale
+        # self.scale = np.sqrt(np.mean(np.abs(s_) ** 2))
+        # s_ = s_ / self.scale
 
         sin_val = np.linalg.svd(K, full_matrices=False)[1]
 
@@ -81,7 +80,8 @@ class LassoFista:
         app = self.inverse_dimension.application
         if "com.github.deepanshs.mrinversion" in app:
             meta = app["com.github.deepanshs.mrinversion"]
-            if meta["log"]:
+            is_log = meta.get("log", False)
+            if is_log:
                 # unit = self.inverse_dimension.coordinates.unit
                 coords = np.log10(self.inverse_dimension.coordinates.value)
                 self.inverse_dimension = cp.as_dimension(
@@ -135,10 +135,7 @@ class LassoFista:
             is a numpy array, return a :math:`m \times m_\text{count}` residue matrix.
             csdm object
         """
-        if isinstance(s, cp.CSDM):
-            s_ = s.dependent_variables[0].components[0].T
-        else:
-            s_ = s
+        s_ = s.y[0].components[0].T if isinstance(s, cp.CSDM) else s
         predict = np.squeeze(self.predict(K))
         residue = s_ - predict
 
@@ -155,15 +152,14 @@ class LassoFistaCV:
         self,
         lambdas=None,
         folds=10,
-        max_iterations=10000,
-        tolerance=1e-5,
+        max_iterations=1000,
+        tolerance=1e-4,
         positive=True,
         sigma=0.0,
         randomize=False,
-        times=2,
-        # verbose=False,
+        times=1,
         inverse_dimension=None,
-        n_jobs=1,
+        n_jobs=CPU_COUNTS,
     ):
 
         if lambdas is None:
@@ -196,16 +192,12 @@ class LassoFistaCV:
             s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}` as a
                 csdm object or a numpy array or shape (m, m_count).
         """
-        if isinstance(s, cp.CSDM):
-            self.s = s
-            s_ = s.dependent_variables[0].components[0].T
-        else:
-            s_ = s
+        s_, self.scale = prepare_signal(s)
+        # s_ = s.dependent_variables[0].components[0].T if isinstance(s, cp.CSDM) else s
+        # s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
 
-        s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
-
-        self.scale = np.sqrt(np.sum(np.abs(s_) ** 2))
-        s_ = s_ / self.scale
+        # self.scale = np.sqrt(np.mean(np.abs(s_) ** 2))
+        # s_ = s_ / self.scale
 
         sin_val = np.linalg.svd(K, full_matrices=False)[1]
 
@@ -216,14 +208,7 @@ class LassoFistaCV:
             K_, s_, self.folds, self.randomize, self.times
         )
 
-        (
-            self.cv_map,
-            self.std,
-            iteri,
-            cpu_time,
-            wall_time,
-            self.predictionerror,
-        ) = fista_cv.fista(
+        self.cv_map, self.std, _, _, _, self.predictionerror = fista_cv.fista(
             matrix=k_train,
             s=s_train,
             matrixtest=k_test,
@@ -235,15 +220,16 @@ class LassoFistaCV:
             tol=self.tolerance,
             npros=self.n_jobs,
             m=m,
+            var=self.sigma**2,
         )
         # subtract the variance.
-        self.cv_map -= (self.sigma / self.scale) ** 2
+        # self.cv_map -= (self.sigma / self.scale) ** 2
         self.cv_map = np.abs(self.cv_map)
 
         lambdas = np.log10(self.cv_lambdas)
         l1_index, l2_index = calculate_opt_lambda(self.cv_map, self.std)
         lambda1, lambda2 = lambdas[l1_index], lambdas[l2_index]
-        self.hyperparameters["lambda"] = 10 ** ((lambda1 + lambda2) / 2.0)
+        self.hyperparameters["lambda"] = 10 ** ((lambda1 + 0.0 * lambda2) / 2.0)
 
         # Calculate the solution using the complete data at the optimized lambda and
         # alpha values
@@ -338,9 +324,13 @@ def calculate_opt_lambda(cv, std):
     l1_index = np.unravel_index(cv.argmin(), cv.shape)[0]
     cv_std = cv[l1_index] + std[l1_index]
     temp = np.where(cv < cv_std)[0]
-    index = np.where(temp > l1_index)[0].max()
-    l2_index = temp[index]
-    return l1_index, l2_index
+    if temp.size != 0:
+        index = np.where(temp > l1_index)[0]
+        if index.size != 0:
+            index = index.max()
+            l2_index = temp[index]
+            return l1_index, l2_index
+    return l1_index, l1_index
 
 
 def test_train_set(X, y, folds, random=False, repeat_folds=1):
@@ -389,8 +379,6 @@ def test_train_set(X, y, folds, random=False, repeat_folds=1):
                 else:
                     test_index = index[i:None:folds][:test_size]
                 train_index = np.delete(index, test_index)
-
-            # print('test', test_index)
 
             k_train[: train_index.size, :, j * folds + i] = X[train_index]
             s_train[: train_index.size, :, j * folds + i] = y[train_index]

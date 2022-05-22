@@ -16,8 +16,6 @@ import numpy as np
 from mrinversion.kernel import relaxation
 from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 
-# sphinx_gallery_thumbnail_number = 4
-
 
 def plot2D(csdm_object, **kwargs):
     plt.figure(figsize=(4, 3))
@@ -25,6 +23,8 @@ def plot2D(csdm_object, **kwargs):
     plt.tight_layout()
     plt.show()
 
+
+# sphinx_gallery_thumbnail_number = 4
 
 # %%
 # Dataset setup
@@ -42,7 +42,7 @@ data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
 data_object = data_object.real
-sigma = 1270.825  # data standard deviation
+sigma = 1407.443  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -71,7 +71,7 @@ data_object = data_object.T
 # directly onto this dataset, it is not computationally optimum. For optimum
 # performance, trim the dataset to the region of relevant signals. Use the appropriate
 # array indexing/slicing to select the signal region.
-data_object_truncated = data_object[:, 241:-245]
+data_object_truncated = data_object[:, 1250:-1250]
 plot2D(data_object_truncated)
 
 # %%
@@ -103,7 +103,6 @@ relaxT2 = relaxation.T2(
 )
 inverse_dimension = relaxT2.inverse_dimension
 K = relaxT2.kernel(supersampling=5)
-print(K.shape)
 
 # %%
 # Data Compression
@@ -129,7 +128,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # the given 2D T2-MAS dataset.
 
 # setup the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-5 + 6 * (np.arange(32) / 31))
+lambdas = 10 ** (-4 + 5 * (np.arange(16) / 15))
 
 # setup the smooth lasso cross-validation class
 s_lasso = LassoFistaCV(
@@ -137,7 +136,6 @@ s_lasso = LassoFistaCV(
     sigma=sigma,  # data standard deviation
     folds=5,  # The number of folds in n-folds cross-validation.
     inverse_dimension=inverse_dimension,  # previously defined inverse dimensions.
-    max_iterations=20000,  # maximum number of allowed iterations.
 )
 
 # run the fit method on the compressed kernel and compressed data.
@@ -165,7 +163,7 @@ plt.show()
 # ''''''''''''''''''''
 f_sol = s_lasso.f
 
-levels = np.arange(10) / 10 + 0.1
+levels = np.arange(15) / 15 + 0.1
 plt.figure(figsize=(4, 3))
 ax = plt.subplot(projection="csdm")
 ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")

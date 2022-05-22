@@ -40,15 +40,18 @@ class TSVDCompression:
         (
             self.compressed_K,
             compressed_signal,
-            _,  # projectedSignal,
+            projectedSignal,  # projectedSignal,
             __,  # guess_solution,
         ) = reduced_subspace_kernel_and_data(U[:, :r], S[:r], VT[:r, :], signal)
         factor = signal.size / compressed_signal.size
         print(f"compression factor = {factor}")
 
+        self.filtered_s = projectedSignal
+        self.compressed_s = compressed_signal
+
         if isinstance(s, cp.CSDM):
-            self.compressed_s = cp.as_csdm(compressed_signal.T.copy())
+            self.compressed_s = cp.as_csdm(self.compressed_s.T.copy())
+            self.filtered_s = cp.as_csdm(self.filtered_s.T.copy())
             if len(s.dimensions) > 1:
                 self.compressed_s.dimensions[1] = s.dimensions[1]
-        else:
-            self.compressed_s = compressed_signal
+                self.filtered_s.dimensions[1] = s.dimensions[1]

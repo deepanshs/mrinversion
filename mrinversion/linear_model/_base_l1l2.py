@@ -2,6 +2,7 @@
 from copy import deepcopy
 
 import csdmpy as cp
+import matplotlib.pyplot as plt
 import numpy as np
 from joblib import delayed
 from joblib import Parallel
@@ -12,6 +13,7 @@ from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 
 from mrinversion.linear_model.tsvd_compression import TSVDCompression  # noqa: F401
+
 
 __author__ = "Deepansh J. Srivastava"
 __email__ = "srivastava.89@osu.edu"
@@ -90,14 +92,8 @@ class GeneralL2Lasso:
             A csdm object or an equivalent numpy array holding the signal,
             :math:`{\bf s}`, as a :math:`m \times m_\text{count}` matrix.
         """
-        if isinstance(s, cp.CSDM):
-            self.s = s
-            s_ = s.dependent_variables[0].components[0].T
-        else:
-            s_ = s
+        s_, self.scale = prepare_signal(s)
 
-        if s_.ndim == 1:
-            s_ = s_[:, np.newaxis]
         prod = np.asarray(self.f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
@@ -105,13 +101,9 @@ class GeneralL2Lasso:
                 f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
             )
 
-        self.scale = s_.real.max()
+        alpha = s_.size * self.hyperparameters["alpha"]
         Ks, ss = _get_augmented_data(
-            K=K,
-            s=s_ / self.scale,
-            alpha=s_.size * self.hyperparameters["alpha"],
-            regularizer=self.regularizer,
-            f_shape=self.f_shape,
+            K=K, s=s_, alpha=alpha, regularizer=self.regularizer, f_shape=self.f_shape
         )
 
         # The factor 0.5 for alpha in the Lasso/LassoLars problem is to compensate
@@ -160,28 +152,50 @@ class GeneralL2Lasso:
 
         estimator.fit(Ks, ss)
         f = estimator.coef_.copy()
-        if s_.shape[1] > 1:
+        if s_.shape[1] > 1 and len(self.f_shape) == 2:
             f.shape = (s_.shape[1],) + self.f_shape
             f[:, :, 0] /= 2.0
             f[:, 0, :] /= 2.0
-        else:
+        elif s_.shape[1] == 1 and len(self.f_shape) == 2:
             f.shape = self.f_shape
             f[:, 0] /= 2.0
             f[0, :] /= 2.0
 
         f *= self.scale
-
-        if isinstance(s, cp.CSDM):
-            f = cp.as_csdm(f)
-
-            if len(s.dimensions) > 1:
-                f.dimensions[2] = s.dimensions[1]
-            f.dimensions[1] = self.inverse_dimension[1]
-            f.dimensions[0] = self.inverse_dimension[0]
-
         self.estimator = estimator
         self.f = f
         self.n_iter = estimator.n_iter_
+        self._sol_to_csdm(s)
+
+    def _sol_to_csdm(self, s):
+        """Pack solution as csdm object"""
+        if not isinstance(s, cp.CSDM):
+            return
+
+        self.f = cp.as_csdm(self.f)
+
+        for dim in self.inverse_dimension:
+            app = dim.application
+            if "com.github.deepanshs.mrinversion" in app:
+                meta = app["com.github.deepanshs.mrinversion"]
+                is_log = meta.get("log", False)
+                if is_log:
+                    # unit = self.inverse_dimension.coordinates.unit
+                    coords = np.log10(dim.coordinates.value)
+                    dim = cp.as_dimension(array=coords, label=meta["label"])
+
+        if len(s.dimensions) > 1 and len(self.f.shape) == 3:
+            self.f.dimensions[2] = s.dimensions[1]
+            self.f.dimensions[1] = self.inverse_dimension[1]
+            self.f.dimensions[0] = self.inverse_dimension[0]
+
+        elif len(s.dimensions) == 1 and len(self.f.shape) == 2:
+            self.f.dimensions[1] = self.inverse_dimension[1]
+            self.f.dimensions[0] = self.inverse_dimension[0]
+
+        elif len(s.dimensions) > 1:
+            self.f.dimensions[1] = s.dimensions[1]
+            self.f.dimensions[0] = self.inverse_dimension[0]
 
     def predict(self, K):
         r"""Predict the signal using the linear model.
@@ -228,10 +242,7 @@ class GeneralL2Lasso:
             is a numpy array, return a :math:`m \times m_\text{count}` residue matrix.
             csdm object
         """
-        if isinstance(s, cp.CSDM):
-            s_ = s.dependent_variables[0].components[0].T
-        else:
-            s_ = s
+        s_ = s.y[0].components[0].T if isinstance(s, cp.CSDM) else s
         predict = np.squeeze(self.estimator.predict(K)) * self.scale
         residue = s_ - predict
 
@@ -307,14 +318,8 @@ class GeneralL2LassoCV:
             s: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}` as a
                 csdm object or a numpy array or shape (m, m_count).
         """
+        s_, self.scale = prepare_signal(s)
 
-        if isinstance(s, cp.CSDM):
-            self.s = s
-            s_ = s.dependent_variables[0].components[0].T
-        else:
-            s_ = s
-
-        s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
         prod = np.asarray(self.f_shape).prod()
         if K.shape[1] != prod:
             raise ValueError(
@@ -322,8 +327,6 @@ class GeneralL2LassoCV:
                 f"the axis 1 of kernel, K, {K.shape[1]} != {prod}."
             )
 
-        self.scale = s_.max().real
-        s_ = s_ / self.scale
         cv_indexes = _get_cv_indexes(
             K,
             self.folds,
@@ -379,7 +382,7 @@ class GeneralL2LassoCV:
         # cv_map contains negated mean square errors, therefore multiply by -1.
         self.cv_map *= -1
         # subtract the variance.
-        self.cv_map -= self.sigma**2
+        self.cv_map -= (self.sigma / self.scale) ** 2
 
         # After subtracting the variance, any negative values in the cv grid is a
         # result of fitting noise. Take the absolute value of cv to avoid such
@@ -406,7 +409,9 @@ class GeneralL2LassoCV:
         )
         self.opt.fit(K, s)
         self.f = self.opt.f
+        self.cv_map_to_csdm()
 
+    def cv_map_to_csdm(self):
         # convert cv_map to csdm
         self.cv_map = cp.as_csdm(np.squeeze(self.cv_map.T.copy()))
         if len(self.cv_alphas) != 1:
@@ -421,6 +426,19 @@ class GeneralL2LassoCV:
             self.cv_map.dimensions[1] = d1
         else:
             self.cv_map.dimensions[0] = d1
+
+    def cv_plot(self):
+        plt.figure(figsize=(5, 3.5))
+        ax = plt.subplot(projection="csdm")
+        ax.contour(np.log10(self.cv_map), levels=25)
+        ax.scatter(
+            -np.log10(self.hyperparameters["alpha"]),
+            -np.log10(self.hyperparameters["lambda"]),
+            marker="x",
+            color="k",
+        )
+        plt.tight_layout(pad=0.5)
+        plt.show()
 
     def _get_minimizer(self):
         """Return the estimator for the method"""
@@ -667,3 +685,13 @@ def _get_augmented_data(K, s, alpha, regularizer, f_shape=None):
     s_[:ss0] = s.real
 
     return np.asfortranarray(K_), np.asfortranarray(s_)
+
+
+def prepare_signal(sig):
+    """Prepare signal for inversion"""
+    s_ = sig.y[0].components[0].T if isinstance(sig, cp.CSDM) else sig
+    s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
+
+    scale = np.sqrt(np.mean(np.abs(s_) ** 2))
+    s_ = s_ / scale
+    return s_, scale
