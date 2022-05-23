@@ -88,7 +88,7 @@ relaxT2 = relaxation.T2(
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
-K = relaxT2.kernel(supersampling=1)
+K = relaxT2.kernel(supersampling=5)
 
 # %%
 # Data Compression
@@ -155,6 +155,7 @@ ax = plt.subplot(projection="csdm")
 ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
 ax.set_ylim(-70, -130)
 ax.set_xlim(-3, 2.5)
+plt.grid(linestyle="--", alpha=0.75)
 plt.tight_layout()
 plt.show()
 

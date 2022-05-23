@@ -167,8 +167,9 @@ levels = np.arange(15) / 15 + 0.1
 plt.figure(figsize=(4, 3))
 ax = plt.subplot(projection="csdm")
 ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
-ax.set_ylim(-75, -130)
+ax.set_ylim(-70, -130)
 ax.set_xlim(-3, 2.5)
+plt.grid(linestyle="--", alpha=0.75)
 plt.tight_layout()
 plt.show()
 

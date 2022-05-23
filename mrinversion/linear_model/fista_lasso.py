@@ -193,12 +193,6 @@ class LassoFistaCV:
                 csdm object or a numpy array or shape (m, m_count).
         """
         s_, self.scale = prepare_signal(s)
-        # s_ = s.dependent_variables[0].components[0].T if isinstance(s, cp.CSDM) else s
-        # s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
-
-        # self.scale = np.sqrt(np.mean(np.abs(s_) ** 2))
-        # s_ = s_ / self.scale
-
         sin_val = np.linalg.svd(K, full_matrices=False)[1]
 
         K_, s_ = np.asfortranarray(K), np.asfortranarray(s_)
@@ -231,8 +225,7 @@ class LassoFistaCV:
         lambda1, lambda2 = lambdas[l1_index], lambdas[l2_index]
         self.hyperparameters["lambda"] = 10 ** ((lambda1 + lambda2) / 2.0)
 
-        # Calculate the solution using the complete data at the optimized lambda and
-        # alpha values
+        # Calculate the solution using the complete data at the optimized lambda
         self.opt = LassoFista(
             lambda1=self.hyperparameters["lambda"],
             max_iterations=self.max_iterations,
@@ -295,6 +288,7 @@ class LassoFistaCV:
         return self.opt.residuals(K, s)
 
     def cv_plot(self):
+        """Plot the CV plot"""
         cv = self.cv_map.y[0].components[0]
         predictionerror = self.predictionerror
         std = self.std

@@ -56,7 +56,7 @@ plot2D(data_object)
 # Prepping the data for inversion
 # '''''''''''''''''''''''''''''''
 data_object = data_object.T
-data_object_truncated = data_object[:, 1200:-1200]
+data_object_truncated = data_object[:, 1220:-1220]
 plot2D(data_object_truncated)
 
 # %%
@@ -152,8 +152,9 @@ levels = np.arange(15) / 15 + 0.1
 plt.figure(figsize=(4, 3))
 ax = plt.subplot(projection="csdm")
 ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
-ax.set_ylim(-75, -130)
+ax.set_ylim(-70, -130)
 ax.set_xlim(-3, 2.5)
+plt.grid(linestyle="--", alpha=0.75)
 plt.tight_layout()
 plt.show()
 
