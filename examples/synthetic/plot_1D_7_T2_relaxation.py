@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Inverse Laplace (ILT) T2 distribution (broad)
-=============================================
+Broad T2 distribution (Inverse Laplace)
+=======================================
 """
 # %%
 # The following example demonstrates the statistical learning based determination of
@@ -34,7 +34,7 @@ log_t2 = (np.arange(64) / 63) * 5 - 2
 
 center = 1.2
 dev = 0.4
-alpha = -3.0
+alpha = -2.0
 
 arg = (log_t2 - center) / np.sqrt(dev)
 gauss = np.exp(-(arg**2) / 2.0)
@@ -46,7 +46,7 @@ signal = 0
 for wt, t2 in zip(T2_dist, log_t2):
     signal += wt * np.exp(-time / 10**t2)
 
-sigma = 0.002
+sigma = 0.0008
 signal += np.random.normal(0, sigma, size=signal.size)
 signal = cp.as_csdm(signal)
 signal.dimensions[0] = cp.as_dimension(array=time, unit="s")
