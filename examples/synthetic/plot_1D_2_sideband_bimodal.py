@@ -49,7 +49,8 @@ def plot2D(ax, csdm_object, title=""):
 # Load the dataset. Here, we import the dataset as a CSDM data-object.
 
 # the 1D spinning sideband cross-section data in csdm format
-filename = "https://osu.box.com/shared/static/wjbhb6sif76mxfgndetew8mnrq6pw4pj.csdf"
+domain = "https://sandbox.zenodo.org/record/1065347/files"
+filename = f"{domain}/wjbhb6sif76mxfgndetew8mnrq6pw4pj.csdf"
 data_object = cp.load(filename)
 
 # convert the data dimension from `Hz` to `ppm`.
@@ -59,7 +60,7 @@ data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
 # The variable ``data_object`` holds the 1D dataset. For comparison, let's
 # also import the true tensor parameter distribution from which the synthetic 1D pure
 # anisotropic spinning sideband cross-section amplitudes is simulated.
-datafile = "https://osu.box.com/shared/static/xesah85nd2gtm9yefazmladi697khuwi.csdf"
+datafile = f"{domain}/xesah85nd2gtm9yefazmladi697khuwi.csdf"
 true_data_object = cp.load(datafile)
 
 # %%
