@@ -28,7 +28,7 @@ from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 # Generate a dataset
 # ''''''''''''''''''
 #
-time = 2 ** (np.arange(25) * 0.45 - 3)  # in s
+time = 2 ** (np.arange(25) * 0.46 - 3)  # in s
 T2_samples = [1, 30]  # in s
 T2_weights = [0.333, 0.666]
 
@@ -108,9 +108,12 @@ plt.show()
 # %%
 # The optimum solution
 # ''''''''''''''''''''
-plt.figure(figsize=(4.5, 3.5))
-f_lasso_cv.f.plot()
-[plt.axvline(np.log10(sample), c="orange", linestyle="--") for sample in T2_samples]
+plt.figure(figsize=(4, 3))
+plt.subplot(projection="csdm")
+[plt.axvline(np.log10(sample), c="b", linestyle="--") for sample in T2_samples]
+plt.plot(f_lasso_cv.f, label="opt solution", c="orange")
+plt.legend()
+plt.grid()
 plt.tight_layout()
 plt.show()
 
