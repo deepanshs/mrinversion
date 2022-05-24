@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-0.05 Cs2O • 0.95 SiO2 MAS-ETA
+0.05 Li2O • 0.95 SiO2 MAS-ETA
 =============================
 """
 
@@ -37,12 +37,12 @@ def plot2D(csdm_object, **kwargs):
 
 # The 2D MAF dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_5%25Cs2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_5%25Li2O_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
 data_object = data_object.real
-sigma = 1407.443  # data standard deviation
+sigma = 1110.521  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -71,7 +71,7 @@ data_object = data_object.T
 # directly onto this dataset, it is not computationally optimum. For optimum
 # performance, trim the dataset to the region of relevant signals. Use the appropriate
 # array indexing/slicing to select the signal region.
-data_object_truncated = data_object[:, 1250:-1250]
+data_object_truncated = data_object[:, 1220:-1220]
 plot2D(data_object_truncated)
 
 # %%
@@ -102,7 +102,7 @@ relaxT2 = relaxation.T2(
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
-K = relaxT2.kernel(supersampling=5)
+K = relaxT2.kernel(supersampling=20)
 
 # %%
 # Data Compression
@@ -128,7 +128,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # the given 2D T2-MAS dataset.
 
 # setup the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-4 + 5 * (np.arange(16) / 15))
+lambdas = 10 ** (-4 + 5 * (np.arange(32) / 31))
 
 # setup the smooth lasso cross-validation class
 s_lasso = LassoFistaCV(

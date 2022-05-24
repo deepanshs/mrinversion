@@ -205,7 +205,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # increase the grid resolution for your problem if desired.
 
 # setup the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-5.2 - 1.25 * (np.arange(5) / 4))
+lambdas = 10 ** (-4.1 - 1.25 * (np.arange(5) / 4))
 alphas = 10 ** (-5.5 - 1.25 * (np.arange(5) / 4))
 
 # setup the smooth lasso cross-validation class
@@ -215,7 +215,6 @@ s_lasso = SmoothLassoCV(
     sigma=0.0045,  # The standard deviation of noise from the 2D MAF data.
     folds=10,  # The number of folds in n-folds cross-validation.
     inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
-    verbose=1,  # If non-zero, prints the progress as the computation proceeds.
 )
 
 # run the fit method on the compressed kernel and compressed data.

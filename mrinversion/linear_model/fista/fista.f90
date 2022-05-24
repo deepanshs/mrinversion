@@ -40,10 +40,10 @@ use omp_lib
 
     integer*4 :: k, i
     double precision :: t_k, sumabs, previousCheckFunction, t_kp1, residue_temp
-    double precision :: dnrm2, sumabsm1, dasum, constantFactor, normalizationFactor
+    double precision :: dnrm2, sumabsm1, dasum, constantFactor, normalizationFactor, temp_val
     double precision, dimension(0:matrixrow-1) :: s_temp, temp
     double precision, dimension(0:matrixcolumn-1) :: f_k_i, y_k_i, temp_c, c_i
-    double precision, dimension(0:matrixcolumn-1, 0:totalappend-1) :: c, f_km1,  y_k
+    double precision, dimension(0:matrixcolumn-1, 0:totalappend-1) :: c, f_km1, y_k
     double precision, dimension(0:matrixcolumn-1, 0:matrixcolumn-1) :: Gradient !&
 
     double precision :: start_cpu_time, end_cpu_time, start_wall_time, end_wall_time
@@ -169,7 +169,9 @@ use omp_lib
         residue(k) = residue(k)/normalizationFactor
 
         if (k .ge. 5) then
-            if (sum(residue(k-5:k-1))/5.0 - residue(k) < tol) exit
+            temp_val = 1.0 - ((sum(residue(k-5:k-1))/5.0) / residue(k))
+            temp_val = temp_val / (matrixrow * totalappend)
+            if (abs(temp_val) <= tol) exit
         endif
 
         ! Checking for decency !

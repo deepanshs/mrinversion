@@ -193,8 +193,8 @@ print(f"truncation_index = {new_system.truncation_index}")
 # increase the grid resolution for your problem if desired.
 
 # setup the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-5.4 - 1 * (np.arange(5) / 4))
-alphas = 10 ** (-4.5 - 1.5 * (np.arange(5) / 4))
+lambdas = 10 ** (-4.2 - 1 * (np.arange(5) / 4))
+alphas = 10 ** (-5.0 - 1.5 * (np.arange(5) / 4))
 
 # setup the smooth lasso cross-validation class
 s_lasso = SmoothLassoCV(
@@ -203,7 +203,6 @@ s_lasso = SmoothLassoCV(
     sigma=0.00070,  # The standard deviation of noise from the MAT dataset.
     folds=10,  # The number of folds in n-folds cross-validation.
     inverse_dimension=inverse_dimensions,  # previously defined inverse dimensions.
-    verbose=1,  # If non-zero, prints the progress as the computation proceeds.
     max_iterations=20000,  # The maximum number of allowed interations.
 )
 
