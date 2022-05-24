@@ -15,6 +15,7 @@ Inverse Laplace (ILT) T2 distribution (broad)
 import csdmpy as cp
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy as sp
 
 from mrinversion.kernel import relaxation
 from mrinversion.linear_model import LassoFistaCV, TSVDCompression
@@ -28,17 +29,18 @@ from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 # Generate a dataset
 # ''''''''''''''''''
 #
-time = 2 ** (np.arange(25) * 0.45 - 3)  # in s
-
+time = 2 ** (np.arange(25) * 0.4 - 3)  # in s
 log_t2 = (np.arange(64) / 63) * 5 - 2
-log_t2_center = [0.03, 0.91]  # in s
-log_t2_std = [0.08, 0.2]  # in s
-log_t2_weights = [1, 1.75]
 
-T2_dist = 0
-for wt, center, std in zip(log_t2_weights, log_t2_center, log_t2_std):
-    T2_dist += wt * np.exp(-((log_t2 - center) ** 2) / (2.0 * std))
-T2_dist /= T2_dist.sum()
+center = 1.2
+dev = 0.4
+alpha = -3.0
+
+arg = (log_t2 - center) / np.sqrt(dev)
+gauss = np.exp(-(arg**2) / 2.0)
+stretch = 1 + sp.special.erf(alpha * arg)
+T2_dist = gauss * stretch
+T2_dist = T2_dist / T2_dist.sum()
 
 signal = 0
 for wt, t2 in zip(T2_dist, log_t2):
@@ -116,16 +118,16 @@ plt.show()
 # %%
 # The optimum solution
 # ''''''''''''''''''''
-sol = f_lasso_cv.f.copy()
+sol = f_lasso_cv.f
 
-sol /= sol.max()
-plt.figure(figsize=(4.5, 3.5))
-sol.plot()
+plt.figure(figsize=(4, 3))
+plt.subplot(projection="csdm")
 plt.plot(log_t2, T2_dist / T2_dist.max(), label="true")
+plt.plot(sol / sol.max(), label="opt solution")
 plt.legend()
+plt.grid()
 plt.tight_layout()
 plt.show()
-
 
 # %%
 # Residuals

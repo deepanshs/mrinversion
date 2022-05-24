@@ -28,11 +28,11 @@ from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 # Generate a dataset
 # ''''''''''''''''''
 #
-time = 2 ** (np.arange(25) * 0.4 - 3)  # in s
+time = 2 ** (np.arange(25) * 0.38 - 3)  # in s
 
 log_t2 = (np.arange(64) / 63) * 5 - 2
 log_t2_center = [0.03, 0.91]  # in s
-log_t2_std = [0.03, 0.04]  # in s
+log_t2_std = [0.02, 0.03]  # in s
 log_t2_weights = [1, 1.75]
 
 T2_dist = 0
@@ -44,7 +44,7 @@ signal = 0
 for wt, t2 in zip(T2_dist, log_t2):
     signal += wt * np.exp(-time / 10**t2)
 
-sigma = 0.002
+sigma = 0.0015
 signal += np.random.normal(0, sigma, size=signal.size)
 signal = cp.as_csdm(signal)
 signal.dimensions[0] = cp.as_dimension(array=time, unit="s")
@@ -116,13 +116,14 @@ plt.show()
 # %%
 # The optimum solution
 # ''''''''''''''''''''
-sol = f_lasso_cv.f.copy()
+sol = f_lasso_cv.f
 
-sol /= sol.max()
-plt.figure(figsize=(4.5, 3.5))
-sol.plot()
+plt.figure(figsize=(4, 3))
+plt.subplot(projection="csdm")
 plt.plot(log_t2, T2_dist / T2_dist.max(), label="true")
+plt.plot(sol / sol.max(), label="opt solution")
 plt.legend()
+plt.grid()
 plt.tight_layout()
 plt.show()
 
