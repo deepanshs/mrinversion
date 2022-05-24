@@ -16,9 +16,9 @@ CPU_COUNTS = os.cpu_count()
 class LassoFista:
     def __init__(
         self,
-        lambda1=1.0e-3,
-        max_iterations=1000,
-        tolerance=2e-4,
+        lambda1=1e-3,
+        max_iterations=50000,
+        tolerance=5e-6,
         positive=True,
         inverse_dimension=None,
     ):
@@ -30,12 +30,6 @@ class LassoFista:
 
     def fit(self, K, s, warm_start=False):
         s_, self.scale = prepare_signal(s)
-        # s_ = s.dependent_variables[0].components[0].T if isinstance(s, cp.CSDM) else s
-        # s_ = s_[:, np.newaxis] if s_.ndim == 1 else s_
-
-        # self.scale = np.sqrt(np.mean(np.abs(s_) ** 2))
-        # s_ = s_ / self.scale
-
         sin_val = np.linalg.svd(K, full_matrices=False)[1]
 
         K_, s_ = np.asfortranarray(K), np.asfortranarray(s_)
@@ -150,10 +144,10 @@ class LassoFista:
 class LassoFistaCV:
     def __init__(
         self,
-        lambdas=None,
+        lambdas,
         folds=10,
-        max_iterations=1000,
-        tolerance=1e-4,
+        max_iterations=50000,
+        tolerance=5e-6,
         positive=True,
         sigma=0.0,
         randomize=False,
@@ -161,12 +155,7 @@ class LassoFistaCV:
         inverse_dimension=None,
         n_jobs=CPU_COUNTS,
     ):
-
-        if lambdas is None:
-            self.cv_lambdas = 10 ** ((np.arange(10) / 9) * 5 - 9)[::-1]
-        else:
-            self.cv_lambdas = np.asarray(lambdas).ravel()
-
+        self.cv_lambdas = lambdas
         self.folds = folds
         self.max_iterations = max_iterations
         self.tolerance = tolerance
@@ -214,7 +203,6 @@ class LassoFistaCV:
             tol=self.tolerance,
             npros=self.n_jobs,
             m=m,
-            var=self.sigma**2,
         )
         # subtract the variance.
         # self.cv_map -= (self.sigma / self.scale) ** 2
@@ -222,8 +210,8 @@ class LassoFistaCV:
 
         lambdas = np.log10(self.cv_lambdas)
         l1_index, l2_index = calculate_opt_lambda(self.cv_map, self.std)
-        lambda1, lambda2 = lambdas[l1_index], lambdas[l2_index]
-        self.hyperparameters["lambda"] = 10 ** ((lambda1 + lambda2) / 2.0)
+        lambda1, _ = lambdas[l1_index], lambdas[l2_index]
+        self.hyperparameters["lambda"] = 10**lambda1
 
         # Calculate the solution using the complete data at the optimized lambda
         self.opt = LassoFista(
@@ -295,15 +283,15 @@ class LassoFistaCV:
 
         l1_idx, l2_idx = calculate_opt_lambda(cv, std)
         lambdas = np.log10(self.cv_lambdas)
-        opt_lambda = 0.5 * (lambdas[l1_idx] + lambdas[l2_idx])
+        # opt_lambda = 0.5 * (lambdas[l1_idx] + lambdas[l2_idx])
 
         plt.axhline(y=std[l1_idx] + cv[l1_idx], linestyle="--", c="r")
         plt.plot(lambdas, predictionerror, alpha=0.5, linestyle="dotted")
 
         kwargs = {"s": 70, "edgecolors": "k", "linewidth": 1.5}
         plt.scatter(lambdas[l1_idx], cv[l1_idx], facecolors="b", **kwargs)
-        plt.scatter(lambdas[l2_idx], cv[l2_idx], facecolors="r", **kwargs)
-        plt.axvline(x=opt_lambda, linestyle="--", c="g", label="$\\lambda^*$")
+        # plt.scatter(lambdas[l2_idx], cv[l2_idx], facecolors="r", **kwargs)
+        # plt.axvline(x=opt_lambda, linestyle="--", c="g", label="$\\lambda^*$")
 
         plt.plot(lambdas, cv, c="k", alpha=1, label="CV curve")
         plt.yscale("log")

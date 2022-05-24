@@ -33,16 +33,14 @@ class TSVDCompression:
             r = r_
         self.truncation_index = r
 
-        if isinstance(s, cp.CSDM):
-            signal = s.dependent_variables[0].components[0].T
-        else:
-            signal = s
+        signal = s.y[0].components[0].T if isinstance(s, cp.CSDM) else s
         (
             self.compressed_K,
             compressed_signal,
-            projectedSignal,  # projectedSignal,
+            projectedSignal,
             __,  # guess_solution,
         ) = reduced_subspace_kernel_and_data(U[:, :r], S[:r], VT[:r, :], signal)
+
         factor = signal.size / compressed_signal.size
         print(f"compression factor = {factor}")
 
@@ -52,6 +50,6 @@ class TSVDCompression:
         if isinstance(s, cp.CSDM):
             self.compressed_s = cp.as_csdm(self.compressed_s.T.copy())
             self.filtered_s = cp.as_csdm(self.filtered_s.T.copy())
-            if len(s.dimensions) > 1:
-                self.compressed_s.dimensions[1] = s.dimensions[1]
-                self.filtered_s.dimensions[1] = s.dimensions[1]
+            if len(s.x) > 1:
+                self.compressed_s.x[1] = s.x[1]
+                self.filtered_s.x[1] = s.x[1]

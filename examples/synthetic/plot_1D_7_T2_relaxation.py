@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Inverse Laplace (ILT) T2 distribution (narrow)
-==============================================
+Inverse Laplace (ILT) T2 distribution (broad)
+=============================================
 """
 # %%
 # The following example demonstrates the statistical learning based determination of
@@ -29,12 +29,20 @@ from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 # ''''''''''''''''''
 #
 time = 2 ** (np.arange(25) * 0.45 - 3)  # in s
-T2_samples = [1, 30]  # in s
-T2_weights = [0.333, 0.666]
+
+log_t2 = (np.arange(64) / 63) * 5 - 2
+log_t2_center = [0.03, 0.91]  # in s
+log_t2_std = [0.08, 0.2]  # in s
+log_t2_weights = [1, 1.75]
+
+T2_dist = 0
+for wt, center, std in zip(log_t2_weights, log_t2_center, log_t2_std):
+    T2_dist += wt * np.exp(-((log_t2 - center) ** 2) / (2.0 * std))
+T2_dist /= T2_dist.sum()
 
 signal = 0
-for wt, t2 in zip(T2_weights, T2_samples):
-    signal += wt * np.exp(-time / t2)
+for wt, t2 in zip(T2_dist, log_t2):
+    signal += wt * np.exp(-time / 10**t2)
 
 sigma = 0.002
 signal += np.random.normal(0, sigma, size=signal.size)
@@ -62,7 +70,7 @@ relaxT2 = relaxation.T2(
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
-K = relaxT2.kernel(supersampling=1)
+K = relaxT2.kernel(supersampling=20)
 
 # %%
 # Data Compression
@@ -79,7 +87,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # '''''''''''''''''''''''''''''
 #
 # Create a guess range of values for the :math:`\lambda` hyperparameters.
-lambdas = 10 ** (-4 + 4 * (np.arange(64) / 63))
+lambdas = 10 ** (-7 + 6 * (np.arange(64) / 63))
 
 # setup the smooth lasso cross-validation class
 f_lasso_cv = LassoFistaCV(
@@ -108,9 +116,13 @@ plt.show()
 # %%
 # The optimum solution
 # ''''''''''''''''''''
+sol = f_lasso_cv.f.copy()
+
+sol /= sol.max()
 plt.figure(figsize=(4.5, 3.5))
-f_lasso_cv.f.plot()
-[plt.axvline(np.log10(sample), c="orange", linestyle="--") for sample in T2_samples]
+sol.plot()
+plt.plot(log_t2, T2_dist / T2_dist.max(), label="true")
+plt.legend()
 plt.tight_layout()
 plt.show()
 

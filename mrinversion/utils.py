@@ -26,11 +26,11 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     n: int
         An interger used in linear interpolation of the data. The default is 5.
     """
-    [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
-    data = csdm_object.dependent_variables[0].components[0]
-    iso = csdm_object.dimensions[2].coordinates.value
+    [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.x]
+    data = csdm_object.y[0].components[0]
+    iso = csdm_object.x[2].coordinates.value
 
-    reg_x, reg_y = [csdm_object.dimensions[i].coordinates.value for i in range(2)]
+    reg_x, reg_y = [csdm_object.x[i].coordinates.value for i in range(2)]
     dx = reg_x[1] - reg_x[0]
     dy = reg_y[1] - reg_y[0]
     sol = np.zeros((data.shape[0], zeta.count, eta.count))
@@ -79,9 +79,9 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
 
     del zeta_grid, eta_grid, index, x_, y_, avg_range_x, avg_range_y
     csdm_new = cp.as_csdm(sol)
-    csdm_new.dimensions[0] = eta
-    csdm_new.dimensions[1] = zeta
-    csdm_new.dimensions[2] = csdm_object.dimensions[2]
+    csdm_new.x[0] = eta
+    csdm_new.x[1] = zeta
+    csdm_new.x[2] = csdm_object.x[2]
     return csdm_new
 
 
@@ -189,10 +189,10 @@ def plot_3d(
     lw = linewidth
 
     if isinstance(csdm_object, cp.CSDM):
-        f = csdm_object.dependent_variables[0].components[0].T
+        f = csdm_object.y[0].components[0].T
         label = csdm_object.description
 
-        a_, b_, c_ = [item for item in csdm_object.dimensions]
+        a_, b_, c_ = [item for item in csdm_object.x]
 
         a = a_.coordinates.value
         b = b_.coordinates.value

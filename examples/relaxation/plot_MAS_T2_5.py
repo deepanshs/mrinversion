@@ -88,7 +88,7 @@ relaxT2 = relaxation.T2(
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
-K = relaxT2.kernel(supersampling=5)
+K = relaxT2.kernel(supersampling=20)
 
 # %%
 # Data Compression
@@ -114,7 +114,7 @@ print(f"truncation_index = {new_system.truncation_index}")
 # the given 2D T2-MAS dataset.
 
 # setup the pre-defined range of alpha and lambda values
-lambdas = 10 ** (-4 + 5 * (np.arange(16) / 15))
+lambdas = 10 ** (-4 + 5 * (np.arange(32) / 31))
 
 # setup the smooth lasso cross-validation class
 s_lasso = LassoFistaCV(

@@ -1,7 +1,7 @@
 subroutine fista(matrix, s, matrixTest, sTest, maxiter, lambdaVal, CV, CVstd, &
                  matrixrow, matrixcolumn, nonnegative, Linv, totalappend, &
                  iter, cpu_time_, wall_time_, tol, lambda, testrow, npros, &
-                 nfold, PredictionError, m, var)
+                 nfold, PredictionError, m)
 
 use omp_lib
 
@@ -18,8 +18,8 @@ use omp_lib
     integer*4, intent(in) :: maxiter, nonnegative, totalappend, testrow, nfold
 !f2py integer*4, intent(in) :: maxiter, nonnegative, totalappend, testrow, nfold
 
-    double precision, intent(in) :: Linv, tol, var
-!f2py double precision, intent(in) :: Linv, tol, var
+    double precision, intent(in) :: Linv, tol
+!f2py double precision, intent(in) :: Linv, tol
 
 double precision, intent(out), dimension(0:lambda-1, nfold) :: PredictionError
 !f2py double precision, intent(out) :: PredictionError
@@ -204,11 +204,9 @@ do fold = 1, nfold
             ! residue(k) = residue(k)/normalizationFactor !(1.0d0 * totalappend * (endIndex+1))
 
             if (k .ge. 5) then
-                temp_val = residue(k)/((endIndex+1) * totalappend)
-                if (abs(temp_val - var)/var < tol) exit
-
-                !if (dnrm2(matrixcolumn, (f_k_i - f_km1_i), 1)**2/ &
-                !        dnrm2(matrixcolumn, f_k_i, 1)**2 < tol) exit
+                temp_val = 1.0 - ((sum(residue(k-5:k-1))/5.0) / residue(k))
+                temp_val = temp_val / ((endIndex+1) * totalappend)
+                if (abs(temp_val) <= tol) exit
             endif
 
             ! Checking for decency !
