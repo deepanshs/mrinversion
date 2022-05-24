@@ -15,7 +15,6 @@ Broad T2 distribution (Inverse Laplace)
 import csdmpy as cp
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
 
 from mrinversion.kernel import relaxation
 from mrinversion.linear_model import LassoFistaCV, TSVDCompression
@@ -25,31 +24,19 @@ from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 # %%
 # Dataset setup
 # -------------
-#
-# Generate a dataset
-# ''''''''''''''''''
-#
-time = 2 ** (np.arange(25) * 0.4 - 3)  # in s
-log_t2 = (np.arange(64) / 63) * 5 - 2
-
-center = 1.2
-dev = 0.4
-alpha = -2.0
-
-arg = (log_t2 - center) / np.sqrt(dev)
-gauss = np.exp(-(arg**2) / 2.0)
-stretch = 1 + sp.special.erf(alpha * arg)
-T2_dist = gauss * stretch
-T2_dist = T2_dist / T2_dist.sum()
-
-signal = 0
-for wt, t2 in zip(T2_dist, log_t2):
-    signal += wt * np.exp(-time / 10**t2)
-
+# Load the dataset
+# ''''''''''''''''
+domain = "https://sandbox.zenodo.org/record/1065394/files"
+filename = f"{domain}/test3_signal.csdf"
+signal = cp.load(filename)
 sigma = 0.0008
-signal += np.random.normal(0, sigma, size=signal.size)
-signal = cp.as_csdm(signal)
-signal.dimensions[0] = cp.as_dimension(array=time, unit="s")
+
+# %%
+# The variable ``signal`` holds the 1D dataset. For comparison, let's
+# also import the true t2 distribution from which the synthetic 1D signal
+# decay is simulated.
+datafile = f"{domain}/test3_t2.csdf"
+true_t2_dist = cp.load(datafile)
 
 plt.figure(figsize=(4.5, 3.5))
 signal.plot()
@@ -59,10 +46,8 @@ plt.show()
 # %%
 # Linear Inversion setup
 # ----------------------
-#
 # Generating the kernel
 # '''''''''''''''''''''
-#
 kernel_dimension = signal.dimensions[0]
 
 relaxT2 = relaxation.T2(
@@ -77,7 +62,6 @@ K = relaxT2.kernel(supersampling=20)
 # %%
 # Data Compression
 # ''''''''''''''''
-#
 new_system = TSVDCompression(K, signal)
 compressed_K = new_system.compressed_K
 compressed_s = new_system.compressed_s
@@ -87,7 +71,6 @@ print(f"truncation_index = {new_system.truncation_index}")
 # %%
 # Fista LASSO cross-validation
 # '''''''''''''''''''''''''''''
-#
 # Create a guess range of values for the :math:`\lambda` hyperparameters.
 lambdas = 10 ** (-7 + 6 * (np.arange(64) / 63))
 
@@ -122,7 +105,7 @@ sol = f_lasso_cv.f
 
 plt.figure(figsize=(4, 3))
 plt.subplot(projection="csdm")
-plt.plot(log_t2, T2_dist / T2_dist.max(), label="true")
+plt.plot(true_t2_dist / true_t2_dist.max(), label="true")
 plt.plot(sol / sol.max(), label="opt solution")
 plt.legend()
 plt.grid()

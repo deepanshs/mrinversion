@@ -24,22 +24,19 @@ from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 # %%
 # Dataset setup
 # -------------
-#
-# Generate a dataset
-# ''''''''''''''''''
-#
-time = 2 ** (np.arange(25) * 0.46 - 3)  # in s
-T2_samples = [1, 30]  # in s
-T2_weights = [0.333, 0.666]
-
-signal = 0
-for wt, t2 in zip(T2_weights, T2_samples):
-    signal += wt * np.exp(-time / t2)
-
+# Load the dataset
+# ''''''''''''''''
+domain = "https://sandbox.zenodo.org/record/1065394/files"
+filename = f"{domain}/test1_signal.csdf"
+signal = cp.load(filename)
 sigma = 0.0008
-signal += np.random.normal(0, sigma, size=signal.size)
-signal = cp.as_csdm(signal)
-signal.dimensions[0] = cp.as_dimension(array=time, unit="s")
+
+# %%
+# The variable ``signal`` holds the 1D dataset. For comparison, let's
+# also import the true t2 distribution from which the synthetic 1D signal
+# decay is simulated.
+datafile = f"{domain}/test1_t2.csdf"
+true_t2_dist = cp.load(datafile)
 
 plt.figure(figsize=(4.5, 3.5))
 signal.plot()
@@ -49,10 +46,8 @@ plt.show()
 # %%
 # Linear Inversion setup
 # ----------------------
-#
 # Generating the kernel
 # '''''''''''''''''''''
-#
 kernel_dimension = signal.dimensions[0]
 
 relaxT2 = relaxation.T2(
@@ -67,7 +62,6 @@ K = relaxT2.kernel(supersampling=1)
 # %%
 # Data Compression
 # ''''''''''''''''
-#
 new_system = TSVDCompression(K, signal)
 compressed_K = new_system.compressed_K
 compressed_s = new_system.compressed_s
@@ -77,9 +71,8 @@ print(f"truncation_index = {new_system.truncation_index}")
 # %%
 # Fista LASSO cross-validation
 # '''''''''''''''''''''''''''''
-#
 # Create a guess range of values for the :math:`\lambda` hyperparameters.
-lambdas = 10 ** (-4 + 4 * (np.arange(64) / 63))
+lambdas = 10 ** (-5 + 4 * (np.arange(64) / 63))
 
 # setup the smooth lasso cross-validation class
 f_lasso_cv = LassoFistaCV(
@@ -108,10 +101,12 @@ plt.show()
 # %%
 # The optimum solution
 # ''''''''''''''''''''
+sol = f_lasso_cv.f
+
 plt.figure(figsize=(4, 3))
 plt.subplot(projection="csdm")
-[plt.axvline(np.log10(sample), c="b", linestyle="--") for sample in T2_samples]
-plt.plot(f_lasso_cv.f, label="opt solution", c="orange")
+plt.plot(true_t2_dist / true_t2_dist.max(), label="true distribution")
+plt.plot(sol / sol.max(), label="opt solution")
 plt.legend()
 plt.grid()
 plt.tight_layout()
