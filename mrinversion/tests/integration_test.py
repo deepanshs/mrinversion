@@ -10,7 +10,8 @@ from mrinversion.linear_model import TSVDCompression
 
 def test_01():
     # The 2D MAF dataset in csdm format
-    filename = "https://osu.box.com/shared/static/8lnwmg0dr7y6egk40c2orpkmmugh9j7c.csdf"
+    domain = "https://sandbox.zenodo.org/record/1065347/files"
+    filename = f"{domain}/8lnwmg0dr7y6egk40c2orpkmmugh9j7c.csdf"
     data_object = cp.load(filename)
     data_object = data_object.real
     _ = [item.to("ppm", "nmr_frequency_ratio") for item in data_object.dimensions]
