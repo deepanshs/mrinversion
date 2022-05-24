@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Bimodal distribution
-====================
+Bimodal distribution (Aniso Shielding Lineshape Inversion)
+==========================================================
 """
 # %%
 # The following example demonstrates the statistical learning based determination of

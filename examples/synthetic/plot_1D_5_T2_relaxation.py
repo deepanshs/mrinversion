@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Inverse Laplace (ILT) T2 distribution (narrow)
-==============================================
+Narrow T2 distribution (Inverse Laplace)
+========================================
 """
 # %%
 # The following example demonstrates the statistical learning based determination of
@@ -36,7 +36,7 @@ signal = 0
 for wt, t2 in zip(T2_weights, T2_samples):
     signal += wt * np.exp(-time / t2)
 
-sigma = 0.002
+sigma = 0.0008
 signal += np.random.normal(0, sigma, size=signal.size)
 signal = cp.as_csdm(signal)
 signal.dimensions[0] = cp.as_dimension(array=time, unit="s")
