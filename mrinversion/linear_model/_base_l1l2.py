@@ -39,7 +39,7 @@ class GeneralL2Lasso:
     Args:
         alpha: Float, the hyperparameter, :math:`\alpha`.
         lambda1: Float, the hyperparameter, :math:`\lambda`.
-        max_iterations: Interger, the maximum number of iterations allowed when
+        max_iterations: Integer, the maximum number of iterations allowed when
                         solving the problem. The default value is 10000.
         tolerance: Float, the tolerance at which the solution is
                    considered converged. The default value is 1e-5.
@@ -51,7 +51,6 @@ class GeneralL2Lasso:
                      and `sparse ridge fusion`.
         f_shape: The shape of the solution, :math:`{\bf f}`, given as a tuple
                         (n1, n2, ..., nd)
-    Attributes:
     """
 
     def __init__(
@@ -213,12 +212,10 @@ class GeneralL2Lasso:
             A numpy array of shape (m, m_count) with the predicted values
         """
         predict = self.estimator.predict(K) * self.scale
-
         return predict
 
     def residuals(self, K, s):
-        r"""
-        Return the residual as the difference the data and the prediced data(fit),
+        r"""Return the residual as the difference the data and the predicted data(fit),
         following
 
         .. math::
@@ -254,10 +251,8 @@ class GeneralL2Lasso:
         return residue
 
     def score(self, K, s, sample_weights=None):
-        """
-        The coefficient of determination, :math:`R^2`, of the prediction.
-        For more information, read scikit-learn documentation.
-        """
+        """The coefficient of determination, :math:`R^2`, of the prediction.
+        For more information, read scikit-learn documentation."""
         return self.estimator.score(K, s / self.scale, sample_weights)
 
 
@@ -491,8 +486,7 @@ class GeneralL2LassoCV:
             )
 
     def predict(self, K):
-        r"""
-        Predict the signal using the linear model.
+        r"""Predict the signal using the linear model.
 
         Args:
             K: A :math:`m \times n` kernel matrix, :math:`{\bf K}`. A numpy array of
@@ -504,7 +498,7 @@ class GeneralL2LassoCV:
         return self.opt.predict(K)
 
     def residuals(self, K, s):
-        r"""Return the residual as the difference the data and the prediced data(fit),
+        r"""Return the residual as the difference the data and the predicted data(fit),
         following
 
         .. math::
@@ -524,18 +518,15 @@ class GeneralL2LassoCV:
         return self.opt.residuals(K, s)
 
     def score(self, K, s, sample_weights=None):
-        """
-        Return the coefficient of determination, :math:`R^2`, of the prediction.
-        For more information, read scikit-learn documentation.
-        """
+        """Return the coefficient of determination, :math:`R^2`, of the prediction.
+        For more information, read scikit-learn documentation."""
         return self.opt.score(K, s, sample_weights)
 
     @property
     def cross_validation_curve(self):
         """The cross-validation error metric determined as the mean square error.
 
-        Returns: A two-dimensional CSDM object.
-        """
+        Returns: A two-dimensional CSDM object."""
         return self.cv_map
 
 
@@ -589,9 +580,7 @@ def _get_smooth_size(f_shape, regularizer, max_size):
 
 def _get_cv_indexes(K, folds, regularizer, f_shape=None, random=False, times=1):
     """Return the indexes of the kernel and signal, corresponding to the test
-    and train sets.
-
-    """
+    and train sets."""
     cv_indexes = []
     ks0, ks1 = K.shape
     if isinstance(f_shape, int):

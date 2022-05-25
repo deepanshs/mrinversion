@@ -105,7 +105,7 @@ class LassoFista:
         return np.dot(K, f)
 
     def residuals(self, K, s):
-        r"""Return the residual as the difference the data and the prediced data(fit),
+        r"""Return the residual as the difference the data and the predicted data(fit),
         following
 
         .. math::
@@ -191,7 +191,7 @@ class LassoFistaCV:
             K_, s_, self.folds, self.randomize, self.times
         )
 
-        self.cv_map, self.std, _, _, _, self.predictionerror = fista_cv.fista(
+        self.cv_map, self.std, _, _, _, self.prediction_error = fista_cv.fista(
             matrix=k_train,
             s=s_train,
             matrixtest=k_test,
@@ -249,7 +249,7 @@ class LassoFistaCV:
         return self.opt.predict(K)
 
     def residuals(self, K, s):
-        r"""Return the residual as the difference the data and the prediced data(fit),
+        r"""Return the residual as the difference the data and the predicted data(fit),
         following
 
         .. math::
@@ -278,7 +278,7 @@ class LassoFistaCV:
     def cv_plot(self):
         """Plot the CV plot"""
         cv = self.cv_map.y[0].components[0]
-        predictionerror = self.predictionerror
+        prediction_error = self.prediction_error
         std = self.std
 
         l1_idx, l2_idx = calculate_opt_lambda(cv, std)
@@ -286,7 +286,7 @@ class LassoFistaCV:
         # opt_lambda = 0.5 * (lambdas[l1_idx] + lambdas[l2_idx])
 
         plt.axhline(y=std[l1_idx] + cv[l1_idx], linestyle="--", c="r")
-        plt.plot(lambdas, predictionerror, alpha=0.5, linestyle="dotted")
+        plt.plot(lambdas, prediction_error, alpha=0.5, linestyle="dotted")
 
         kwargs = {"s": 70, "edgecolors": "k", "linewidth": 1.5}
         plt.scatter(lambdas[l1_idx], cv[l1_idx], facecolors="b", **kwargs)
@@ -316,18 +316,12 @@ def calculate_opt_lambda(cv, std):
 
 
 def test_train_set(X, y, folds, random=False, repeat_folds=1):
-    # test_indexSize = np.empty(folds)
-    # chi2_test = np.empty((folds, lambdaPoints))
-    # cv = np.empty(lambdaPoints)
-    # cvk = np.empty(lambdaPoints)
-
+    """Generate test and training sets"""
     index = np.arange(X.shape[0])
-    # print('index', index)
 
-    test_size = np.int(index.size / folds)
+    test_size = int(index.size / folds)
     m = index.size % folds
     train_size = index.size - test_size
-    # print('test_size', test_size, 'train_size', train_size)
 
     shape_k_train = (train_size, X.shape[1], folds * repeat_folds)
     k_train = np.zeros(shape_k_train)

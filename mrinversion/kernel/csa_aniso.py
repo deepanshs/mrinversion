@@ -99,8 +99,7 @@ class ShieldingPALineshape(LineShape):
 
 
 class MAF(ShieldingPALineshape):
-    r"""
-    A specialized class for simulating the pure anisotropic NMR nuclear shielding
+    r"""A specialized class for simulating the pure anisotropic NMR nuclear shielding
     line-shape kernel resulting from the 2D MAF spectra.
 
     Args:
@@ -141,8 +140,7 @@ class MAF(ShieldingPALineshape):
 
 
 class SpinningSidebands(ShieldingPALineshape):
-    r"""
-    A specialized class for simulating the pure anisotropic spinning sideband
+    r"""A specialized class for simulating the pure anisotropic spinning sideband
     amplitudes of the nuclear shielding resonances resulting from a 2D sideband
     separation spectra.
 

@@ -112,30 +112,21 @@ def zeta_eta_to_x_y(zeta, eta):
 
 def _x_y_to_zeta_eta_distribution(grid, supersampling):
     """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
-    # if grid.x.coordinates_offset != grid.y.coordinates_offset:
-    #     raise ValueError("coordinates_offset for x and y grid must be identical")
-
     x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)
     y_coordinates = _supersampled_coordinates(grid[1], supersampling=supersampling)
 
     if x_coordinates.unit.physical_type == "frequency":
         x_coordinates = x_coordinates.to("Hz").value
         y_coordinates = y_coordinates.to("Hz").value
-        # offset = grid.x.coordinates_offset.to("Hz").value
 
     elif x_coordinates.unit.physical_type == "dimensionless":
         x_coordinates = x_coordinates.to("ppm").value
         y_coordinates = y_coordinates.to("ppm").value
-        # x_coordinates = (x_coordinates * dimension.larmor_frequency).to("").value
-        # y_coordinates = (y_coordinates * dimension.larmor_frequency).to("").value
-        # offset = grid.x.coordinates_offset.to("").value
 
     x_mesh, y_mesh = np.meshgrid(
         np.abs(x_coordinates), np.abs(y_coordinates), indexing="xy"
     )
 
-    # y_offset = y_coordinates[0]
-    # x_offset = x_coordinates[0]
     return _x_y_to_zeta_eta(x_mesh, y_mesh)
 
 

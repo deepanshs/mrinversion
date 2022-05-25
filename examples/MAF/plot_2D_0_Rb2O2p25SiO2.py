@@ -233,23 +233,11 @@ print(s_lasso.hyperparameters)
 # The cross-validation surface
 # ''''''''''''''''''''''''''''
 #
-# Optionally, you may want to visualize the cross-validation error curve/surface. Use
-# the :attr:`~mrinversion.linear_model.SmoothLassoCV.cross_validation_curve` attribute
-# of the instance, as follows
-CV_metric = s_lasso.cross_validation_curve  # `CV_metric` is a CSDM object.
-
-# plot of the cross validation surface
-plt.figure(figsize=(5, 3.5))
-ax = plt.subplot(projection="csdm")
-ax.contour(np.log10(CV_metric), levels=25)
-ax.scatter(
-    -np.log10(s_lasso.hyperparameters["alpha"]),
-    -np.log10(s_lasso.hyperparameters["lambda"]),
-    marker="x",
-    color="k",
-)
-plt.tight_layout(pad=0.5)
-plt.show()
+# Optionally, you may want to visualize the cross-validation error curve/surface. The
+# :attr:`~mrinversion.linear_model.SmoothLassoCV.cross_validation_curve` attribute
+# of the instance holds a CSDM object of the CV surface. For convenience, we provide
+# a ``cv_plot`` function.
+s_lasso.cv_plot()
 
 # %%
 # The optimum solution

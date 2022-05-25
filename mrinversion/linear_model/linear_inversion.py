@@ -11,11 +11,11 @@ def find_optimum_singular_value(s):
     sj = s2 / s2.sum()
     T = sj * np.log10(sj)
     T[np.where(np.isnan(T))] = 0
-    logn = np.log10(length)
-    lognm1 = np.log10(length - 1.0)
-    entropy = (-1.0 / logn) * T.sum()
+    log_n = np.log10(length)
+    log_nm1 = np.log10(length - 1.0)
+    entropy = (-1.0 / log_n) * T.sum()
 
-    deltaEntropy = entropy - (entropy * logn + T) / lognm1
+    deltaEntropy = entropy - (entropy * log_n + T) / log_nm1
 
     c = deltaEntropy.mean()
     d = deltaEntropy.std()
@@ -30,7 +30,7 @@ def TSVD(K):
     return U, S, VT, r
 
 
-# standard deviation of noise remains unchanged after unitary tranformation.
+# standard deviation of noise remains unchanged after unitary transformation.
 def reduced_subspace_kernel_and_data(U, S, VT, signal, sigma=None):
     diagS = np.diag(S)
     K_tilde = np.dot(diagS, VT)

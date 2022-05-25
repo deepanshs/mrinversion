@@ -24,7 +24,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     eta: CSDM.Dimension
         A CSDM dimension object describing the eta dimension.
     n: int
-        An interger used in linear interpolation of the data. The default is 5.
+        An integer used in linear interpolation of the data. The default is 5.
     """
     [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.x]
     data = csdm_object.y[0].components[0]
@@ -36,11 +36,11 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     sol = np.zeros((data.shape[0], zeta.count, eta.count))
 
     bins = [zeta.count, eta.count]
-    dzeta = zeta.increment.value / 2
-    deta = eta.increment.value / 2
+    d_zeta = zeta.increment.value / 2
+    d_eta = eta.increment.value / 2
     range_ = [
-        [zeta.coordinates[0].value - dzeta, zeta.coordinates[-1].value + dzeta],
-        [eta.coordinates[0] - deta, eta.coordinates[-1] + deta],
+        [zeta.coordinates[0].value - d_zeta, zeta.coordinates[-1].value + d_zeta],
+        [eta.coordinates[0] - d_eta, eta.coordinates[-1] + d_eta],
     ]
 
     avg_range_x = (np.arange(n) - (n - 1) / 2) * dx / n
@@ -94,8 +94,8 @@ def get_polar_grids(ax, ticks=None, offset=0):
             or a numpy array. The default value is None.
         offset: The grid is drawn at an offset away from the origin.
     """
-    limy = ax.get_ylim()
-    limx = ax.get_xlim()
+    ylim = ax.get_ylim()
+    xlim = ax.get_xlim()
     if ticks is None:
         x = np.asarray(ax.get_xticks())
         inc = x[1] - x[0]
@@ -131,8 +131,8 @@ def get_polar_grids(ax, ticks=None, offset=0):
     for ang_ in angle2:
         ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=lw)
     ax.plot(x, x, "k", alpha=0.5, linewidth=2 * lw)
-    ax.set_xlim(limx)
-    ax.set_ylim(limy)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
 
 
 def plot_3d(
@@ -176,18 +176,14 @@ def plot_3d(
         box: (Optional) If True, draw a box around the 3D data region.
         clip_percent: (Optional) The amplitudes of the dataset below the given percent
             is made transparent for the volumetric plot.
-        linewidth: (Optional) The linewidth of the 2D countours, 1D plots and box.
+        linewidth: (Optional) The linewidth of the 2D contours, 1D plots and box.
         alpha: (Optional) The amount of alpha(transparency) applied in rendering the 3D
             volume.
     """
-
-    if max_2d is None:
-        max_2d = [None, None, None]
-    if max_1d is None:
-        max_1d = [None, None, None]
+    max_2d = [None, None, None] if max_2d is None else max_2d
+    max_1d = [None, None, None] if max_1d is None else max_1d
 
     lw = linewidth
-
     if isinstance(csdm_object, cp.CSDM):
         f = csdm_object.y[0].components[0].T
         label = csdm_object.description
