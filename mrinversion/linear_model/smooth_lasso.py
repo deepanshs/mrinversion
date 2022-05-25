@@ -57,7 +57,7 @@ class SmoothLasso(GeneralL2Lasso):
         The tolerance at which the solution is considered converged. The default value
         is 1e-5.
     positive: bool
-        If True, the amplitudes in the solution, :math:`{\bf f}`, is contrained to only
+        If True, the amplitudes in the solution, :math:`{\bf f}`, is constrained to only
         positive values, else the solution may contain positive and negative amplitudes.
         The default is True.
 
@@ -151,7 +151,7 @@ class SmoothLassoCV(GeneralL2LassoCV):
         The tolerance at which the solution is considered converged. The default value
         is 1e-5.
     positive: bool
-        If True, the amplitudes in the solution, :math:`{\bf f}`, is contrained to only
+        If True, the amplitudes in the solution, :math:`{\bf f}`, is constrained to only
         positive values, else the solution may contain positive and negative amplitudes.
         The default is True.
     sigma: float

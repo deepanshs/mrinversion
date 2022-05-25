@@ -27,7 +27,7 @@ class SparseRidgeFusion(GeneralL2Lasso):
         signal: A :math:`m \times m_\text{count}` signal matrix, :math:`{\bf s}`.
         inverse_dimension: A list of csdmpy Dimension objects representing the
             inverse space.
-        max_iterations: An interger defining the maximum number of iterations used
+        max_iterations: An integer defining the maximum number of iterations used
             in solving the LASSO problem. The default value is 10000.
         tolerance: A float defining the tolerance at which the solution is
             considered converged. The default value is 1e-5.

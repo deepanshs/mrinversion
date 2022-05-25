@@ -8,7 +8,6 @@ from mrsimulator.methods import BlochDecaySpectrum
 from .utils import _x_y_to_zeta_eta_distribution
 
 __dimension_list__ = (cp.Dimension, cp.LinearDimension, cp.MonotonicDimension)
-
 __dimension_name__ = ("Dimension", "LinearDimension", "MonotonicDimension")
 
 
@@ -83,7 +82,6 @@ class BaseModel:
 
         inv_size = np.asarray([item.count for item in inverse_kernel_dimension]).prod()
         K = K.reshape(inv_size, self.kernel_dimension.count).T
-
         return K
 
 
@@ -189,11 +187,6 @@ def _check_csdm_dimension(dimensions, dimension_id):
 
 
 def _check_dimension_type(dimensions, direction, dimension_quantity, kernel_type):
-    # if isinstance(dimension_quantity, tuple):
-    #     dimension_quantity = list(dimension_quantity)
-    # if isinstance(dimension_quantity, str):
-    #     dimension_quantity = [dimension_quantity]
-
     if not isinstance(dimensions, list):
         if dimensions.quantity_name not in dimension_quantity:
             raise ValueError(
