@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from ._base_l1l2 import GeneralL2Lasso
 from ._base_l1l2 import GeneralL2LassoCV
 

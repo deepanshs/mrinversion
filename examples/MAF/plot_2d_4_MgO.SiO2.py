@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 2D MAF data of MgO.SiO2 glass
 =============================

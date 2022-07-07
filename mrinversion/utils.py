@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from copy import deepcopy
 from itertools import combinations
 from itertools import product
@@ -30,7 +29,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     data = csdm_object.y[0].components[0]
     iso = csdm_object.x[2].coordinates.value
 
-    reg_x, reg_y = [csdm_object.x[i].coordinates.value for i in range(2)]
+    reg_x, reg_y = (csdm_object.x[i].coordinates.value for i in range(2))
     dx = reg_x[1] - reg_x[0]
     dy = reg_y[1] - reg_y[0]
     sol = np.zeros((data.shape[0], zeta.count, eta.count))
@@ -152,7 +151,7 @@ def plot_3d(
     alpha=0.15,
     **kwargs,
 ):
-    """Generate a 3D density plot with 2D contour and 1D projections.
+    r"""Generate a 3D density plot with 2D contour and 1D projections.
 
     Args:
         ax: Matplotlib Axes to render the plot.
@@ -188,7 +187,7 @@ def plot_3d(
         f = csdm_object.y[0].components[0].T
         label = csdm_object.description
 
-        a_, b_, c_ = [item for item in csdm_object.x]
+        a_, b_, c_ = (item for item in csdm_object.x)
 
         a = a_.coordinates.value
         b = b_.coordinates.value

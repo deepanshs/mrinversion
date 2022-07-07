@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .fista_lasso import LassoFista  # noqa: F401
 from .fista_lasso import LassoFistaCV  # noqa: F401
 from .smooth_lasso import SmoothLasso  # noqa: F401

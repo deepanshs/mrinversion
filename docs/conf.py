@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Configuration file for the Sphinx documentation builder.
 #
 # This file does only contain a selection of the most common options. For a
@@ -26,7 +24,7 @@ author = "Deepansh J. Srivastava"
 
 path = os.path.split(__file__)[0]
 # get version number from the file
-with open(os.path.join(path, "../mrinversion/__init__.py"), "r") as f:
+with open(os.path.join(path, "../mrinversion/__init__.py")) as f:
     for line in f.readlines():
         if "__version__" in line:
             before_keyword, keyword, after_keyword = line.partition("=")

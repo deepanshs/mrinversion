@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Bimodal distribution (Aniso Shielding Lineshape Inversion)
 ==========================================================
@@ -31,7 +30,6 @@ def plot2D(ax, csdm_object, title=""):
     _ = [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.dimensions]
 
     levels = (np.arange(9) + 1) / 10
-    plt.figure(figsize=(4.5, 3.5))
     ax.contourf(csdm_object, cmap="gist_ncar", levels=levels)
     ax.grid(None)
     ax.set_title(title)

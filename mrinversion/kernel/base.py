@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from copy import deepcopy
 
 import csdmpy as cp
@@ -66,7 +65,7 @@ class BaseModel:
         K = amp.reshape(shape)
 
         inv_len = len(inverse_kernel_dimension)
-        axes = tuple([2 * i + 1 for i in range(inv_len)])
+        axes = tuple(2 * i + 1 for i in range(inv_len))
         K = K.mean(axis=axes)
 
         if xy_grid:

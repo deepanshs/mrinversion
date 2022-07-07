@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 2D MAF data of Na2O.4.7SiO2 glass
 =================================
@@ -416,13 +415,13 @@ std_Q3 = stats.std(Q3_region)  # standard deviation of the Q3 distribution
 
 print("Q4 statistics")
 print(f"\tpopulation = {100 * int_Q4 / (int_Q4 + int_Q3)}%")
-print("\tmean\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*mean_Q4))
-print("\tstandard deviation\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*std_Q4))
+print("\tmean\n\t\tx:\t{}\n\t\ty:\t{}\n\t\tiso:\t{}".format(*mean_Q4))
+print("\tstandard deviation\n\t\tx:\t{}\n\t\ty:\t{}\n\t\tiso:\t{}".format(*std_Q4))
 
 print("Q3 statistics")
 print(f"\tpopulation = {100 * int_Q3 / (int_Q4 + int_Q3)}%")
-print("\tmean\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*mean_Q3))
-print("\tstandard deviation\n\t\tx:\t{0}\n\t\ty:\t{1}\n\t\tiso:\t{2}".format(*std_Q3))
+print("\tmean\n\t\tx:\t{}\n\t\ty:\t{}\n\t\tiso:\t{}".format(*mean_Q3))
+print("\tstandard deviation\n\t\tx:\t{}\n\t\ty:\t{}\n\t\tiso:\t{}".format(*std_Q3))
 
 # %%
 # The statistics shown above are according to the respective dimensions, that is, the
@@ -442,9 +441,9 @@ std_η = (4 / np.pi) * np.sqrt(std_η)
 
 print("Q3 statistics")
 print(f"\tpopulation = {100 * int_Q3 / (int_Q4 + int_Q3)}%")
-print("\tmean\n\t\tζ:\t{0}\n\t\tη:\t{1}\n\t\tiso:\t{2}".format(*mean_ζη_Q3, mean_Q3[2]))
+print("\tmean\n\t\tζ:\t{}\n\t\tη:\t{}\n\t\tiso:\t{}".format(*mean_ζη_Q3, mean_Q3[2]))
 print(
-    "\tstandard deviation\n\t\tζ:\t{0}\n\t\tη:\t{1}\n\t\tiso:\t{2}".format(
+    "\tstandard deviation\n\t\tζ:\t{}\n\t\tη:\t{}\n\t\tiso:\t{}".format(
         std_ζ, std_η, std_Q3[2]
     )
 )
