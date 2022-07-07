@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from os.path import abspath
 from os.path import dirname
 from os.path import join
@@ -7,7 +6,7 @@ from setuptools import find_packages
 from numpy.distutils.core import setup
 from numpy.distutils.core import Extension
 
-with open("mrinversion/__init__.py", "r") as f:
+with open("mrinversion/__init__.py") as f:
     for line in f.readlines():
         if "__version__" in line:
             before_keyword, keyword, after_keyword = line.partition("=")

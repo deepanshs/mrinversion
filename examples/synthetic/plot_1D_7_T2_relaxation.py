@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Broad T2 distribution (Inverse Laplace)
 =======================================

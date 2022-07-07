@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import csdmpy as cp
 
 from mrinversion.linear_model.linear_inversion import reduced_subspace_kernel_and_data

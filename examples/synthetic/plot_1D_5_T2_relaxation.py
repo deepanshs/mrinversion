@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Narrow T2 distribution (Inverse Laplace)
 ========================================

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from copy import deepcopy
 
 import csdmpy as cp
@@ -71,7 +70,7 @@ class GeneralL2Lasso:
         self.positive = positive
         self.regularizer = regularizer
         self.inverse_dimension = inverse_dimension
-        self.f_shape = tuple([item.count for item in inverse_dimension])[::-1]
+        self.f_shape = tuple(item.count for item in inverse_dimension)[::-1]
         self.method = method
 
         # attributes
@@ -300,7 +299,7 @@ class GeneralL2LassoCV:
         self.times = times
         self.verbose = verbose
         self.inverse_dimension = inverse_dimension
-        self.f_shape = tuple([item.count for item in inverse_dimension])[::-1]
+        self.f_shape = tuple(item.count for item in inverse_dimension)[::-1]
 
     def fit(self, K, s):
         r"""Fit the model using the coordinate descent method from scikit-learn for
