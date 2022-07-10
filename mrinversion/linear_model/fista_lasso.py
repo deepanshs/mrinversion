@@ -37,7 +37,7 @@ class LassoFista:
 
         if warm_start:
             self.f_1 = np.asfortranarray(np.zeros((K_.shape[1], 1)))
-            zf, function, chi2, iter, cpu_time, wall_time = fista.fista(
+            _ = fista.fista(
                 matrix=K_,
                 s=s_.mean(axis=1),
                 lambd=self.hyperparameters["lambda"],
@@ -50,7 +50,7 @@ class LassoFista:
             )
             self.f = np.asfortranarray(np.tile(self.f_1, s_.shape[1]))
 
-        zf, function, chi2, iter, cpu_time, wall_time = fista.fista(
+        _ = fista.fista(
             matrix=K_,
             s=s_,
             lambd=self.hyperparameters["lambda"],
