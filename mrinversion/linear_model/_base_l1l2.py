@@ -11,8 +11,6 @@ from sklearn.linear_model import MultiTaskLasso
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 
-from mrinversion.linear_model.tsvd_compression import TSVDCompression  # noqa: F401
-
 
 __author__ = "Deepansh J. Srivastava"
 __email__ = "srivastava.89@osu.edu"
@@ -172,15 +170,16 @@ class GeneralL2Lasso:
 
         self.f = cp.as_csdm(self.f)
 
-        for dim in self.inverse_dimension:
+        for i, dim in enumerate(self.inverse_dimension):
             app = dim.application or {}
             if "com.github.deepanshs.mrinversion" in app:
                 meta = app["com.github.deepanshs.mrinversion"]
                 is_log = meta.get("log", False)
                 if is_log:
-                    # unit = self.inverse_dimension.coordinates.unit
                     coords = np.log10(dim.coordinates.value)
-                    dim = cp.as_dimension(array=coords, label=meta["label"])
+                    self.inverse_dimension[i] = cp.as_dimension(
+                        array=coords, label=meta["label"]
+                    )
 
         if len(s.dimensions) > 1 and len(self.f.shape) == 3:
             self.f.dimensions[2] = s.dimensions[1]
