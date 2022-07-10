@@ -39,7 +39,7 @@ For more information, refer to the
 
 > **View our example gallery**
 >
-> [![](https://img.shields.io/badge/View-Example%20Gallery-Purple?s=small)](https://mrinversion.readthedocs.io/en/latest/auto_examples/index.html)
+> [![](https://img.shields.io/badge/View-Example%20Gallery-Purple?s=small)](https://mrinversion.readthedocs.io/en/latest/galley_examples/index.html)
 
 ## Installation
 

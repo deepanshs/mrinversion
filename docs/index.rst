@@ -98,7 +98,7 @@ tensor parameters**. At present, we support the inversion of
     **View our example gallery**
 
     .. image:: https://img.shields.io/badge/View-Example%20Gallery-Purple?s=small
-        :target: auto_examples/index.html
+        :target: galley_examples/index.html
 
 ----
 
@@ -125,7 +125,7 @@ Examples
     :maxdepth: 1
     :caption: Examples
 
-    auto_examples/index
+    galley_examples/index
 
 Project details
 ---------------

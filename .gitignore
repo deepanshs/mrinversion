@@ -12,7 +12,7 @@ importTypes/
 *.zip
 app/
 c_lib/
-docs/auto_examples/**
+docs/galley_examples/**
 
 # C extensions
 *.so

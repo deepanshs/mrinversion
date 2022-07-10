@@ -95,7 +95,7 @@ math_number_all = True
 sphinx_gallery_conf = {
     "examples_dirs": "../examples",  # path to your example scripts
     "remove_config_comments": True,
-    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+    "gallery_dirs": "galley_examples",  # path to where to save gallery generated output
     "within_subsection_order": FileNameSortKey,
     "subsection_order": ExplicitOrder(
         [
@@ -115,18 +115,18 @@ sphinx_gallery_conf = {
         "import mrinversion\n"
         "print(f'You are using mrinversion v{mrinversion.__version__}')"
     ),
-    "binder": {
-        # Required keys
-        "org": "DeepanshS",
-        "repo": "mrinversion",
-        "branch": "master",
-        "binderhub_url": "https://mybinder.org",
-        "dependencies": "../requirements.txt",
-        # Optional keys
-        "filepath_prefix": "docs/_build/html",
-        "notebooks_dir": "../../notebooks",
-        "use_jupyter_lab": True,
-    },
+    # "binder": {
+    #     # Required keys
+    #     "org": "DeepanshS",
+    #     "repo": "mrinversion",
+    #     "branch": "master",
+    #     "binderhub_url": "https://mybinder.org",
+    #     "dependencies": "../requirements.txt",
+    #     # Optional keys
+    #     "filepath_prefix": "docs/_build/html",
+    #     "notebooks_dir": "../../notebooks",
+    #     "use_jupyter_lab": True,
+    # },
 }
 
 intersphinx_mapping = {
