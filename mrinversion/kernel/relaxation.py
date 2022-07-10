@@ -35,7 +35,7 @@ class BaseRelaxation(BaseModel):
             "log": check_log,
             "label": f"log({self.__class__.__name__} / {unit})" if check_log else None,
         }
-        inverse_dimension.application["com.github.deepanshs.mrinversion"] = meta
+        inverse_dimension.application = {"com.github.deepanshs.mrinversion": meta}
         super().__init__(kernel_dimension, inverse_dimension, 1, 1)
 
 

@@ -70,7 +70,7 @@ class LassoFista:
         # CSDM pack
         self.f = cp.as_csdm(np.squeeze(self.f.T))
 
-        app = self.inverse_dimension.application
+        app = self.inverse_dimension.application or {}
         if "com.github.deepanshs.mrinversion" in app:
             meta = app["com.github.deepanshs.mrinversion"]
             is_log = meta.get("log", False)

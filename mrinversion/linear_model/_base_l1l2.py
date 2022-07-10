@@ -173,7 +173,7 @@ class GeneralL2Lasso:
         self.f = cp.as_csdm(self.f)
 
         for dim in self.inverse_dimension:
-            app = dim.application
+            app = dim.application or {}
             if "com.github.deepanshs.mrinversion" in app:
                 meta = app["com.github.deepanshs.mrinversion"]
                 is_log = meta.get("log", False)
