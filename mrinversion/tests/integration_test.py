@@ -2,13 +2,14 @@ import csdmpy as cp
 import numpy as np
 from csdmpy import statistics as stats
 
+from mrinversion.kernel import relaxation
 from mrinversion.kernel.nmr import ShieldingPALineshape
+from mrinversion.linear_model import LassoFistaCV
 from mrinversion.linear_model import SmoothLasso
 from mrinversion.linear_model import TSVDCompression
 
 
 def test_01():
-    # The 2D MAF dataset in csdm format
     domain = "https://sandbox.zenodo.org/record/1065347/files"
     filename = f"{domain}/8lnwmg0dr7y6egk40c2orpkmmugh9j7c.csdf"
     data_object = cp.load(filename)
@@ -97,3 +98,61 @@ def test_01():
         np.asarray([6.138761032132587, 7.837190479891721, 4.210912435356488]),
         decimal=0,
     )
+
+
+def test_inversion():
+    domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
+    filename = f"{domain}/MAS_SE_PIETA_5%25Li2O_FT.csdf"
+    data_object = cp.load(filename)
+
+    # Inversion only requires the real part of the complex dataset.
+    data_object = data_object.real
+    sigma = 1110.521  # data standard deviation
+
+    # Convert the MAS dimension from Hz to ppm.
+    data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
+
+    data_object = data_object.T
+    data_object_truncated = data_object[:, 1220:-1220]
+
+    data_object_truncated.dimensions[0].to("s")  # set coordinates to 's'
+    kernel_dimension = data_object_truncated.dimensions[0]
+
+    relaxT2 = relaxation.T2(
+        kernel_dimension=kernel_dimension,
+        inverse_dimension=dict(
+            count=32,
+            minimum="1e-3 s",
+            maximum="1e4 s",
+            scale="log",
+            label="log (T2 / s)",
+        ),
+    )
+    inverse_dimension = relaxT2.inverse_dimension
+    K = relaxT2.kernel(supersampling=20)
+
+    new_system = TSVDCompression(K, data_object_truncated)
+    compressed_K = new_system.compressed_K
+    compressed_s = new_system.compressed_s
+
+    assert new_system.truncation_index == 18
+
+    # setup the pre-defined range of alpha and lambda values
+    lambdas = 10 ** (-4 + 5 * (np.arange(32) / 31))
+
+    # setup the smooth lasso cross-validation class
+    s_lasso = LassoFistaCV(
+        lambdas=lambdas,  # A numpy array of lambda values.
+        sigma=sigma,  # data standard deviation
+        folds=5,  # The number of folds in n-folds cross-validation.
+        inverse_dimension=inverse_dimension,  # previously defined inverse dimensions.
+    )
+
+    # run the fit method on the compressed kernel and compressed data.
+    s_lasso.fit(K=compressed_K, s=compressed_s)
+    np.testing.assert_almost_equal(s_lasso.hyperparameters["lambda"], 0.116, decimal=1)
+
+    s_lasso.cv_plot()
+
+    residuals = s_lasso.residuals(K=K, s=data_object_truncated)
+    np.testing.assert_almost_equal(residuals.std().value, 1538.48, decimal=1)

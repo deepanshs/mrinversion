@@ -257,8 +257,8 @@ class GeneralL2Lasso:
 class GeneralL2LassoCV:
     def __init__(
         self,
-        alphas=None,
-        lambdas=None,
+        alphas,
+        lambdas,
         folds=10,
         max_iterations=10000,
         tolerance=1e-5,
@@ -273,15 +273,8 @@ class GeneralL2LassoCV:
         method="gradient_decent",
     ):
 
-        if alphas is None:
-            self.cv_alphas = 10 ** ((np.arange(5) / 4) * 2 - 4)[::-1]
-        else:
-            self.cv_alphas = np.asarray(alphas).ravel()
-
-        if lambdas is None:
-            self.cv_lambdas = 10 ** ((np.arange(10) / 9) * 5 - 9)[::-1]
-        else:
-            self.cv_lambdas = np.asarray(lambdas).ravel()
+        self.cv_alphas = np.asarray(alphas).ravel()
+        self.cv_lambdas = np.asarray(lambdas).ravel()
 
         self.method = method
         self.folds = folds

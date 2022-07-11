@@ -32,7 +32,7 @@ def plot2D(csdm_object, **kwargs):
 # ''''''''''''''''''
 # Load the dataset as a CSDM data-object.
 
-# The 2D MAF dataset in csdm format
+# The 2D MAS dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
 filename = f"{domain}/MAS_SE_PIETA_7%25Li2O_FT.csdf"
 data_object = cp.load(filename)
