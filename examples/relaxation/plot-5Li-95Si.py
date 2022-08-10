@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 0.05 Li2O • 0.95 SiO2 MAS-ETA
 =============================
@@ -16,11 +15,12 @@ import numpy as np
 from mrinversion.kernel import relaxation
 from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 
-plt.rcParams['pdf.fonttype'] = 42   # For using plots in Illustrator
+plt.rcParams["pdf.fonttype"] = 42  # For using plots in Illustrator
+
 
 def plot2D(csdm_object, **kwargs):
     plt.figure(figsize=(4, 3))
-    csdm_object.plot(**kwargs)
+    csdm_object.plot(cmap="gist_ncar_r", **kwargs)
     plt.tight_layout()
     plt.show()
 
@@ -47,7 +47,7 @@ sigma = 1110.521  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
-plot2D(data_object,cmap="gist_ncar_r")
+plot2D(data_object)
 
 # %%
 # There are two dimensions in this dataset. The dimension at index 0, the horizontal
@@ -73,7 +73,7 @@ data_object = data_object.T
 # performance, trim the dataset to the region of relevant signals. Use the appropriate
 # array indexing/slicing to select the signal region.
 data_object_truncated = data_object[:, 1220:-1220]
-plot2D(data_object_truncated,cmap="gist_ncar_r")
+plot2D(data_object_truncated)
 
 # %%
 # Linear Inversion setup
@@ -167,14 +167,14 @@ f_sol = s_lasso.f
 levels = np.arange(15) / 15 + 0.1
 plt.figure(figsize=(3.85, 2.75))  # set the figure size
 ax = plt.subplot(projection="csdm")
-cb=ax.contourf(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
+cb = ax.contourf(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
 ax.set_ylim(-70, -130)
 ax.set_xlim(-3, 2.5)
 plt.title("5Li:95Si")
-ax.set_xlabel("$\log(\lambda^{-1}\,/\,$s)")
+ax.set_xlabel(r"$\log(\lambda^{-1}\,/\,$s)")
 ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
-plt.colorbar(cb,ticks=[0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1.0,1.1])
+plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
 plt.savefig("5Li-95Si.pdf")
 plt.show()
@@ -186,7 +186,7 @@ plt.show()
 # To calculate the residuals between the data and predicted data(fit), use the
 # :meth:`~mrinversion.linear_model.LassoFistaCV.residuals` method, as follows,
 residuals = s_lasso.residuals(K=K, s=data_object_truncated)
-plot2D(residuals,cmap="gist_ncar_r")
+plot2D(residuals)
 
 # %%
 # The standard deviation of the residuals is
