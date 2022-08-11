@@ -1,11 +1,11 @@
 """
-0.07 Li2O • 0.02 Al2O3 • 0.001 SnO2 • 0.91 SiO2 MAS-ETA
-=======================================================
+0.05 Na2O • 0.95 SiO2 MAS-ETA
+=============================
 """
 
 # %%
 # The following example is an application of the statistical learning method in
-# determining the distribution of the T2 relaxation constants in glasses.
+# determining the distribution of the Si-29 echo train decay constants in glasses.
 #
 # Import all relevant packages.
 import csdmpy as cp
@@ -15,10 +15,12 @@ import numpy as np
 from mrinversion.kernel import relaxation
 from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 
+plt.rcParams["pdf.fonttype"] = 42  # For using plots in Illustrator
+
 
 def plot2D(csdm_object, **kwargs):
     plt.figure(figsize=(4, 3))
-    csdm_object.plot(**kwargs)
+    csdm_object.plot(cmap="gist_ncar_r", **kwargs)
     plt.tight_layout()
     plt.show()
 
@@ -34,12 +36,12 @@ def plot2D(csdm_object, **kwargs):
 
 # The 2D MAS dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_7%25Li2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_5%25Na2O_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
 data_object = data_object.real
-sigma = 1194.356  # data standard deviation
+sigma = 1089.445  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -71,7 +73,6 @@ relaxT2 = relaxation.T2(
 )
 inverse_dimension = relaxT2.inverse_dimension
 K = relaxT2.kernel(supersampling=20)
-print(K.shape)
 
 # %%
 # Data Compression
@@ -121,13 +122,18 @@ plt.show()
 f_sol = s_lasso.f
 
 levels = np.arange(15) / 15 + 0.1
-plt.figure(figsize=(4, 3))
+plt.figure(figsize=(3.85, 2.75))  # set the figure size
 ax = plt.subplot(projection="csdm")
-ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
+cb = ax.contourf(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
 ax.set_ylim(-70, -130)
-ax.set_xlim(-3, 2.5)
+ax.set_xlim(-3, 2)
+plt.title("5Na:95Si")
+ax.set_xlabel(r"$\log(\lambda^{-1}\,/\,$s)")
+ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
+plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
+plt.savefig("5Na-95Si.pdf")
 plt.show()
 
 # %%
@@ -143,5 +149,5 @@ residuals.std()
 # %%
 # Saving the solution
 # '''''''''''''''''''
-f_sol.save("T2_inverse.csdf")  # save the solution
-residuals.save("T2_residue.csdf")  # save the residuals
+f_sol.save("5Na-95Si-T2_inverse.csdf")  # save the solution
+residuals.save("5Na-95Si-T2_residue.csdf")  # save the residuals

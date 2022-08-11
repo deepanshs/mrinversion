@@ -93,9 +93,9 @@ math_number_all = True
 
 # sphinx gallery config
 sphinx_gallery_conf = {
-    "examples_dirs": "../examples",  # path to your example scripts
+    "examples_dirs": ["../examples"],  # path to example scripts
     "remove_config_comments": True,
-    "gallery_dirs": "galley_examples",  # path to where to save gallery generated output
+    "gallery_dirs": ["galley_examples"],  # path to gallery generated output
     "within_subsection_order": FileNameSortKey,
     "subsection_order": ExplicitOrder(
         [

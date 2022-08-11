@@ -1,11 +1,11 @@
 """
-0.05 K2O • 0.95 SiO2 MAS-ETA
+0.10 Cs2O • 0.90 SiO2 MAS-ETA
 =============================
 """
 
 # %%
 # The following example is an application of the statistical learning method in
-# determining the distribution of the T2 relaxation constants in glasses.
+# determining the distribution of the Si-29 echo train decay constants in glasses.
 #
 # Import all relevant packages.
 import csdmpy as cp
@@ -15,10 +15,12 @@ import numpy as np
 from mrinversion.kernel import relaxation
 from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 
+plt.rcParams["pdf.fonttype"] = 42  # For using plots in Illustrator
+
 
 def plot2D(csdm_object, **kwargs):
     plt.figure(figsize=(4, 3))
-    csdm_object.plot(**kwargs)
+    csdm_object.plot(cmap="gist_ncar_r", **kwargs)
     plt.tight_layout()
     plt.show()
 
@@ -28,21 +30,18 @@ def plot2D(csdm_object, **kwargs):
 # %%
 # Dataset setup
 # -------------
-#
 # Import the dataset
 # ''''''''''''''''''
-#
 # Load the dataset as a CSDM data-object.
 
 # The 2D MAS dataset in csdm format
-
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_5%25K2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_10%25Cs2O_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
 data_object = data_object.real
-sigma = 1085.251  # data standard deviation
+sigma = 1270.825  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -123,14 +122,20 @@ plt.show()
 f_sol = s_lasso.f
 
 levels = np.arange(15) / 15 + 0.1
-plt.figure(figsize=(4, 3))
+plt.figure(figsize=(3.85, 2.75))  # set the figure size
 ax = plt.subplot(projection="csdm")
-ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
+cb = ax.contourf(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
 ax.set_ylim(-70, -130)
-ax.set_xlim(-3, 2.5)
+ax.set_xlim(-3, 2)
+plt.title("10Cs:90Si")
+ax.set_xlabel(r"$\log(\lambda^{-1}\,/\,$s)")
+ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
+plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
+plt.savefig("10Cs-90Si.pdf")
 plt.show()
+
 
 # %%
 # The fit residuals
@@ -145,5 +150,5 @@ residuals.std()
 # %%
 # Saving the solution
 # '''''''''''''''''''
-f_sol.save("T2_inverse.csdf")  # save the solution
-residuals.save("T2_residue.csdf")  # save the residuals
+f_sol.save("10Cs-90Si-T2_inverse.csdf")  # save the solution
+residuals.save("10Cs-90Si-T2_residue.csdf")  # save the residuals

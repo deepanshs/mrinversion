@@ -1,11 +1,11 @@
 """
-0.10 Li2O • 0.90 SiO2 MAS-ETA
+0.05 Cs2O • 0.95 SiO2 MAS-ETA
 =============================
 """
 
 # %%
 # The following example is an application of the statistical learning method in
-# determining the distribution of the T2 relaxation constants in glasses.
+# determining the distribution of the Si-29 echo train decay constants in glasses.
 #
 # Import all relevant packages.
 import csdmpy as cp
@@ -15,10 +15,12 @@ import numpy as np
 from mrinversion.kernel import relaxation
 from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 
+plt.rcParams["pdf.fonttype"] = 42  # For using plots in Illustrator
+
 
 def plot2D(csdm_object, **kwargs):
     plt.figure(figsize=(4, 3))
-    csdm_object.plot(**kwargs)
+    csdm_object.plot(cmap="gist_ncar_r", **kwargs)
     plt.tight_layout()
     plt.show()
 
@@ -33,14 +35,13 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset as a CSDM data-object.
 
 # The 2D MAS dataset in csdm format
-
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_10%25Li2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_5%25Cs2O_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
 data_object = data_object.real
-sigma = 1109.108  # data standard deviation
+sigma = 1407.443  # data standard deviation
 
 # Convert the MAS dimension from Hz to ppm.
 data_object.dimensions[0].to("ppm", "nmr_frequency_ratio")
@@ -50,7 +51,7 @@ plot2D(data_object)
 # Prepping the data for inversion
 # '''''''''''''''''''''''''''''''
 data_object = data_object.T
-data_object_truncated = data_object[:, 1240:-1240]
+data_object_truncated = data_object[:, 1250:-1250]
 plot2D(data_object_truncated)
 
 # %%
@@ -67,7 +68,11 @@ kernel_dimension = data_object_truncated.dimensions[0]
 relaxT2 = relaxation.T2(
     kernel_dimension=kernel_dimension,
     inverse_dimension=dict(
-        count=32, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
+        count=32,
+        minimum="1e-3 s",
+        maximum="1e4 s",
+        scale="log",
+        label=r"log ($\lambda^{-1}$ / s)",
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
@@ -121,13 +126,18 @@ plt.show()
 f_sol = s_lasso.f
 
 levels = np.arange(15) / 15 + 0.1
-plt.figure(figsize=(4, 3))
+plt.figure(figsize=(3.85, 2.75))  # set the figure size
 ax = plt.subplot(projection="csdm")
-ax.contour(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
+cb = ax.contourf(f_sol / f_sol.max(), levels=levels, cmap="jet_r")
 ax.set_ylim(-70, -130)
-ax.set_xlim(-3, 2.5)
+ax.set_xlim(-3, 2)
+plt.title("5Cs:95Si")
+ax.set_xlabel(r"$\log(\lambda^{-1}\,/\,$s)")
+ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
+plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
+plt.savefig("5Cs-95Si.pdf")
 plt.show()
 
 # %%
@@ -143,5 +153,5 @@ residuals.std()
 # %%
 # Saving the solution
 # '''''''''''''''''''
-f_sol.save("T2_inverse.csdf")  # save the solution
-residuals.save("T2_residue.csdf")  # save the residuals
+f_sol.save("5Cs-95Si-T2_inverse.csdf")  # save the solution
+residuals.save("5Cs-95Si-T2-residue.csdf")  # save the residuals
