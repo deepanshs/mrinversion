@@ -14,8 +14,10 @@ import numpy as np
 
 from mrinversion.kernel import relaxation
 from mrinversion.linear_model import LassoFistaCV, TSVDCompression
+from csdmpy import statistics as stats
 
 plt.rcParams["pdf.fonttype"] = 42  # For using plots in Illustrator
+plt.rc("font", size=9)
 
 
 def plot2D(csdm_object, **kwargs):
@@ -131,7 +133,7 @@ ax.set_xlim(-3, 2.5)
 plt.title("10Li:90Si")
 ax.set_xlabel(r"$\log(\lambda^{-1}\,/\,$s)")
 ax.set_ylabel("Frequency / ppm")
-plt.grid(linestyle="--", alpha=0.75)
+plt.grid(linestyle="--", alpha=0.75, linewidth=0.5)
 plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
 plt.savefig("10Li-90Si.pdf")
@@ -152,3 +154,75 @@ residuals.std()
 # '''''''''''''''''''
 f_sol.save("10Li:90Si-T2_inverse.csdf")  # save the solution
 residuals.save("10Li:90Si-T2_residue.csdf")  # save the residuals
+
+# %%
+# Analysis
+# --------
+
+# Normalize the distribution to 1.
+f_sol /= f_sol.max()
+
+# Get the Q4 and Q3 cross-sections.
+Q4_coordinate = -108e-6  # ppm
+Q3_coordinate = -91e-6  # ppm
+Q4_index = np.where(f_sol.dimensions[1].coordinates > Q4_coordinate)[0][0]
+Q3_index = np.where(f_sol.dimensions[1].coordinates > Q3_coordinate)[0][0]
+
+Q4_region = f_sol[:, Q4_index]
+Q3_region = f_sol[:, Q3_index]
+
+# %%
+# Plot of the Q4 and Q3 cross-sections
+fig, ax = plt.subplots(1, 2, figsize=(7, 2.75), subplot_kw={"projection": "csdm"})
+cb = ax[0].contourf(f_sol, levels=levels, cmap="jet_r")
+ax[0].arrow(1, Q4_coordinate * 1e6, -0.5, 0, color="blue")
+ax[0].arrow(1, Q3_coordinate * 1e6, -0.5, 0, color="orange")
+ax[0].set_ylim(-70, -130)
+ax[0].set_xlim(-3, 2.5)
+ax[0].set_xlabel(r"$\log(\lambda^{-1}\,/\,$s)")
+ax[0].set_ylabel("Frequency / ppm")
+ax[0].grid(linestyle="--", alpha=0.75, linewidth=0.5)
+
+ax[1].plot(Q4_region, label="Q4")
+ax[1].plot(Q3_region, label="Q3")
+ax[1].set_xlim(-3, 2.5)
+ax[1].set_xlabel(r"$\log(\lambda^{-1}\,/\,$s)")
+ax[1].grid(linestyle="--", alpha=0.75, linewidth=0.5)
+
+plt.colorbar(cb, ax=ax[0], ticks=np.arange(11) / 10)
+plt.tight_layout()
+plt.legend()
+plt.show()
+
+# %%
+# Mean and mode analysis
+# ''''''''''''''''''''''
+# The T2 distribution is sampled over a log-linear scale. The statistical mean of
+# the `Q4_region` and `Q3_region` in log10(T2). The mean T2 is 10**(log10(T2)),
+# in units of seconds.
+
+Q4_mean = 10 ** stats.mean(Q4_region)[0] * 1e3  # ms
+Q3_mean = 10 ** stats.mean(Q3_region)[0] * 1e3  # ms
+
+# %%
+# Mode the argument corresponding to the max distribution.
+
+# index corresponding to the max distribution.
+arg_index_Q4 = int(np.argmax(Q4_region))
+arg_index_Q3 = int(np.argmax(Q3_region))
+
+# log10(T2) coordinates corresponding to the max distribution.
+arg_coord_Q4 = Q4_region.dimensions[0].coordinates[arg_index_Q4]
+arg_coord_Q3 = Q3_region.dimensions[0].coordinates[arg_index_Q3]
+
+# T2 coordinates corresponding to the max distribution.
+Q4_mode = 10**arg_coord_Q4 * 1e3  # ms
+Q3_mode = 10**arg_coord_Q3 * 1e3  # ms
+
+# %%
+# Results
+# '''''''
+print(f"Q4 statistics:\n\tmean = {Q4_mean} ms,\n\tmode = {Q4_mode} ms\n")
+print(f"Q3 statistics:\n\tmean = {Q3_mean} ms,\n\tmode = {Q3_mode} ms\n")
+print(f"r_λ (mean) = {Q4_mean/Q3_mean}")
+print(f"r_λ (mode) = {Q4_mode/Q3_mode}")

@@ -170,7 +170,6 @@ use omp_lib
 
         if (k .ge. 5) then
             temp_val = 1.0 - ((sum(residue(k-5:k-1))/5.0) / residue(k))
-            temp_val = temp_val / (matrixrow * totalappend)
             if (abs(temp_val) <= tol) exit
         endif
 

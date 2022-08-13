@@ -1,3 +1,4 @@
+import csdmpy as cp
 import numpy as np
 
 __author__ = "Deepansh J. Srivastava"
@@ -27,6 +28,37 @@ def TSVD(K):
     U, S, VT = np.linalg.svd(K, full_matrices=False)
     r = find_optimum_singular_value(S)
     return U, S, VT, r
+
+
+def TSVD_denoise(dataset, r=-1):
+    dataset_ = dataset.y[0].components[0] if isinstance(dataset, cp.CSDM) else dataset
+
+    # original_shape = dataset_.shape
+    # size = dataset_.size
+    # half = int(np.sqrt(size)) + 1
+    # size_2 = half**2
+    # diff = size_2 - size
+    # new_dat_ = np.append(dataset_.ravel(), dataset_.ravel()[:diff])
+    # print(half)
+    # new_dat_ = new_dat_.reshape(half, half)
+
+    U, S, VT = np.linalg.svd(dataset_, full_matrices=False)
+    r_vec = S / S[0]
+    r = np.where(r_vec < 0.04)[0][0]
+    # r = find_optimum_singular_value(S)
+
+    print(r)
+    S[r:] = 0
+    new_dataset_ = (U * S) @ VT
+
+    # new_dataset_ = new_dataset_.ravel()[:size].reshape(original_shape)
+
+    if isinstance(dataset, cp.CSDM):
+        new = dataset.copy()
+        new.y[0].components[0] = new_dataset_
+    else:
+        new = new_dataset_
+    return new
 
 
 # standard deviation of noise remains unchanged after unitary transformation.
