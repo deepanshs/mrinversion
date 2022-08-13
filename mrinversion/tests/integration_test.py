@@ -155,4 +155,4 @@ def test_inversion():
     s_lasso.cv_plot()
 
     residuals = s_lasso.residuals(K=K, s=data_object_truncated)
-    np.testing.assert_almost_equal(residuals.std().value, 1538.48, decimal=1)
+    np.testing.assert_almost_equal(residuals.std().value, 1526.48, decimal=0)
