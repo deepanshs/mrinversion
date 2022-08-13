@@ -51,4 +51,4 @@ def test_fista():
 
     residuals = f_lasso_cv.residuals(K=K, s=signal)
     std = residuals.std()
-    np.testing.assert_almost_equal(std.value, sigma, decimal=3)
+    np.testing.assert_almost_equal(std.value, sigma, decimal=2)

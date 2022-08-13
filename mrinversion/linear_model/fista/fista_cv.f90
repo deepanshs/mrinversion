@@ -205,7 +205,6 @@ do fold = 1, nfold
 
             if (k .ge. 5) then
                 temp_val = 1.0 - ((sum(residue(k-5:k-1))/5.0) / residue(k))
-                temp_val = temp_val / ((endIndex+1) * totalappend)
                 if (abs(temp_val) <= tol) exit
             endif
 

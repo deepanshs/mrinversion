@@ -17,7 +17,7 @@ class LassoFista:
         self,
         lambda1=1e-3,
         max_iterations=50000,
-        tolerance=5e-6,
+        tolerance=5.2e-3,
         positive=True,
         inverse_dimension=None,
     ):
@@ -146,7 +146,7 @@ class LassoFistaCV:
         lambdas,
         folds=10,
         max_iterations=50000,
-        tolerance=5e-6,
+        tolerance=5.2e-3,
         positive=True,
         sigma=0.0,
         randomize=False,
@@ -204,7 +204,7 @@ class LassoFistaCV:
             m=m,
         )
         # subtract the variance.
-        # self.cv_map -= (self.sigma / self.scale) ** 2
+        self.cv_map -= (self.sigma / self.scale) ** 2
         self.cv_map = np.abs(self.cv_map)
 
         lambdas = np.log10(self.cv_lambdas)
