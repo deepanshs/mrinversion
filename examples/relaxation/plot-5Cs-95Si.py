@@ -38,7 +38,7 @@ def plot2D(csdm_object, **kwargs):
 
 # The 2D MAS dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_5%25Cs2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_5Cs_95Si_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
@@ -155,8 +155,8 @@ residuals.std()
 # %%
 # Saving the solution
 # '''''''''''''''''''
-f_sol.save("5Cs-95Si-T2_inverse.csdf")  # save the solution
-residuals.save("5Cs-95Si-T2-residue.csdf")  # save the residuals
+f_sol.save("5Cs-95Si_inverse.csdf")  # save the solution
+residuals.save("5Cs-95Si-residue.csdf")  # save the residuals
 
 # %%
 # Analysis
@@ -166,8 +166,8 @@ residuals.save("5Cs-95Si-T2-residue.csdf")  # save the residuals
 f_sol /= f_sol.max()
 
 # Get the Q4 and Q3 cross-sections.
-Q4_coordinate = -110e-6  # ppm
-Q3_coordinate = -100e-6  # ppm
+Q4_coordinate = -110.1e-6  # ppm
+Q3_coordinate = -99.4e-6  # ppm
 Q4_index = np.where(f_sol.dimensions[1].coordinates > Q4_coordinate)[0][0]
 Q3_index = np.where(f_sol.dimensions[1].coordinates > Q3_coordinate)[0][0]
 
