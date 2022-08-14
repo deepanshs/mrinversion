@@ -38,7 +38,7 @@ def plot2D(csdm_object, **kwargs):
 
 # The 2D MAS dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_5%25Na2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_5Na_95Si_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
@@ -70,7 +70,11 @@ kernel_dimension = data_object_truncated.dimensions[0]
 relaxT2 = relaxation.T2(
     kernel_dimension=kernel_dimension,
     inverse_dimension=dict(
-        count=32, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
+        count=32,
+        minimum="1e-3 s",
+        maximum="1e4 s",
+        scale="log",
+        label=r"log ($\lambda^{-1}$ / s)",
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
@@ -151,8 +155,8 @@ residuals.std()
 # %%
 # Saving the solution
 # '''''''''''''''''''
-f_sol.save("5Na-95Si-T2_inverse.csdf")  # save the solution
-residuals.save("5Na-95Si-T2_residue.csdf")  # save the residuals
+f_sol.save("5Na-95Si_inverse.csdf")  # save the solution
+residuals.save("5Na-95Si_residue.csdf")  # save the residuals
 
 # %%
 # Analysis
@@ -162,8 +166,8 @@ residuals.save("5Na-95Si-T2_residue.csdf")  # save the residuals
 f_sol /= f_sol.max()
 
 # Get the Q4 and Q3 cross-sections.
-Q4_coordinate = -110e-6  # ppm
-Q3_coordinate = -93e-6  # ppm
+Q4_coordinate = -110.7e-6  # ppm
+Q3_coordinate = -94.4e-6  # ppm
 Q4_index = np.where(f_sol.dimensions[1].coordinates > Q4_coordinate)[0][0]
 Q3_index = np.where(f_sol.dimensions[1].coordinates > Q3_coordinate)[0][0]
 
