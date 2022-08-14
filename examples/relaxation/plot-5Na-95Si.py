@@ -36,7 +36,7 @@ def plot2D(csdm_object, **kwargs):
 # ''''''''''''''''''
 # Load the dataset as a CSDM data-object.
 
-# The 2D MAS dataset in csdm format
+# The 2D SE-PIETA MAS dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
 filename = f"{domain}/MAS_SE_PIETA_5Na_95Si_FT.csdf"
 data_object = cp.load(filename)
@@ -139,7 +139,6 @@ ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
-plt.savefig("5Na-95Si.pdf")
 plt.show()
 
 # %%
@@ -195,6 +194,7 @@ ax[1].grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ax=ax[0], ticks=np.arange(11) / 10)
 plt.tight_layout()
 plt.legend()
+plt.savefig("5Na-95Si.pdf")
 plt.show()
 
 # %%

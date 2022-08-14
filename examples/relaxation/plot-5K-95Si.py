@@ -142,7 +142,6 @@ ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
-plt.savefig("5K-95Si.pdf")
 plt.show()
 
 # %%
@@ -198,6 +197,7 @@ ax[1].grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ax=ax[0], ticks=np.arange(11) / 10)
 plt.tight_layout()
 plt.legend()
+plt.savefig("5K-95Si.pdf")
 plt.show()
 
 # %%

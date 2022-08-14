@@ -38,7 +38,7 @@ def plot2D(csdm_object, **kwargs):
 #
 # Load the dataset as a CSDM data-object.
 
-# The 2D MAS dataset in csdm format
+# The 2D SE-PIETA-MAS dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
 filename = f"{domain}/MAS_SE_PIETA_5Li_95Si_FT.csdf"
 data_object = cp.load(filename)
@@ -69,7 +69,7 @@ data_object = data_object.T
 # %%
 # **Step-2: Optimization**
 #
-# Notice, that the signal from the 2D T2-MAS dataset occupies a small fraction of the
+# Notice, that the signal from the 2D SE-PIETA-MAS dataset occupies a small fraction of the
 # two-dimensional grid. Though you may choose to proceed with the inversion
 # directly onto this dataset, it is not computationally optimum. For optimum
 # performance, trim the dataset to the region of relevant signals. Use the appropriate
@@ -182,7 +182,6 @@ ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
-plt.savefig("5Li-95Si.pdf")
 plt.show()
 
 # %%
@@ -243,6 +242,7 @@ ax[1].grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ax=ax[0], ticks=np.arange(11) / 10)
 plt.tight_layout()
 plt.legend()
+plt.savefig("5Li-95Si.pdf")
 plt.show()
 
 # %%
