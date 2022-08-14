@@ -162,10 +162,10 @@ residuals.save("7Cs-2Al-91Si-T2-residue.csdf")  # save the residuals
 f_sol /= f_sol.max()
 
 # Get the Q4 and Q3 cross-sections.
-Q4_coordinate = -108e-6  # ppm
-Q3_coordinate = -97e-6  # ppm
-Q4_index = np.where(f_sol.dimensions[1].coordinates > Q4_coordinate)[0][0]
-Q3_index = np.where(f_sol.dimensions[1].coordinates > Q3_coordinate)[0][0]
+Q4_coordinate = -108.2e-6  # ppm
+Q3_coordinate = -98.4e-6  # ppm
+Q4_index = np.where(f_sol.dimensions[1].coordinates >= Q4_coordinate)[0][0]
+Q3_index = np.where(f_sol.dimensions[1].coordinates >= Q3_coordinate)[0][0]
 
 Q4_region = f_sol[:, Q4_index]
 Q3_region = f_sol[:, Q3_index]
