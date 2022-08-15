@@ -41,7 +41,7 @@ def plot2D(csdm_object, **kwargs):
 # The 2D MAS dataset in csdm format
 
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_5%25K2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_5K_95Si_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
@@ -73,7 +73,11 @@ kernel_dimension = data_object_truncated.dimensions[0]
 relaxT2 = relaxation.T2(
     kernel_dimension=kernel_dimension,
     inverse_dimension=dict(
-        count=32, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
+        count=32,
+        minimum="1e-3 s",
+        maximum="1e4 s",
+        scale="log",
+        label=r"log ($\lambda^{-1}$ / s)",
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
@@ -138,7 +142,6 @@ ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
-plt.savefig("5K-95Si.pdf")
 plt.show()
 
 # %%
@@ -154,8 +157,8 @@ residuals.std()
 # %%
 # Saving the solution
 # '''''''''''''''''''
-f_sol.save("5K-95Si-T2_inverse.csdf")  # save the solution
-residuals.save("5K-95Si-T2-residue.csdf")  # save the residuals
+f_sol.save("5K-95Si_inverse.csdf")  # save the solution
+residuals.save("5K-95Si-residue.csdf")  # save the residuals
 
 # %%
 # Analysis
@@ -194,6 +197,7 @@ ax[1].grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ax=ax[0], ticks=np.arange(11) / 10)
 plt.tight_layout()
 plt.legend()
+plt.savefig("5K-95Si.pdf")
 plt.show()
 
 # %%

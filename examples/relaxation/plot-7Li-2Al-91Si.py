@@ -19,7 +19,6 @@ from csdmpy import statistics as stats
 plt.rcParams["pdf.fonttype"] = 42  # For using plots in Illustrator
 plt.rc("font", size=9)
 
-
 def plot2D(csdm_object, **kwargs):
     plt.figure(figsize=(4, 3))
     csdm_object.plot(cmap="gist_ncar_r", **kwargs)
@@ -36,9 +35,9 @@ def plot2D(csdm_object, **kwargs):
 # ''''''''''''''''''
 # Load the dataset as a CSDM data-object.
 
-# The 2D MAS dataset in csdm format
+# The 2D SE-PIETA MAS dataset in csdm format
 domain = "https://www.ssnmr.org/sites/default/files/mrsimulator"
-filename = f"{domain}/MAS_SE_PIETA_7%25Li2O_FT.csdf"
+filename = f"{domain}/MAS_SE_PIETA_7Li_2Al_91Si_FT.csdf"
 data_object = cp.load(filename)
 
 # Inversion only requires the real part of the complex dataset.
@@ -70,7 +69,11 @@ kernel_dimension = data_object_truncated.dimensions[0]
 relaxT2 = relaxation.T2(
     kernel_dimension=kernel_dimension,
     inverse_dimension=dict(
-        count=32, minimum="1e-3 s", maximum="1e4 s", scale="log", label="log (T2 / s)"
+        count=32,
+        minimum="1e-3 s",
+        maximum="1e4 s",
+        scale="log",
+        label=r"log ($\lambda^{-1}$ / s)",
     ),
 )
 inverse_dimension = relaxT2.inverse_dimension
@@ -136,7 +139,6 @@ ax.set_ylabel("Frequency / ppm")
 plt.grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ticks=np.arange(11) / 10)
 plt.tight_layout()
-plt.savefig("7Li-2Al-91Si.pdf")
 plt.show()
 
 # %%
@@ -152,8 +154,8 @@ residuals.std()
 # %%
 # Saving the solution
 # '''''''''''''''''''
-f_sol.save("7Li-2Al-91Si-T2_inverse.csdf")  # save the solution
-residuals.save("7Li-2Al-91Si-T2-residue.csdf")  # save the residuals
+f_sol.save("7Li-2Al-91Si_inverse.csdf")  # save the solution
+residuals.save("7Li-2Al-91Si-residue.csdf")  # save the residuals
 
 # %%
 # Analysis
@@ -192,6 +194,7 @@ ax[1].grid(linestyle="--", alpha=0.75)
 plt.colorbar(cb, ax=ax[0], ticks=np.arange(11) / 10)
 plt.tight_layout()
 plt.legend()
+plt.savefig("7Li-2Al-91Si.pdf")
 plt.show()
 
 # %%
