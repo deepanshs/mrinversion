@@ -34,16 +34,8 @@ Welcome to Mrinversion documentation!
             :alt: License
 
       * - Metrics
-        - .. image:: https://img.shields.io/lgtm/grade/python/g/DeepanshS/mrinversion.svg?logo=lgtm
-            :target: https://lgtm.com/projects/g/DeepanshS/mrinversion/context:python
-            :alt: Language grade: Python
-
           .. image:: https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg
             :target: https://codecov.io/gh/DeepanshS/mrinversion
-
-          .. image:: https://img.shields.io/lgtm/alerts/g/DeepanshS/mrinversion.svg?logo=lgtm
-            :target: https://lgtm.com/projects/g/DeepanshS/mrinversion/alerts/
-            :alt: Total alerts
 
       * - GitHub
         - .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
@@ -59,8 +51,8 @@ Welcome to Mrinversion documentation!
 **About**
 
 The ``mrinversion`` python package is based on the statistical learning technique for
-determining the distribution of the magnetic resonance (NMR) tensor parameters
-from two-dimensional NMR spectra correlating the isotropic to anisotropic frequencies.
+determining the underlying distribution of the magnetic resonance (NMR) parameters.
+
 The library utilizes the `mrsimulator <https://mrsimulator.readthedocs.io/en/stable/>`_
 package for generating solid-state NMR spectra and
 `scikit-learn <https://scikit-learn.org/stable/>`_ package for statistical learning.
@@ -69,25 +61,29 @@ package for generating solid-state NMR spectra and
 
 **Features**
 
-The ``mrinversion`` package includes the **inversion of a two-dimensional
-solid-state NMR spectrum of dilute spin-systems to a three-dimensional distribution of
-tensor parameters**. At present, we support the inversion of
+The ``mrinversion`` package includes
 
-- **Magic angle turning (MAT), Phase adjusted spinning sidebands (PASS)**, and similar
-  spectra correlating the isotropic chemical shift resonances to pure anisotropic
-  spinning sideband resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)`,
-  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta_\sigma`
-  and :math:`\eta_\sigma`, are the shielding anisotropy and asymmetry parameters,
-  respectively, defined using the Haeberlen convention.
+- **Spectral Inversion**: Two-dimensional solid-state NMR spectrum of dilute spin-systems
+  correlating the isotropic to anisotropic frequencies to a three-dimensional distribution
+  of tensor parameters. Presently, we support the inversion of
 
-- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
-  resonances to pure anisotropic resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)`,
-  where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta_\sigma`
-  and :math:`\eta_\sigma`, are the shielding anisotropy and asymmetry parameters,
-  respectively, defined using the Haeberlen convention.
+  - **Magic angle turning (MAT), Phase adjusted spinning sidebands (PASS)**, and similar
+    spectra correlating the isotropic chemical shift resonances to pure anisotropic
+    spinning sideband resonances into a three-dimensional distribution of
+    nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)`,
+    where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta_\sigma`
+    and :math:`\eta_\sigma`, are the shielding anisotropy and asymmetry parameters,
+    respectively, defined using the Haeberlen convention.
 
+  - **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
+    resonances to pure anisotropic resonances into a three-dimensional distribution of
+    nuclear shielding tensor parameters, :math:`\rho(\delta_\text{iso}, \zeta_\sigma, \eta_\sigma)`,
+    where :math:`\delta_\text{iso}` is the isotropic chemical shift, and :math:`\zeta_\sigma`
+    and :math:`\eta_\sigma`, are the shielding anisotropy and asymmetry parameters,
+    respectively, defined using the Haeberlen convention.
+
+- **Relaxometry Inversion**: Inversion of NMR relaxometry measurements to the distribution of
+  relaxation parameters (T1, T2).
 
 .. only:: html
 
@@ -109,14 +105,23 @@ Getting Started
 
 .. toctree::
     :maxdepth: 2
-    :caption: Getting Started
+    :caption: Installation
 
-    installation
-    requirement
+    installation/install
+    installation/requirement
+
+
+User Documentation
+------------------
+
+.. toctree::
+    :maxdepth: 2
+    :caption: User Documentation
+
     introduction
     before_getting_started
     getting_started
-    referenceAPI
+
 
 Examples
 --------
@@ -134,6 +139,7 @@ Project details
     :maxdepth: 1
     :caption: Project details
 
+    referenceAPI
     changelog
     credits/license
     credits/acknowledgment

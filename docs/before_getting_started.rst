@@ -12,9 +12,6 @@
 Before getting started
 ======================
 
-Prepping the 2D dataset for inversion
--------------------------------------
-
 The following is a list of some requirements and recommendations to help prepare
 the 2D dataset for inversion.
 
@@ -90,8 +87,3 @@ Magic angle flipping dataset specific recommendations
 
       **Recommendation**: If zero-filled, try to keep the total number of points along
       the anisotropic dimension in the range of 120 - 150 points.
-
-  * -
-    - **Sinc wiggles artifacts**
-
-      Kernel correction for spectrum with sinc wiggle artifacts is coming soon.

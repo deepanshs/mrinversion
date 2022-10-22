@@ -5,12 +5,10 @@
 | Deployment   | [![PyPI version](https://img.shields.io/pypi/v/mrinversion.svg?style=flat&logo=pypi&logoColor=white)](https://pypi.python.org/pypi/mrinversion) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mrinversion)                                                                                                                                                                                                                                              |
 | Build Status | [![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI?logo=GitHub>)](https://github.com/DeepanshS/mrinversion/actions) [![Read the Docs](https://img.shields.io/readthedocs/mrinversion)](https://mrinversion.readthedocs.io/en/latest/)                                                                                                                                                                             |
 | License      | [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)                                                                                                                                                                                                                                                                                                                                                 |
-| Metrics      | [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/DeepanshS/mrinversion.svg?logo=lgtm)](https://lgtm.com/projects/g/DeepanshS/mrinversion/context:python) [![codecov](https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg)](https://codecov.io/gh/DeepanshS/mrinversion) [![Total alerts](https://img.shields.io/lgtm/alerts/g/DeepanshS/mrinversion.svg?logo=lgtm)](https://lgtm.com/projects/g/DeepanshS/mrinversion/alerts/) |
+| Metrics      | [![codecov](https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg)](https://codecov.io/gh/DeepanshS/mrinversion) |
 
-The `mrinversion` python package is based on the statistical learning technique for
-determining the distribution of the magnetic resonance (NMR) tensor parameters
-from two-dimensional NMR spectra correlating the isotropic to anisotropic
-frequencies.
+The `mrinversion` python package is based on the statistical learning technique for determining the underlying distribution of the magnetic resonance (NMR) parameters.
+
 The library utilizes the [mrsimulator](https://mrsimulator.readthedocs.io/en/latest/)
 package for generating solid-state NMR spectra and
 [scikit-learn](https://scikit-learn.org/latest/) package for statistical learning.
@@ -19,20 +17,25 @@ package for generating solid-state NMR spectra and
 
 ## Features
 
-The `mrinversion` package includes the **inversion of a two-dimensional
-solid-state NMR spectrum of dilute spin-systems to a three-dimensional distribution of
-tensor parameters**. At present, we support the inversion of
+The `mrinversion` package includes
 
-- **Magic angle turning (MAT), Phase adjusted spinning sidebands (PASS)**, and similar
-  spectra correlating the isotropic chemical shift resonances to pure anisotropic
-  spinning sideband resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters---isotropic chemical shift, shielding
-  anisotropy and asymmetry parameters---defined using the Haeberlen convention.
+- **Spectral Inversion**: Two-dimensional solid-state NMR spectrum of dilute spin-systems correlating
+  the isotropic to anisotropic frequencies to a three-dimensional distribution of NMR tensor parameters.
+  Presently, we support the inversion of
 
-- **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
-  resonances to pure anisotropic resonances into a three-dimensional distribution of
-  nuclear shielding tensor parameters---isotropic chemical shift, shielding
-  anisotropy and asymmetry parameters---defined using the Haeberlen convention.
+  - **Magic angle turning (MAT), Phase adjusted spinning sidebands (PASS)**, and similar
+    spectra correlating the isotropic chemical shift resonances to pure anisotropic
+    spinning sideband resonances into a three-dimensional distribution of
+    nuclear shielding tensor parameters---isotropic chemical shift, shielding
+    anisotropy and asymmetry parameters---defined using the Haeberlen convention.
+
+  - **Magic angle flipping (MAF)** spectra correlating the isotropic chemical shift
+    resonances to pure anisotropic resonances into a three-dimensional distribution of
+    nuclear shielding tensor parameters---isotropic chemical shift, shielding
+    anisotropy and asymmetry parameters---defined using the Haeberlen convention.
+
+- **Relaxometry Inversion**: Inversion of NMR relaxometry measurements to the distribution of
+  relaxation parameters (T1, T2).
 
 For more information, refer to the
 [documentation](https://mrinversion.readthedocs.io/en/latest/).
