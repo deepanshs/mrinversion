@@ -121,6 +121,7 @@ User Documentation
     introduction
     before_getting_started
     getting_started_lineshape
+    getting_started_relaxation
 
 Examples
 --------
