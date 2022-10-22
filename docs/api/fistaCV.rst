@@ -1,11 +1,9 @@
-.. _linear_model_api:
-
-Smooth Lasso
-============
+Lasso Fista cross-validation
+============================
 
 .. currentmodule:: mrinversion.linear_model
 
-.. autoclass:: SmoothLasso
+.. autoclass:: LassoFistaCV
    :show-inheritance:
 
    .. rubric:: Methods Documentation
@@ -13,4 +11,4 @@ Smooth Lasso
    .. automethod:: fit
    .. automethod:: predict
    .. automethod:: residuals
-   .. automethod:: score
+   .. automethod:: cv_plot

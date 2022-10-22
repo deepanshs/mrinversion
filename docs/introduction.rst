@@ -4,17 +4,23 @@ Introduction
 Objective
 ---------
 
-In ``mrinversion``, we solve for the distribution of the second-rank traceless
-symmetric tensor principal components, through an inversion of a pure anisotropic
-NMR spectrum.
+The ``mrinversion`` package solves the linear inverse problems involving Fredholm integrals of
+the first kind, which are often encounted in magnetic resonance. The package currently
+supports inversion of
+
+- pure shielding anisotropic NMR lineshape into a distribution of the second-rank traceless
+  symmetric shielding tensor principal components, and
+- NMR relaxometry measurement into a distribution of relaxation parameters.
 
 .. whose frequency
 .. contributions are assumed to arise predominantly from the second-rank traceless
 .. symmetric tensors.
 
-In the case of the shielding tensors, the pure anisotropic frequency spectra corresponds
-the cross-sections of the 2D isotropic *v.s.* anisotropic correlation spectrum, such as
-the 2D One Pulse (TOP) MAS, phase adjusted spinning sidebands (PASS), magic-angle turning
+**Pure shielding anisotropic lineshape inversion**
+
+In the case NMR lineshape inversion, the pure anisotropic frequency spectra corresponds to the
+cross-sections of the 2D isotropic *v.s.* anisotropic correlation spectrum, such as the
+2D One Pulse (TOP) MAS, phase adjusted spinning sidebands (PASS), magic-angle turning
 (MAT), extended chemical shift modulation (XCS), magic-angle hopping (MAH), magic-angle
 flipping (MAF), and Variable Angle Correlation Spectroscopy (VACSY). A key feature of all
 these 2D isotropic/anisotropic correlation spectra—--either as acquired or after a shear
@@ -22,7 +28,7 @@ transformation—--is that the anisotropic cross-section can be modeled as a lin
 combination of subspectra,
 
 .. math::
-    :label: eq_0
+    :label: eq_0a
 
     s(\nu| \delta_\text{iso}) = \int_{\bf R} \mathcal{K}(\nu, {\bf R}) f({\bf R} | \delta_\text{iso}) d{\bf R},
 
@@ -30,10 +36,26 @@ where :math:`s(\nu| \delta_\text{iso})` is the observed anisotropic cross-sectio
 given isotropic shift, :math:`\delta_\text{iso}`, :math:`\mathcal{K}(\nu, {\bf R})` represents
 a simulated subspectrum of a nuclear spin system with a given set of parameters, :math:`{\bf R}`,
 and :math:`f({\bf R} | \delta_\text{iso})` is the probability of the respective set of
-parameters. In Eq. :eq:`eq_0`, :math:`{\bf R}` represents the anisotropic and asymmetry
+parameters. In Eq. :eq:`eq_0a`, :math:`{\bf R}` represents the anisotropic and asymmetry
 parameters of the shielding tensor.
 
-Note, Eq. :eq:`eq_0` is a Fredholm integral of the first kind.
+**Relaxometry inversion**
+
+For inversion of relaxometry measurements, the signal growth or decay from spin relaxation is
+modeled as,
+
+.. math::
+    :label: eq_0b
+
+    s(t| \nu) = \int_{\bf R} \mathcal{K}(t, {\bf R}) f({\bf R} | \nu) d{\bf R},
+
+where :math:`s(t, \nu)` is the observed signal relaxation at a given frequency cross-section,
+:math:`\nu`, :math:`\mathcal{K}(t, {\bf R})` is a simulated kernel of spin relaxation
+with a given set of parameters, :math:`{\bf R}`, and :math:`f({\bf R} | \nu)` is the probability
+of the respective set of parameters. In Eq. :eq:`eq_0b`, :math:`{\bf R}` represents the relaxation
+parameters---:math:`T_1`, :math:`T_2`.
+
+Note, both Eq. :eq:`eq_0a`, and Eq. :eq:`eq_0b` are Fredholm integrals of the first kind.
 
 ..  and the inverse of the forward
 .. computation, i.e., calculating :math:`f({\bf R})` from :math:`s(\nu| \delta_\text{iso})`, is often
@@ -107,12 +129,28 @@ spectrum inversion, we choose the smooth-LASSO regularization.
 
 .. For example, in a more familiar linear-inverse problem, the inverse Fourier transform, the two dimensions are the frequency and time dimensions, where the frequency dimension undergoes the inverse transformation, and the time dimension is where the inversion method transforms the data.
 
+.. _l1_intro:
+
+l1 regularization
+"""""""""""""""""
+
+The l1 regularized linear model minimizes the objective function,
+
+.. math::
+    :label: l1
+
+    \| {\bf K \cdot f - s} \|^2_2 + \lambda  \| {\bf f} \|_1 ,
+
+where :math:`\lambda` is the regularization hyperparameter controlling the sparsity
+of the solution :math:`{\bf f}`.
+
+
 .. _smooth_lasso_intro:
 
 Smooth-LASSO regularization
 """""""""""""""""""""""""""
 
-Our prior assumption for the distribution of the tensorial parameters is that it should
+Our prior assumption for the distribution of the tensor parameters is that it should
 be smooth and continuous for disordered and sparse and discrete for crystalline
 materials. Therefore, we employ the smooth-lasso method, which is a linear model
 that is trained with the combined l1 and l2 priors as the regularizer. The method

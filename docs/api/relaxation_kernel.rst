@@ -1,5 +1,3 @@
-
-
 .. _shielding_kernel_api:
 
 Relaxation Kernel
