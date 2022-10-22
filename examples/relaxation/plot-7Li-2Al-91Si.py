@@ -19,6 +19,7 @@ from csdmpy import statistics as stats
 plt.rcParams["pdf.fonttype"] = 42  # For using plots in Illustrator
 plt.rc("font", size=9)
 
+
 def plot2D(csdm_object, **kwargs):
     plt.figure(figsize=(4, 3))
     csdm_object.plot(cmap="gist_ncar_r", **kwargs)
