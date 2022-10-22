@@ -1,11 +1,9 @@
-.. _linear_model_api:
-
-Smooth Lasso
-============
+Lasso Fista
+===========
 
 .. currentmodule:: mrinversion.linear_model
 
-.. autoclass:: SmoothLasso
+.. autoclass:: LassoFista
    :show-inheritance:
 
    .. rubric:: Methods Documentation
@@ -13,4 +11,3 @@ Smooth Lasso
    .. automethod:: fit
    .. automethod:: predict
    .. automethod:: residuals
-   .. automethod:: score
