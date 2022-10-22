@@ -34,7 +34,7 @@ Welcome to Mrinversion documentation!
             :alt: License
 
       * - Metrics
-          .. image:: https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg
+        - .. image:: https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg
             :target: https://codecov.io/gh/DeepanshS/mrinversion
 
       * - GitHub
