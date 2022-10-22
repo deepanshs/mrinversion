@@ -1,7 +1,7 @@
 
-====================================
-Getting started with ``mrinversion``
-====================================
+=======================================
+Getting started with spectral inversion
+=======================================
 
 We have put together a set of guidelines for using the *mrinversion* package.
 We encourage our users to follow these guidelines for consistency.
