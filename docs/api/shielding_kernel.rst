@@ -1,5 +1,3 @@
-
-
 .. _shielding_kernel_api:
 
 Pure anisotropic Nuclear Shielding Kernel
