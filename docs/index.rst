@@ -20,8 +20,8 @@ Welcome to Mrinversion documentation!
             :alt: PyPI - Python Version
 
       * - Build Status
-        - .. image:: https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI?logo=GitHub
-            :target: https://github.com/DeepanshS/mrinversion/actions
+        - .. image:: https://img.shields.io/github/actions/workflow/status/deepanshs/mrinversion/continuous-integration-pip.yml?logo=GitHub
+            :target: https://github.com/DeepanshS/mrinversion/actions/workflow/continuous-integration-pip.yml
             :alt: GitHub Workflow Status
 
           .. image:: https://readthedocs.org/projects/mrinversion/badge/?version=latest
@@ -34,19 +34,10 @@ Welcome to Mrinversion documentation!
             :alt: License
 
       * - Metrics
-        - .. image:: https://img.shields.io/lgtm/grade/python/g/DeepanshS/mrinversion.svg?logo=lgtm
-            :target: https://lgtm.com/projects/g/DeepanshS/mrinversion/context:python
-            :alt: Language grade: Python
-
-          .. image:: https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg
+        - .. image:: https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg
             :target: https://codecov.io/gh/DeepanshS/mrinversion
 
-          .. image:: https://img.shields.io/lgtm/alerts/g/DeepanshS/mrinversion.svg?logo=lgtm
-            :target: https://lgtm.com/projects/g/DeepanshS/mrinversion/alerts/
-            :alt: Total alerts
-
-      * - GitHub
-        - .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
+          .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
             :target: https://github.com/DeepanshS/mrinversion/issues
             :alt: GitHub issues
 
