@@ -69,8 +69,8 @@ data_object = data_object.T
 # %%
 # **Step-2: Optimization**
 #
-# Notice, that the signal from the 2D SE-PIETA-MAS dataset occupies a small fraction of the
-# two-dimensional grid. Though you may choose to proceed with the inversion
+# Notice, that the signal from the 2D SE-PIETA-MAS dataset occupies a small fraction of
+# the two-dimensional grid. Though you may choose to proceed with the inversion
 # directly onto this dataset, it is not computationally optimum. For optimum
 # performance, trim the dataset to the region of relevant signals. Use the appropriate
 # array indexing/slicing to select the signal region.
