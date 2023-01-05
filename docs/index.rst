@@ -20,8 +20,8 @@ Welcome to Mrinversion documentation!
             :alt: PyPI - Python Version
 
       * - Build Status
-        - .. image:: https://img.shields.io/github/workflow/status/deepanshs/mrinversion/CI?logo=GitHub
-            :target: https://github.com/DeepanshS/mrinversion/actions
+        - .. image:: https://img.shields.io/github/actions/workflow/status/deepanshs/mrinversion/continuous-integration-pip.yml?logo=GitHub
+            :target: https://github.com/DeepanshS/mrinversion/actions/workflow/continuous-integration-pip.yml
             :alt: GitHub Workflow Status
 
           .. image:: https://readthedocs.org/projects/mrinversion/badge/?version=latest
@@ -37,8 +37,7 @@ Welcome to Mrinversion documentation!
         - .. image:: https://codecov.io/gh/DeepanshS/mrinversion/branch/master/graph/badge.svg
             :target: https://codecov.io/gh/DeepanshS/mrinversion
 
-      * - GitHub
-        - .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
+          .. image:: https://img.shields.io/github/issues-raw/deepanshs/mrinversion
             :target: https://github.com/DeepanshS/mrinversion/issues
             :alt: GitHub issues
 
