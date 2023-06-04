@@ -5,6 +5,7 @@ from os.path import join
 from setuptools import find_packages
 from numpy.distutils.core import setup
 from numpy.distutils.core import Extension
+import numpy as np
 
 with open("mrinversion/__init__.py") as f:
     for line in f.readlines():
@@ -28,6 +29,7 @@ extras = {"matplotlib": ["matplotlib>=3.0"]}
 ext1 = Extension(
     name="mrinversion.linear_model.fista.fista",
     sources=["mrinversion/linear_model/fista/fista.f90"],
+    include_dirs=[np.get_include()],
     # f2py_options=['only:', 'subroutine_name', ':'],
     extra_f90_compile_args=["-O3"],  # '-fopenmp'],
     libraries=["gomp", "blas"],
@@ -38,6 +40,7 @@ ext1 = Extension(
 ext2 = Extension(
     name="mrinversion.linear_model.fista.fista_cv",
     sources=["mrinversion/linear_model/fista/fista_cv.f90"],
+    include_dirs=[np.get_include()],
     # f2py_options=['only:', 'subroutine_name', ':'],
     extra_f90_compile_args=["-O3"],  # '-fopenmp'],
     libraries=["gomp", "blas"],
