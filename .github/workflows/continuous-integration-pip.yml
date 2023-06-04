@@ -51,11 +51,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: MacOS gcc install
+      - name: MacOS gfortran install
         if: startsWith(matrix.os, 'mac')
         run: |
-          brew install gcc
-          brew info gcc
+          brew install gfortran
 
       - name: Install dependencies
         run: |
