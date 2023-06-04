@@ -84,9 +84,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: MacOS gfortran install
+      - name: MacOS gcc install
         run: |
-          brew install gfortran
+          brew reinstall gcc
 
       - name: Install dependencies
         run: |
