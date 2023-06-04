@@ -1,5 +1,5 @@
 numpy>=1.20
-mrsimulator>=0.6
+mrsimulator>=0.7
 scikit-learn>=0.24.2
 matplotlib>=3.3.4
 csdmpy>=0.5

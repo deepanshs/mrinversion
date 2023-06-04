@@ -3,7 +3,7 @@ import numpy as np
 from mrsimulator import Simulator
 from mrsimulator import Site
 from mrsimulator import SpinSystem
-from mrsimulator.methods import BlochDecaySpectrum
+from mrsimulator.method.lib import BlochDecaySpectrum
 
 from mrinversion.kernel.nmr import MAF
 from mrinversion.kernel.nmr import ShieldingPALineshape

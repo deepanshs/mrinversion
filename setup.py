@@ -19,7 +19,7 @@ install_requires = [
     "numpy>=1.17",
     "setuptools>=27.3",
     "csdmpy>=0.5",
-    "mrsimulator>=0.6",
+    "mrsimulator>=0.7",
     "scikit-learn>=0.22",
 ]
 
