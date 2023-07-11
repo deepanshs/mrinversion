@@ -20,6 +20,7 @@ install_requires = [
     "csdmpy>=0.5",
     "mrsimulator>=0.6",
     "scikit-learn>=0.22",
+    "pydantic<=1.10",
 ]
 
 setup_requires = ["setuptools>=27.3", "numpy"]

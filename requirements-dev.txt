@@ -4,6 +4,7 @@ scikit-learn>=0.24.2
 matplotlib>=3.3.4
 csdmpy>=0.5
 joblib>=1.0.0
+pydantic<=1.10
 
 # development packages
 pytest-runner>=5.0

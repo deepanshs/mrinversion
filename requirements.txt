@@ -5,3 +5,4 @@ csdmpy>=0.5
 joblib>=0.13.2
 mrsimulator>=0.6
 scikit-learn>=0.24.2
+pydantic<=1.10
