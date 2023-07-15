@@ -63,7 +63,7 @@ def component_cluster(
         if th_index.size != 0:
             threshold_array = threshold_array[: th_index[0]]
 
-        coords, indexes = get_coords_and_indexes(
+        coords, wts, indexes = get_coords_wts_and_indexes(
             csdm_norm, threshold_array, inc_coords, sigma
         )
 
@@ -72,7 +72,7 @@ def component_cluster(
         labels = clustering_result.labels_
 
         for lbl_index in range(label_counts):
-            mask = get_cluster_mask(csdm_norm, labels, lbl_index, indexes)
+            mask = get_cluster_mask(csdm_norm, labels, lbl_index, indexes, wts)
             cl_csdm = csdm_norm.copy()
             if n_steps > 1:
                 cl_csdm.y[0].components[0] = mask
@@ -95,22 +95,29 @@ def component_cluster(
     return clusters, clustering_result
 
 
-def get_cluster_mask(csdm_norm, labels, lbl_index, indexes):
+def get_cluster_mask(csdm_norm, labels, lbl_index, indexes, wts):
     mask = np.zeros(csdm_norm.y[0].components[0].shape)
     start_lbls = 0
     for idxs in indexes:
         lbls = labels[start_lbls : idxs[0].size + start_lbls]
         cl_idx = np.where(lbls == lbl_index)
         for cl_idx_ in cl_idx:
-            mask[idxs[0][cl_idx_], idxs[1][cl_idx_], idxs[2][cl_idx_]] += 1
+            x = idxs[0][cl_idx_]
+            y = idxs[1][cl_idx_]
+            iso = idxs[2][cl_idx_]
+            mask[x, y, iso] += wts[start_lbls + cl_idx_]
         start_lbls += idxs[0].size
     return mask
 
 
-def get_coords_and_indexes(csdm_norm, threshold_array, inc_coords, sigma):
+def get_coords_wts_and_indexes(csdm_norm, threshold_array, inc_coords, sigma):
     indexes = []
     coords = []
-    for th in threshold_array:
+    wts = []
+    wt_diff = threshold_array[1] - threshold_array[0]
+    wt_array = (threshold_array[1:] - threshold_array[:-1]) / wt_diff
+    wt_array = np.concatenate(([threshold_array[0] / wt_diff], wt_array))
+    for i, th in enumerate(threshold_array):
         indexes.append(np.where(csdm_norm.y[0].components[0] > th))
         indexes_shape = (len(indexes[-1]), len(indexes[-1][0]))
         total_size = np.prod(indexes_shape)
@@ -124,15 +131,17 @@ def get_coords_and_indexes(csdm_norm, threshold_array, inc_coords, sigma):
                 )
             ]
         )
+        wt_next = np.ones(len(indexes[-1][0])) * wt_array[i]
         next_coords += rand * np.asarray(sigma)[::-1][:, None]
         next_coords = next_coords.T.ravel()
         coords = np.concatenate((coords, next_coords))
+        wts = np.concatenate((wts, wt_next))
 
     coords = np.array(coords).reshape(-1, 3)
     # coords = (coords - coords.mean(axis=0))
     coords /= coords.std(axis=0)
 
-    return coords, indexes
+    return coords, wts, indexes
 
 
 def aff_matrix(X, delta=1e-3, coords=None):
