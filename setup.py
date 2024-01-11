@@ -15,10 +15,10 @@ with open("mrinversion/__init__.py") as f:
 module_dir = dirname(abspath(__file__))
 
 install_requires = [
-    "numpy>=1.17",
+    "numpy>=1.20",
     "setuptools>=27.3",
-    "csdmpy>=0.5",
-    "mrsimulator>=0.6",
+    "csdmpy>=0.6",
+    "mrsimulator>=0.8.0rc0",
     "scikit-learn>=0.22",
 ]
 
