@@ -25,7 +25,11 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     n: int
         An integer used in linear interpolation of the data. The default is 5.
     """
-    [item.to("ppm", "nmr_frequency_ratio") for item in csdm_object.x]
+    [
+        item.to("ppm", "nmr_frequency_ratio")
+        for item in csdm_object.x
+        if item.origin_offset != 0
+    ]
     data = csdm_object.y[0].components[0]
     iso = csdm_object.x[2].coordinates.value
 
@@ -208,6 +212,10 @@ def plot_3d(
         ylabel = "y"
         zlabel = "z"
 
+    delta_a = a[1] - a[0]
+    delta_b = b[1] - b[0]
+    delta_c = c[1] - c[0]
+
     clr = cmap
     ck = cmap(0)
     facecolors = cmap(f)
@@ -220,30 +228,30 @@ def plot_3d(
         x_lim = [a[0], a[-1]]
     if y_lim is None:
         y_lim = [b[0], b[-1]]
-
     if z_lim is None:
         z_lim = [c[0], c[-1]]
-        offz = c[0] + (c[1] - c[0]) / 2
-        offz_n = c[-1]
-        sign = np.sign(c[0] - c[-1])
-    else:
-        offz = z_lim[1] - (c[1] - c[0]) / 2
-        offz_n = z_lim[0]
-        sign = np.sign(z_lim[1] - z_lim[0])
 
-    offy = y_lim[1] + (b[1] - b[0]) / 2
-    offy_n = y_lim[0] - (b[1] - b[0]) / 2
+    offset_scalar = 50
+    height_scalar = 5
+    z_offset = (z_lim[1] - z_lim[0]) / offset_scalar
+    z_scale = (z_lim[1] - z_lim[0]) / height_scalar
+    # offz = z_lim[1] + (delta_c / 2.0)
+    offz_n = z_lim[0] - (delta_c / 2.0)
+    offz_1d = z_lim[1] + z_offset
 
-    offx = x_lim[1] + (a[1] - a[0]) / 2
-    # if angle < -90:
-    #     offx = x_lim[1] + (a[1] - a[0]) / 2
-    # else:
-    #     offx = x_lim[0] - (a[1] - a[0]) / 2
+    y_offset = (y_lim[1] - y_lim[0]) / offset_scalar
+    y_scale = (y_lim[1] - y_lim[0]) / height_scalar
+    offy = y_lim[1] + (delta_b / 2.0)
+    # offy_n = y_lim[0] - (delta_b / 2.0)
+    offy_n_1d = y_lim[0] - y_offset
+
+    offx = x_lim[1] + (delta_a / 2.0)
 
     if azim > 0:
-        offy = y_lim[0] - (b[1] - b[0]) / 2
-        offy_n = y_lim[-1] + (b[1] - b[0]) / 2
-        offx = x_lim[0] - (a[1] - a[0]) / 2
+        offy = y_lim[0] - (delta_b / 2.0)
+        # offy_n = y_lim[1] + (delta_b / 2.0)
+        offy_n_1d = y_lim[1] + y_offset
+        offx = x_lim[0] - (delta_a / 2.0)
 
     ax.set_proj_type("persp")
     ax.view_init(elev=elev, azim=azim)
@@ -275,16 +283,16 @@ def plot_3d(
     # 1D x-axis projection from 2D x-z projection
     proj_x = dist.sum(axis=1)
     if max_1d[0] is None:
-        max_1d[0] = proj_x.max()
+        max_1d[0] = proj_x.max() / z_scale
     proj_x /= max_1d[0]
-    ax.plot(a, sign * 14 * proj_x + offz, offy, zdir="y", c=ck, linewidth=lw)
+    ax.plot(a, proj_x + offz_1d, offy, zdir="y", c=ck, linewidth=lw)
 
     # 1D z-axis projection from 2D x-z projection
     proj_z = dist.sum(axis=0)
     if max_1d[2] is None:
-        max_1d[2] = proj_z.max()
+        max_1d[2] = proj_z.max() / y_scale
     proj_z /= max_1d[2]
-    ax.plot(-20 * proj_z + offy_n, c, offx, zdir="x", c=ck, linewidth=lw)
+    ax.plot(-proj_z + offy_n_1d, c, offx, zdir="x", c=ck, linewidth=lw)
     ax.set_xlim(z_lim)
 
     # 2D y-z contour projection
@@ -300,11 +308,9 @@ def plot_3d(
     # 1D y-axis projection
     proj_y = dist.sum(axis=1)
     if max_1d[1] is None:
-        max_1d[1] = proj_y.max()
+        max_1d[1] = proj_y.max() / ((z_lim[1] - z_lim[0]) / 5)
     proj_y /= max_1d[1]
-    ax.plot(
-        b, sign * 14 * proj_y + offz, offx, zdir="x", c=ck, linewidth=lw, label=label
-    )
+    ax.plot(b, proj_y + offz_1d, offx, zdir="x", c=ck, linewidth=lw, label=label)
 
     ax.set_xlim(x_lim)
     ax.set_ylim(y_lim)
@@ -325,12 +331,9 @@ def plot_3d(
     ax.scatter(x.flat, y.flat, z.flat, marker="X", c=facecolors, **kwargs)
 
     # full box
-    da = a[1] - a[0]
-    r1 = [x_lim[0] - da / 2, x_lim[-1] + da / 2]
-    db = b[1] - b[0]
-    r2 = [y_lim[0] - db / 2, y_lim[-1] + db / 2]
-    dc = c[1] - c[0]
-    r3 = [z_lim[-1] - dc / 2, z_lim[0] + dc / 2]
+    r1 = [x_lim[0] - delta_a / 2, x_lim[-1] + delta_a / 2]
+    r2 = [y_lim[0] - delta_b / 2, y_lim[-1] + delta_b / 2]
+    r3 = [z_lim[-1] - delta_c / 2, z_lim[0] + delta_c / 2]
 
     l_box = lw
     for s, e in combinations(np.array(list(product(r1, r2, r3))), 2):
@@ -343,12 +346,9 @@ def plot_3d(
 
     # draw cube
     if box:
-        da = a[1] - a[0]
-        r1 = [a[0] - da / 2, a[-1] + da / 2]
-        db = b[1] - b[0]
-        r2 = [b[0] - db / 2, b[-1] + db / 2]
-        dc = c[1] - c[0]
-        r3 = [c[0] - dc / 2, c[-1] + dc / 2]
+        r1 = [a[0] - delta_a / 2, a[-1] + delta_a / 2]
+        r2 = [b[0] - delta_b / 2, b[-1] + delta_b / 2]
+        r3 = [c[0] - delta_c / 2, c[-1] + delta_c / 2]
 
         for s, e in combinations(np.array(list(product(r1, r2, r3))), 2):
             if np.sum(np.abs(s - e)) == r1[1] - r1[0]:
