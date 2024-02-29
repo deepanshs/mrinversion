@@ -31,12 +31,16 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
         if item.origin_offset != 0
     ]
     data = csdm_object.y[0].components[0]
-    iso = csdm_object.x[2].coordinates.value
+
+    extra_dims = 1
+    if len(csdm_object.x) > 2:
+        extra_dims = np.sum([item.coordinates.size for item in csdm_object.x[2:]])
+    data.shape = (extra_dims, data.shape[-2], data.shape[-1])
 
     reg_x, reg_y = (csdm_object.x[i].coordinates.value for i in range(2))
     dx = reg_x[1] - reg_x[0]
     dy = reg_y[1] - reg_y[0]
-    sol = np.zeros((data.shape[0], zeta.count, eta.count))
+    sol = np.zeros((extra_dims, zeta.count, eta.count))
 
     bins = [zeta.count, eta.count]
     d_zeta = zeta.increment.value / 2
@@ -69,7 +73,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
             index = np.where(x_ == y_)
             np.append(zeta, -zeta_grid[index])
             np.append(eta, np.ones(index[0].size))
-            for i in range(iso.size):
+            for i in range(extra_dims):
                 weight = deepcopy(data[i]).ravel()
                 weight[index] /= 2
                 np.append(weight, weight[index])
@@ -81,10 +85,11 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     sol /= n * n
 
     del zeta_grid, eta_grid, index, x_, y_, avg_range_x, avg_range_y
-    csdm_new = cp.as_csdm(sol)
+    csdm_new = cp.as_csdm(np.squeeze(sol))
     csdm_new.x[0] = eta
     csdm_new.x[1] = zeta
-    csdm_new.x[2] = csdm_object.x[2]
+    if len(csdm_object.x) > 2:
+        csdm_new.x[2] = csdm_object.x[2]
     return csdm_new
 
 
