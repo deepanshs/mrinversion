@@ -62,7 +62,7 @@ follows,
 
     >>> import csdmpy as cp
     ...
-    >>> filename = "https://sandbox.zenodo.org/record/1065347/files/xnlhecn8ifzcwx09f83gsh27rhc5i5l6.csdf"
+    >>> filename = "https://ssnmr.org/resources/mrinversion/xnlhecn8ifzcwx09f83gsh27rhc5i5l6.csdf"
     >>> data_object = cp.load(filename) # load the CSDM file with the csdmpy module
 
 Here, the variable *data_object* is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
@@ -90,7 +90,7 @@ synthetic spinning sideband dataset is derived.
     :context: close-figs
     :include-source:
 
-    >>> datafile = "https://sandbox.zenodo.org/record/1065347/files/lufeus68orw1izrg8juthcqvp7w0cpzk.csdf"
+    >>> datafile = "https://ssnmr.org/resources/mrinversion/lufeus68orw1izrg8juthcqvp7w0cpzk.csdf"
     >>> true_data_object = cp.load(datafile) # the true solution for comparison
 
 
