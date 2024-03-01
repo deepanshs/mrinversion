@@ -47,7 +47,7 @@ def plot2D(ax, csdm_object, title=""):
 # Load the dataset. Here, we import the dataset as a CSDM data-object.
 
 # the 1D MAF cross-section data in csdm format
-domain = "https://sandbox.zenodo.org/record/1065347/files"
+domain = "https://ssnmr.org/resources/mrinversion"
 filename = f"{domain}/6kcnou9iwqya30utlmzznnbv25iisxxj.csdf"
 data_object = cp.load(filename)
 
