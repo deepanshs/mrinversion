@@ -7,7 +7,7 @@ from mrinversion.linear_model import TSVDCompression
 
 
 def test_fista():
-    domain = "https://sandbox.zenodo.org/record/1065394/files"
+    domain = "https://ssnmr.org/resources/mrinversion"
     filename = f"{domain}/test1_signal.csdf"
     signal = cp.load(filename)
     sigma = 0.0008

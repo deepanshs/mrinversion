@@ -124,9 +124,9 @@ class LineShape(BaseModel):
         if dim.increment.unit.physical_type == "dimensionless":
             lf = abs(self.larmor_frequency)
             val = spectral_width.to("ppm")
-            spectral_width = f"{val.value * lf} Hz"
+            spectral_width = f"{np.round(val.value * lf, decimals=8)} Hz"
             val = reference_offset.to("ppm")
-            reference_offset = f"{val.value * lf} Hz"
+            reference_offset = f"{np.round(val.value * lf, decimals=8)} Hz"
 
         spectral_dimensions = [
             dict(
