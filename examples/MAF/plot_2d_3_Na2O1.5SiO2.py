@@ -48,7 +48,7 @@ def plot2D(csdm_object, **kwargs):
 # Load the dataset. Here, we import the dataset as the CSDM data-object.
 
 # The 2D MAF dataset in csdm format
-filename = "https://sandbox.zenodo.org/record/1065347/files/2Na2O_3SiO2_MAF.csdf"
+filename = "https://ssnmr.org/resources/mrinversion/2Na2O_3SiO2_MAF.csdf"
 data_object = cp.load(filename)
 
 # For inversion, we only interest ourselves with the real part of the complex dataset.

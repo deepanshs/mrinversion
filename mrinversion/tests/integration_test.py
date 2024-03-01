@@ -10,7 +10,7 @@ from mrinversion.linear_model import TSVDCompression
 
 
 def test_01():
-    domain = "https://sandbox.zenodo.org/record/1065347/files"
+    domain = "https://ssnmr.org/resources/mrinversion"
     filename = f"{domain}/8lnwmg0dr7y6egk40c2orpkmmugh9j7c.csdf"
     data_object = cp.load(filename)
     data_object = data_object.real

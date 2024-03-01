@@ -15,10 +15,10 @@ with open("mrinversion/__init__.py") as f:
 module_dir = dirname(abspath(__file__))
 
 install_requires = [
-    "numpy>=1.17",
+    "numpy>=1.20",
     "setuptools>=27.3",
-    "csdmpy>=0.5",
-    "mrsimulator>=0.6",
+    "csdmpy>=0.6",
+    "mrsimulator>=0.8.0rc0",
     "scikit-learn>=0.22",
 ]
 
@@ -56,7 +56,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Deepansh J. Srivastava",
     author_email="deepansh2012@gmail.com",
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     url="https://github.com/DeepanshS/mrinversion/",
     packages=find_packages(),
     # package_dir={"": "mrinversion"},
@@ -77,11 +77,11 @@ setup(
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering",
     ],
 )
