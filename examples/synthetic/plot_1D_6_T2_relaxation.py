@@ -25,7 +25,7 @@ from mrinversion.linear_model import LassoFistaCV, TSVDCompression
 # -------------
 # Load the dataset
 # ''''''''''''''''
-domain = "https://sandbox.zenodo.org/record/1065394/files"
+domain = "https://ssnmr.org/resources/mrinversion"
 filename = f"{domain}/test2_signal.csdf"
 signal = cp.load(filename)
 sigma = 0.0008
