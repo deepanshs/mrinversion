@@ -47,7 +47,7 @@ def plot2D(ax, csdm_object, title=""):
 # Load the dataset. Here, we import the dataset as a CSDM data-object.
 
 # the 1D spinning sideband cross-section data in csdm format
-domain = "https://sandbox.zenodo.org/record/1065347/files"
+domain = "https://ssnmr.org/resources/mrinversion"
 filename = f"{domain}/wjbhb6sif76mxfgndetew8mnrq6pw4pj.csdf"
 data_object = cp.load(filename)
 
