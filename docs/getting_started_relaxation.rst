@@ -44,7 +44,7 @@ follows,
 
     >>> import csdmpy as cp
     ...
-    >>> filename = "https://sandbox.zenodo.org/record/1065394/files/test3_signal.csdf"
+    >>> filename = "https://ssnmr.org/resources/mrinversion/test3_signal.csdf"
     >>> data_object = cp.load(filename) # load the CSDM file with the csdmpy module
 
 Here, the variable *data_object* is a `CSDM <https://csdmpy.readthedocs.io/en/latest/api/CSDM.html>`_
@@ -55,7 +55,7 @@ object. For comparison, let's also import the true t2 distribution from which th
     :context: close-figs
     :include-source:
 
-    >>> datafile = "https://sandbox.zenodo.org/record/1065394/files/test3_t2.csdf"
+    >>> datafile = "https://ssnmr.org/resources/mrinversion/test3_t2.csdf"
     >>> true_t2_dist = cp.load(datafile) # the true solution for comparison
 
 
