@@ -103,24 +103,15 @@ Getting Started
 ---------------
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Installation
-
-    installation/install
-    installation/requirement
-
-
-User Documentation
-------------------
-
-.. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: User Documentation
 
+    installation/install
     introduction
     before_getting_started
     getting_started_lineshape
     getting_started_relaxation
+
 
 Examples
 --------
