@@ -309,46 +309,16 @@ Q3_region = f_sol[0:8, 11:22, 8:20]
 Q3_region.description = "Q3 region"
 # %%
 # The plot of the respective regions is shown below.
-
-# Calculate the normalization factor for the 2D contours and 1D projections from the
-# original solution, `f_sol`. Use this normalization factor to scale the intensities
-# from the sub-regions.
-max_2d = [
-    f_sol.sum(axis=0).max().value,
-    f_sol.sum(axis=1).max().value,
-    f_sol.sum(axis=2).max().value,
-]
-max_1d = [
-    f_sol.sum(axis=(1, 2)).max().value,
-    f_sol.sum(axis=(0, 2)).max().value,
-    f_sol.sum(axis=(0, 1)).max().value,
-]
-
 plt.figure(figsize=(5, 4.4))
 ax = plt.subplot(projection="3d")
 
-# plot for the Q4 region
 plot_3d(
     ax,
-    Q4_region,
+    [Q4_region, Q3_region],
     x_lim=[0, 140],  # the x-limit
     y_lim=[0, 140],  # the y-limit
     z_lim=[-50, -150],  # the z-limit
-    max_2d=max_2d,  # normalization factors for the 2D contours projections
-    max_1d=max_1d,  # normalization factors for the 1D projections
-    cmap=cm.Reds_r,  # colormap
-    box=True,  # draw a box around the region
-)
-# plot for the Q3 region
-plot_3d(
-    ax,
-    Q3_region,
-    x_lim=[0, 140],  # the x-limit
-    y_lim=[0, 140],  # the y-limit
-    z_lim=[-50, -150],  # the z-limit
-    max_2d=max_2d,  # normalization factors for the 2D contours projections
-    max_1d=max_1d,  # normalization factors for the 1D projections
-    cmap=cm.Blues_r,  # colormap
+    cmap=[cm.Reds_r, cm.Blues_r],  # colormaps for each volume
     box=True,  # draw a box around the region
 )
 ax.legend()

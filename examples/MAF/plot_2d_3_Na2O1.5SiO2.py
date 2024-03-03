@@ -300,59 +300,17 @@ Q2_region.description = "Q2 region"
 
 # %%
 # An approximate plot of the respective regions is shown below.
-
-# Calculate the normalization factor for the 2D contours and 1D projections from the
-# original solution, `f_sol`. Use this normalization factor to scale the intensities
-# from the sub-regions.
-max_2d = [
-    f_sol.sum(axis=0).max().value,
-    f_sol.sum(axis=1).max().value,
-    f_sol.sum(axis=2).max().value,
-]
-max_1d = [
-    f_sol.sum(axis=(1, 2)).max().value,
-    f_sol.sum(axis=(0, 2)).max().value,
-    f_sol.sum(axis=(0, 1)).max().value,
-]
-
 plt.figure(figsize=(5, 4.4))
 ax = plt.subplot(projection="3d")
 
 # plot for the Q4 region
 plot_3d(
     ax,
-    Q4_region,
+    [Q4_region, Q3_region, Q2_region],
     x_lim=[0, 150],  # the x-limit
     y_lim=[0, 150],  # the y-limit
     z_lim=[-60, -120],  # the z-limit
-    max_2d=max_2d,  # normalization factors for the 2D contours projections
-    max_1d=max_1d,  # normalization factors for the 1D projections
-    cmap=cm.Reds_r,  # colormap
-)
-# plot for the Q3 region
-plot_3d(
-    ax,
-    Q3_region,
-    x_lim=[0, 150],  # the x-limit
-    y_lim=[0, 150],  # the y-limit
-    z_lim=[-60, -120],  # the z-limit
-    max_2d=max_2d,  # normalization factors for the 2D contours projections
-    max_1d=max_1d,  # normalization factors for the 1D projections
-    cmap=cm.Blues_r,  # colormap
-)
-# plot for the Q2 region
-plot_3d(
-    ax,
-    Q2_region,
-    elev=25,  # the elevation angle in the z plane
-    azim=-50,  # the azimuth angle in the x-y plane
-    x_lim=[0, 150],  # the x-limit
-    y_lim=[0, 150],  # the y-limit
-    z_lim=[-60, -120],  # the z-limit
-    max_2d=max_2d,  # normalization factors for the 2D contours projections
-    max_1d=max_1d,  # normalization factors for the 1D projections
-    cmap=cm.Oranges_r,  # colormap
-    box=False,  # draw a box around the region
+    cmap=[cm.Reds_r, cm.Blues_r, cm.Oranges_r],  # colormaps for each volume
 )
 ax.legend()
 plt.tight_layout()

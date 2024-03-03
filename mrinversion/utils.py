@@ -145,14 +145,86 @@ def get_polar_grids(ax, ticks=None, offset=0):
 
 def plot_3d(
     ax,
+    csdm_objects,
+    elev=28,
+    azim=-150,
+    x_lim=None,
+    y_lim=None,
+    z_lim=None,
+    cmap=cm.PiYG,
+    box=False,
+    clip_percent=0.0,
+    linewidth=1,
+    alpha=0.15,
+    **kwargs,
+):
+    r"""Generate a 3D density plot with 2D contour and 1D projections.
+
+    Args:
+        ax: Matplotlib Axes to render the plot.
+        csdm_objects: A 3D{1} CSDM object or a list of CSDM objects holding the data.
+        elev: (optional) The 3D view angle, elevation angle in the z plane.
+        azim: (optional) The 3D view angle, azimuth angle in the x-y plane.
+        x_lim: (optional) The x limit given as a list, [x_min, x_max].
+        y_lim: (optional) The y limit given as a list, [y_min, y_max].
+        z_lim: (optional) The z limit given as a list, [z_min, z_max].
+        max_2d: (Optional) The normalization factor of the 2D contour projections. The
+            attribute is meaningful when multiple 3D datasets are viewed on the same
+            plot. The value is given as a list, [`yz`, `xz`, `xy`], where `ij` is the
+            maximum of the projection onto the `ij` plane, :math:`i,j \in [x, y, z]`.
+        max_1d: (Optional) The normalization factor of the 1D projections. The
+            attribute is meaningful when multiple 3D datasets are viewed on the same
+            plot. The value is given as a list, [`x`, `y`, `z`], where `i` is the
+            maximum of the projection onto the `i` axis, :math:`i \in [x, y, z]`.
+        cmap: (Optional) The colormap or a list of colormaps used in rendering the
+            volumetric plot. The colormap list is applied to the ordered list of csdm_objects.
+            The same colormap is used for the 2D contour projections. For 1D plots, the first
+            color in the colormap scheme is used for the line color.
+        box: (Optional) If True, draw a box around the 3D data region.
+        clip_percent: (Optional) The amplitudes of the dataset below the given percent
+            is made transparent for the volumetric plot.
+        linewidth: (Optional) The linewidth of the 2D contours, 1D plots and box.
+        alpha: (Optional) The amount of alpha(transparency) applied in rendering the 3D
+            volume.
+    """
+    csdm_object_list = csdm_objects
+    if not isinstance(csdm_objects, list):
+        csdm_object_list = [csdm_objects]
+
+    if not isinstance(cmap, list):
+        cmap = [cmap]
+
+    fraction = np.array([abs(item).sum() for item in csdm_object_list])
+    fraction /= fraction.max()
+
+    for index, item in enumerate(csdm_object_list):
+        plot_3d_(
+            ax,
+            item,
+            elev=elev,
+            azim=azim,
+            x_lim=x_lim,
+            y_lim=y_lim,
+            z_lim=z_lim,
+            fraction=fraction[index],
+            cmap=cmap[index],
+            box=box,
+            clip_percent=clip_percent,
+            linewidth=linewidth,
+            alpha=alpha,
+            **kwargs,
+        )
+
+
+def plot_3d_(
+    ax,
     csdm_object,
     elev=28,
     azim=-150,
     x_lim=None,
     y_lim=None,
     z_lim=None,
-    max_2d=None,
-    max_1d=None,
+    fraction=1.0,
     cmap=cm.PiYG,
     box=False,
     clip_percent=0.0,
@@ -188,13 +260,9 @@ def plot_3d(
         alpha: (Optional) The amount of alpha(transparency) applied in rendering the 3D
             volume.
     """
-    max_2d = [None, None, None] if max_2d is None else max_2d
-    max_1d = [None, None, None] if max_1d is None else max_1d
-
     lw = linewidth
     if isinstance(csdm_object, cp.CSDM):
         f = csdm_object.y[0].components[0].T
-        label = csdm_object.description
 
         a_, b_, c_ = (item for item in csdm_object.x)
 
@@ -208,7 +276,6 @@ def plot_3d(
 
     else:
         f = csdm_object
-        label = ""
         a = np.arange(f.shape[0])
         b = np.arange(f.shape[1])
         c = np.arange(f.shape[2])
@@ -237,93 +304,109 @@ def plot_3d(
         z_lim = [c[0], c[-1]]
 
     offset_scalar = 50
-    height_scalar = 5
+    height_scalar = 10
     z_offset = (z_lim[1] - z_lim[0]) / offset_scalar
-    z_scale = (z_lim[1] - z_lim[0]) / height_scalar
-    # offz = z_lim[1] + (delta_c / 2.0)
+    z_scale = np.abs(z_lim[1] - z_lim[0]) / height_scalar
     offz_n = z_lim[0] - (delta_c / 2.0)
     offz_1d = z_lim[1] + z_offset
 
     y_offset = (y_lim[1] - y_lim[0]) / offset_scalar
-    y_scale = (y_lim[1] - y_lim[0]) / height_scalar
+    y_scale = np.abs(y_lim[1] - y_lim[0]) / height_scalar
     offy = y_lim[1] + (delta_b / 2.0)
-    # offy_n = y_lim[0] - (delta_b / 2.0)
     offy_n_1d = y_lim[0] - y_offset
 
     offx = x_lim[1] + (delta_a / 2.0)
+    x_scale = np.abs(x_lim[1] - x_lim[0]) / height_scalar
 
-    if azim > 0:
+    if azim > -90 and azim <= 0:
+        offx = x_lim[0] - (delta_a / 2.0)
+        offy_n_1d = y_lim[0] - y_offset
+
+    if azim > 0 and azim <= 90:
         offy = y_lim[0] - (delta_b / 2.0)
-        # offy_n = y_lim[1] + (delta_b / 2.0)
         offy_n_1d = y_lim[1] + y_offset
         offx = x_lim[0] - (delta_a / 2.0)
+
+    if azim > 90:
+        offx = x_lim[1] + (delta_a / 2.0)
+        offy_n_1d = y_lim[1] + y_offset
+        offy = y_lim[0] - (delta_b / 2.0)
 
     ax.set_proj_type("persp")
     ax.view_init(elev=elev, azim=azim)
 
     # 2D x-y contour projection ---------------------
     levels = (np.arange(20) + 1) / 20
-
     x1, y1 = np.meshgrid(a, b, indexing="ij")
-    dist = f.sum(axis=2)
-    if max_2d[2] is None:
-        max_2d[2] = dist.max()
-    dist /= max_2d[2]
-
+    dist_xy = f.mean(axis=2)
+    dist_xy *= fraction * z_scale / np.abs(dist_xy.max())
     ax.contour(
-        x1, y1, dist, zdir="z", offset=offz_n, cmap=clr, levels=levels, linewidths=lw
+        x1,
+        y1,
+        dist_xy,
+        zdir="z",
+        offset=offz_n,
+        cmap=clr,
+        levels=z_scale * levels,
+        linewidths=lw,
     )
 
     # 2D x-z contour projection
     x1, y1 = np.meshgrid(a, c, indexing="ij")
-
-    dist = f.sum(axis=1)
-    if max_2d[1] is None:
-        max_2d[1] = dist.max()
-    dist_ = dist / max_2d[1]
+    dist_xz = f.mean(axis=1)
+    dist_xz *= fraction * y_scale / np.abs(dist_xz.max())
     ax.contour(
-        x1, dist_, y1, zdir="y", offset=offy, cmap=clr, levels=levels, linewidths=lw
+        x1,
+        dist_xz,
+        y1,
+        zdir="y",
+        offset=offy,
+        cmap=clr,
+        levels=y_scale * levels,
+        linewidths=lw,
     )
 
     # 1D x-axis projection from 2D x-z projection
-    proj_x = dist.sum(axis=1)
-    if max_1d[0] is None:
-        max_1d[0] = proj_x.max() / z_scale
-    proj_x /= max_1d[0]
-    ax.plot(a, proj_x + offz_1d, offy, zdir="y", c=ck, linewidth=lw)
+    proj_x = dist_xz.mean(axis=1)
+    proj_x *= fraction * z_scale / np.abs(proj_x.max())
+    ax.plot(a, np.sign(z_offset) * proj_x + offz_1d, offy, zdir="y", c=ck, linewidth=lw)
 
     # 1D z-axis projection from 2D x-z projection
-    proj_z = dist.sum(axis=0)
-    if max_1d[2] is None:
-        max_1d[2] = proj_z.max() / y_scale
-    proj_z /= max_1d[2]
-    ax.plot(-proj_z + offy_n_1d, c, offx, zdir="x", c=ck, linewidth=lw)
+    proj_z = dist_xz.mean(axis=0)
+    proj_z *= fraction * y_scale / np.abs(proj_z.max())
+    ax.plot(
+        np.sign(azim) * np.sign(y_offset) * proj_z + offy_n_1d,
+        c,
+        offx,
+        zdir="x",
+        c=ck,
+        linewidth=lw,
+    )
     ax.set_xlim(z_lim)
 
     # 2D y-z contour projection
     x1, y1 = np.meshgrid(b, c, indexing="ij")
-    dist = f.sum(axis=0)
-    if max_2d[0] is None:
-        max_2d[0] = dist.max()
-    dist_ = dist / max_2d[0]
+    dist_yz = f.mean(axis=0)
+    dist_yz *= fraction * x_scale / np.abs(dist_yz.max())
     ax.contour(
-        dist_, x1, y1, zdir="x", offset=offx, cmap=clr, levels=levels, linewidths=lw
+        dist_yz,
+        x1,
+        y1,
+        zdir="x",
+        offset=offx,
+        cmap=clr,
+        levels=x_scale * levels,
+        linewidths=lw,
     )
 
     # 1D y-axis projection
-    proj_y = dist.sum(axis=1)
-    if max_1d[1] is None:
-        max_1d[1] = proj_y.max() / ((z_lim[1] - z_lim[0]) / 5)
-    proj_y /= max_1d[1]
-    ax.plot(b, proj_y + offz_1d, offx, zdir="x", c=ck, linewidth=lw, label=label)
+    proj_y = dist_yz.mean(axis=1)
+    proj_y *= fraction * z_scale / np.abs(proj_y.max())
+    ax.plot(b, np.sign(z_offset) * proj_y + offz_1d, offx, zdir="x", c=ck, linewidth=lw)
 
     ax.set_xlim(x_lim)
     ax.set_ylim(y_lim)
-
-    if z_lim is None:
-        ax.set_zlim([c[-1], c[0]])
-    else:
-        ax.set_zlim(z_lim)
+    ax.set_zlim(z_lim)
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
