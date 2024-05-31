@@ -4,7 +4,7 @@ import csdmpy as cp
 import numpy as np
 from mrsimulator.methods import BlochDecaySpectrum
 
-from .utils import _x_y_to_zeta_eta_distribution
+from .utils import _x_y_to_zeta_eta_distribution, _x_y_to_cq_eta_distribution
 
 __dimension_list__ = (cp.Dimension, cp.LinearDimension, cp.MonotonicDimension)
 __dimension_name__ = ("Dimension", "LinearDimension", "MonotonicDimension")
@@ -162,6 +162,13 @@ class LineShape(BaseModel):
         )
         return zeta, eta
 
+    def _get_cq_eta(self, supersampling):
+        """Return zeta and eta coordinates over x-y grid"""
+
+        cq, eta = _x_y_to_cq_eta_distribution(
+            self.inverse_kernel_dimension, supersampling
+        )
+        return cq, eta
 
 def _check_csdm_dimension(dimensions, dimension_id):
     if not isinstance(dimensions, (list, *__dimension_list__)):

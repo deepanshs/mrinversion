@@ -128,6 +128,25 @@ def _x_y_to_zeta_eta_distribution(grid, supersampling):
 
     return _x_y_to_zeta_eta(x_mesh, y_mesh)
 
+def _x_y_to_cq_eta_distribution(grid, supersampling):
+    """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
+    x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)
+    y_coordinates = _supersampled_coordinates(grid[1], supersampling=supersampling)
+
+    if x_coordinates.unit.physical_type == "frequency":
+        x_coordinates = x_coordinates.to("Hz").value
+        y_coordinates = y_coordinates.to("Hz").value
+
+    elif x_coordinates.unit.physical_type == "dimensionless":
+        x_coordinates = x_coordinates.to("ppm").value
+        y_coordinates = y_coordinates.to("ppm").value
+
+    x_mesh, y_mesh = np.meshgrid(
+        np.abs(x_coordinates), np.abs(y_coordinates), indexing="xy"
+    )
+
+    return _x_y_to_cq_eta(x_mesh, y_mesh)
+
 
 def _supersampled_coordinates(dimension, supersampling=1):
     r"""The coordinates along the dimension.
@@ -171,3 +190,55 @@ def _supersampled_coordinates(dimension, supersampling=1):
             array[i::supersampling] = coordinates + (i - s2 + eo) * diff
 
     return array
+
+
+def cq_eta_to_x_y(cq, eta):
+    r"""Convert the coordinates :math:`(C_q,\eta)` to :math:`(x, y)` using the
+        following definition,
+
+        .. math::
+            \begin{array}{rl}
+            x &= C_q \sin\theta, \\
+            y &= C_q \cos\theta
+            \end{array} {~~~~~~~~}
+
+        where :math:`\theta = \frac{\pi}{2}\eta`.
+
+        Args:
+            x: ndarray or list of floats. The coordinate x.
+            y: ndarray or list of floats. The coordinate y.
+
+        Return:
+            A list of ndarrays. The first array holds the coordinate :math:`x`. The
+            second array holds the coordinates :math:`y`.
+    """
+    cq = np.asarray(cq)
+    eta = np.asarray(eta)
+
+    theta = np.pi * eta / 2.0
+    x = np.zeros(cq.size)
+    y = np.zeros(cq.size)
+
+    index = np.arange(len(cq))
+    x[index] = cq[index] * np.cos(theta[index])
+    y[index] = cq[index] * np.sin(theta[index])
+
+
+    return x.ravel(), y.ravel()
+
+
+def _x_y_to_cq_eta(x, y):
+    """Same as def x_y_to_zeta_eta, but for ndarrays."""
+    x = np.abs(x)
+    y = np.abs(y)
+    cq = np.sqrt(x**2 + y**2)  # + offset
+    eta = np.ones(cq.shape)
+    # index = np.where(x > y)
+    index = np.arange(len(cq))
+    # zeta[index] = -zeta[index]
+    eta[index] = (2.0 / np.pi) * np.arctan(y[index] / x[index])
+
+    # index = np.where(x < y)
+    # eta[index] = (4.0 / np.pi) * np.arctan(x[index] / y[index])
+
+    return cq.ravel(), eta.ravel()
