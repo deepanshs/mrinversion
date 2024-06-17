@@ -4,7 +4,7 @@ Narrow T2 distribution (Inverse Laplace)
 ========================================
 """
 # %%
-# The following example demonstrates the statistical learning based determination of
+# The following example demonstrates the statistical learning-based determination of
 # the NMR T2 relaxation vis inverse Laplace transformation.
 #
 # Before getting started
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from mrinversion.kernel import relaxation
-from mrinversion.linear_model import LassoFistaCV, TSVDCompression
+from mrinversion.linear_model import SmoothLasso, TSVDCompression
 
 # sphinx_gallery_thumbnail_number = 3
 
@@ -74,11 +74,12 @@ print(f"truncation_index = {new_system.truncation_index}")
 lambdas = 10 ** (-5 + 4 * (np.arange(64) / 63))
 
 # setup the smooth lasso cross-validation class
-f_lasso_cv = LassoFistaCV(
-    lambdas=lambdas,  # A numpy array of lambda values.
-    folds=5,  # The number of folds in n-folds cross-validation.
-    sigma=sigma,  # noise standard deviation
-    inverse_dimension=inverse_dimension,  # previously defined inverse dimensions.
+f_lasso_cv = SmoothLasso(
+    alpha=0,
+    lambda1=1e-6,  # A numpy array of lambda values.
+    # folds=5,  # The number of folds in n-folds cross-validation.
+    # sigma=sigma,  # noise standard deviation
+    inverse_dimension=[inverse_dimension],  # previously defined inverse dimensions.
 )
 
 # run the fit method on the compressed kernel and compressed data.

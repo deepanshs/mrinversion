@@ -30,8 +30,7 @@ class GeneralL2Lasso:
     containing noise, and :math:`{\bf f} \in \mathbb{R}^{n \times m_\text{count}}`
     is the desired solution matrix.
 
-
-    Based on the regularization literal, the above problem is constraint
+    Based on the regularization literal, the above problem is constrained.
 
     Args:
         alpha: Float, the hyperparameter, :math:`\alpha`.
@@ -60,6 +59,10 @@ class GeneralL2Lasso:
         regularizer=None,
         inverse_dimension=None,
         method="gradient_decent",
+        warm_start=False,
+        random_state=None,
+        selection="random",
+        jitter=None,
     ):
 
         self.hyperparameters = {"lambda": lambda1, "alpha": alpha}
@@ -70,6 +73,10 @@ class GeneralL2Lasso:
         self.inverse_dimension = inverse_dimension
         self.f_shape = tuple(item.count for item in inverse_dimension)[::-1]
         self.method = method
+        self.warm_start = warm_start
+        self.random_state = random_state
+        self.selection = selection
+        self.jitter = jitter
 
         # attributes
         self.f = None
@@ -111,9 +118,9 @@ class GeneralL2Lasso:
                 copy_X=True,
                 max_iter=self.max_iterations,
                 tol=self.tolerance,
-                warm_start=False,
-                random_state=None,
-                selection="random",
+                warm_start=self.warm_start,
+                random_state=self.random_state,
+                selection=self.selection,
                 # positive=self.positive,
             )
 
@@ -124,9 +131,9 @@ class GeneralL2Lasso:
                 copy_X=True,
                 max_iter=self.max_iterations,
                 tol=self.tolerance,
-                warm_start=False,
-                random_state=None,
-                selection="random",
+                warm_start=self.warm_start,
+                random_state=self.random_state,
+                selection=self.selection,
                 positive=self.positive,
             )
 
@@ -141,9 +148,9 @@ class GeneralL2Lasso:
                 eps=2.220446049250313e-16,
                 copy_X=True,
                 fit_path=False,
-                positive=True,
-                jitter=None,
-                random_state=None,
+                positive=self.positive,
+                jitter=self.jitter,
+                random_state=self.random_state,
             )
 
         estimator.fit(Ks, ss)
