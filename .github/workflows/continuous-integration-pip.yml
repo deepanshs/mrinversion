@@ -65,9 +65,9 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v4.5.0
 
-  testing_mac:
+  testing_mac_intel:
     needs: [code_lint]
-    runs-on: "macos-latest"
+    runs-on: "macos-13"
     strategy:
       matrix:
         python-version: [3.9, "3.10", "3.11"]
