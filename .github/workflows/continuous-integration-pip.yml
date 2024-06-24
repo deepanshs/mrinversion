@@ -36,11 +36,10 @@ jobs:
 
   testing_unix:
     needs: [code_lint]
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: "ubuntu-latest"
         python-version: [3.9, "3.10", "3.11"]
-    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -68,11 +67,10 @@ jobs:
 
   test-windows:
     needs: [code_lint]
+    runs-on: "windows-latest"
     strategy:
       matrix:
-        os: "windows-latest"
         python-version: [3.7, 3.8]
-    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
