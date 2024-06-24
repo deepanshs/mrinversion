@@ -83,7 +83,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pacman -S mingw-w64-x86_64-openblas
+          C:\msys64\pacman -S mingw-w64-x86_64-openblas
           python -m pip install --upgrade pip
           pip install setuptools
           pip install -r requirements-dev.txt
