@@ -18,9 +18,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -38,29 +38,23 @@ jobs:
     needs: [code_lint]
     strategy:
       matrix:
-        os: ["ubuntu-latest", "macos-latest"]
-        ppython-version: [3.8, 3.9, "3.10", "3.11"]
+        os: "ubuntu-latest"
+        python-version: [3.9, "3.10", "3.11"]
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: MacOS gcc install
-        if: startsWith(matrix.os, 'mac')
-        run: |
-          brew reinstall gcc
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install -r requirements.txt
+          pip install setuptools
           pip install -r requirements-dev.txt
 
       - name: Build and install package from source
@@ -70,30 +64,29 @@ jobs:
         run: pytest --cov=./ --cov-report=xml
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v3.1.1
+        uses: codecov/codecov-action@v4.5.0
 
   test-windows:
     needs: [code_lint]
     strategy:
       matrix:
-        os: ["windows-latest"]
+        os: "windows-latest"
         python-version: [3.7, 3.8]
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install -r requirements.txt
+          pip install setuptools
           pip install -r requirements-dev.txt
 
       - name: Build and install package from source
@@ -103,4 +96,36 @@ jobs:
         run: pytest --cov=./ --cov-report=xml
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v3.1.1
+        uses: codecov/codecov-action@v4.5.0
+
+  testing_mac_intel:
+    needs: [code_lint]
+    runs-on: "macos-13"
+    strategy:
+      matrix:
+        python-version: [3.9, "3.10", "3.11"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          brew install gfortran
+          python -m pip install --upgrade pip
+          pip install setuptools
+          pip install -r requirements-dev.txt
+
+      - name: Build and install package from source
+        run: pip install -e .
+
+      - name: Test with pytest
+        run: pytest --cov=./ --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4.5.0
