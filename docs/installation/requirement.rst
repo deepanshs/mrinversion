@@ -10,7 +10,7 @@ The ``mrinversion`` library depends on the following packages:
 
 - `numpy<2.0 <https://www.numpy.org>`_
 - `csdmpy>=0.5 <https://csdmpy.readthedocs.io/en/stable/>`_
-- `mrsimulator>=0.6 <https://mrsimulator.readthedocs.io/en/stable/>`_ (for generating
+- `mrsimulator>=0.7 <https://mrsimulator.readthedocs.io/en/stable/>`_ (for generating
   the NMR line-shape)
 - `scikit-learn>=0.22.1 <https://scikit-learn.org/stable/>`_ (for statistical leaning methods)
 
