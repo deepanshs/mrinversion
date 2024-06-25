@@ -2,7 +2,8 @@ from copy import deepcopy
 
 from mrsimulator import Simulator
 from mrsimulator import SpinSystem
-from mrsimulator.method.lib import BlochDecaySpectrum, BlochDecayCentralTransitionSpectrum
+from mrsimulator.method.lib import BlochDecaySpectrum
+from mrsimulator.method.lib import BlochDecayCentralTransitionSpectrum
 
 from mrinversion.kernel.base import LineShape
 
