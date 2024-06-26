@@ -128,6 +128,7 @@ def _x_y_to_zeta_eta_distribution(grid, supersampling):
 
     return _x_y_to_zeta_eta(x_mesh, y_mesh)
 
+
 def _x_y_to_cq_eta_distribution(grid, supersampling):
     """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
     x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)

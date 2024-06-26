@@ -170,6 +170,7 @@ class LineShape(BaseModel):
         )
         return cq, eta
 
+
 def _check_csdm_dimension(dimensions, dimension_id):
     if not isinstance(dimensions, (list, *__dimension_list__)):
         raise ValueError(
