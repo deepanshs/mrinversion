@@ -187,7 +187,7 @@ def get_quadpolar_grids(ax, ticks=None, offset=0):
     for ang_ in angle1:
         ax.plot(x, ((x - offset) * ang_) + offset, "k--", alpha=0.5, linewidth=lw)
     # for ang_ in angle2:
-        # ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=lw)
+    # ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=lw)
     # ax.plot(x, x, "k", alpha=0.5, linewidth=2 * lw)
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)

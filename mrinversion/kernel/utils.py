@@ -224,7 +224,6 @@ def cq_eta_to_x_y(cq, eta):
     x[index] = cq[index] * np.cos(theta[index])
     y[index] = cq[index] * np.sin(theta[index])
 
-
     return x.ravel(), y.ravel()
 
 
