@@ -2,8 +2,8 @@ from copy import deepcopy
 
 from mrsimulator import Simulator
 from mrsimulator import SpinSystem
+from mrsimulator.method import Method
 from mrsimulator.method.lib import BlochDecaySpectrum
-from mrsimulator.method.lib import BlochDecayCentralTransitionSpectrum
 
 from mrinversion.kernel.base import LineShape
 
@@ -205,9 +205,14 @@ class DAS(LineShape):
         )
 
     def kernel(self, supersampling):
-        method = BlochDecayCentralTransitionSpectrum.parse_dict_with_units(
-            self.method_args
+        # update method for DAS spectra events
+        das_event = dict(
+            transition_queries=[{"ch1": {"P": [-1], "D": [0]}}],
+            freq_contrib=["Quad2_4"],
         )
+        self.method_args["spectral_dimensions"][0]["events"] = [das_event]
+
+        method = Method.parse_dict_with_units(self.method_args)
         isotope = self.method_args["channels"][0]
         Cq, eta = self._get_cq_eta(supersampling)
         spin_systems = [
