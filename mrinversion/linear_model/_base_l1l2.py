@@ -534,7 +534,7 @@ def cv(l1, X, y, cv):
         y=y,
         scoring="neg_mean_squared_error",  # 'neg_mean_absolute_error",
         cv=cv,
-        fit_params=fit_params,
+        params=fit_params,
         n_jobs=1,
         verbose=0,
     )
