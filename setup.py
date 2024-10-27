@@ -15,7 +15,7 @@ with open("mrinversion/__init__.py") as f:
 module_dir = dirname(abspath(__file__))
 
 install_requires = [
-    "numpy<2.0",
+    "numpy>=2.0",
     "setuptools>=27.3",
     "csdmpy>=0.7",
     "mrsimulator>=1.0.0rc1",

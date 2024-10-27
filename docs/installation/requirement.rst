@@ -8,7 +8,7 @@ The ``mrinversion`` library depends on the following packages:
 
 **Required packages**
 
-- `numpy<2.0 <https://www.numpy.org>`_
+- `numpy>=2.0 <https://www.numpy.org>`_
 - `csdmpy>=0.5 <https://csdmpy.readthedocs.io/en/stable/>`_
 - `mrsimulator>=1.0 <https://mrsimulator.readthedocs.io/en/stable/>`_ (for generating
   the NMR line-shape)
