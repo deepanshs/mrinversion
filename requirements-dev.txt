@@ -1,9 +1,8 @@
 numpy<2.0
-mrsimulator>=0.8.0rc0
+mrsimulator>=1.0.0rc1
 scikit-learn>=0.24.2
 matplotlib>=3.3.4
-pydantic<2.0
-csdmpy>=0.6
+csdmpy>=0.7
 joblib>=1.0.0
 astropy>=5.1
 

@@ -17,10 +17,9 @@ module_dir = dirname(abspath(__file__))
 install_requires = [
     "numpy<2.0",
     "setuptools>=27.3",
-    "csdmpy>=0.6",
-    "mrsimulator>=0.8.0rc0",
+    "csdmpy>=0.7",
+    "mrsimulator>=1.0.0rc1",
     "scikit-learn>=0.22",
-    "pydantic<2.0",
 ]
 
 setup_requires = ["setuptools>=27.3", "numpy"]
