@@ -143,6 +143,56 @@ def get_polar_grids(ax, ticks=None, offset=0):
     ax.set_ylim(ylim)
 
 
+def get_quadpolar_grids(ax, ticks=None, offset=0):
+    """Generate a piece-wise polar grid of Haeberlen parameters, zeta and eta.
+
+    Args:
+        ax: Matplotlib Axes.
+        ticks: Tick coordinates where radial grids are drawn. The value can be a list
+            or a numpy array. The default value is None.
+        offset: The grid is drawn at an offset away from the origin.
+    """
+    ylim = ax.get_ylim()
+    xlim = ax.get_xlim()
+    if ticks is None:
+        x = np.asarray(ax.get_xticks())
+        inc = x[1] - x[0]
+        size = x.size
+        x = np.arange(size + 5) * inc
+    else:
+        x = np.asarray(ticks)
+
+    lw = 0.3
+    # t1 = plt.Polygon([[0, 0], [0, x[-1]], [x[-1], x[-1]]], color="b", alpha=0.05)
+    # t2 = plt.Polygon([[0, 0], [x[-1], 0], [x[-1], x[-1]]], color="r", alpha=0.05)
+
+    # ax.add_artist(t1)
+    # ax.add_artist(t2)
+    for x_ in x:
+        if x_ - offset > 0:
+            ax.add_artist(
+                plt.Circle(
+                    (0, 0),
+                    x_ - offset,
+                    fill=False,
+                    color="k",
+                    linestyle="--",
+                    linewidth=lw,
+                    alpha=0.5,
+                )
+            )
+
+    angle1 = np.tan(np.pi * np.asarray([0, 0.2, 0.4, 0.6, 0.8]) / 2.0)
+    # angle2 = np.tan(np.pi * np.asarray([0.8, 0.6, 0.4, 0.2, 0]) / 4.0)
+    for ang_ in angle1:
+        ax.plot(x, ((x - offset) * ang_) + offset, "k--", alpha=0.5, linewidth=lw)
+    # for ang_ in angle2:
+    # ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=lw)
+    # ax.plot(x, x, "k", alpha=0.5, linewidth=2 * lw)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+
 def plot_3d(
     ax,
     csdm_objects,
