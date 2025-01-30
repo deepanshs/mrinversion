@@ -204,7 +204,7 @@ class DAS(LineShape):
             # "DAS",
         )
 
-    def kernel(self, supersampling):
+    def kernel(self, supersampling, mask_kernel=False):
         # update method for DAS spectra events
         das_event = dict(
             transition_queries=[{"ch1": {"P": [-1], "D": [0]}}],
@@ -215,6 +215,7 @@ class DAS(LineShape):
         method = Method.parse_dict_with_units(self.method_args)
         isotope = self.method_args["channels"][0]
         Cq, eta = self._get_cq_eta(supersampling)
+        Cq, eta = self._get_zeta_eta(supersampling)
         spin_systems = [
             SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
             for cq_, e in zip(Cq, eta)
@@ -229,4 +230,4 @@ class DAS(LineShape):
 
         amp = sim.methods[0].simulation.real
 
-        return self._averaged_kernel(amp, supersampling)
+        return self._averaged_kernel(amp, supersampling, mask_kernel=mask_kernel)

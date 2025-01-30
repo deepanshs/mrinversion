@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import csdmpy as cp
 import numpy as np
+import numpy.ma as ma
 from mrsimulator.method.lib import BlochDecaySpectrum
 
 from .utils import _x_y_to_cq_eta_distribution
@@ -52,7 +53,7 @@ class BaseModel:
         self.inverse_kernel_dimension = inverse_kernel_dimension
         self.inverse_dimension = self.inverse_kernel_dimension
 
-    def _averaged_kernel(self, amp, supersampling, xy_grid=True):
+    def _averaged_kernel(self, amp, supersampling, xy_grid=True, mask_kernel=False):
         """Return the kernel by averaging over the supersampled grid cells."""
         shape = ()
         inverse_kernel_dimension = self.inverse_kernel_dimension
@@ -79,7 +80,13 @@ class BaseModel:
                     section_ = deepcopy(section)
                     section_[i] = 0
                     K[tuple(section_)] /= 2.0
-
+        print(f'K-shape: {K.shape}')
+        if mask_kernel:
+            mask = np.zeros(K.shape)
+            for i in range(len(K)):
+                mask[i][len(K[0])-i:] += 1
+            K = ma.masked_array(K, mask=mask)
+            
         inv_size = np.asarray([item.count for item in inverse_kernel_dimension]).prod()
         K = K.reshape(inv_size, self.kernel_dimension.count).T
         return K
