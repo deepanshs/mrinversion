@@ -49,20 +49,101 @@ def x_y_to_zeta_eta(x, y):
     return zeta * x_unit, eta
 
 
-def _x_y_to_zeta_eta(x, y):
+def _x_y_to_zeta_eta(x, y, eta_bound=1):
     """Same as def x_y_to_zeta_eta, but for ndarrays."""
-    x = np.abs(x)
-    y = np.abs(y)
+    x = np.abs(x).ravel()
+    y = np.abs(y).ravel()
+    # print(x/1e6)
+    # print(y/1e6)
+    n_lost = 0
     zeta = np.sqrt(x**2 + y**2)  # + offset
+    abundances = np.ones(zeta.shape)
     eta = np.ones(zeta.shape)
-    index = np.where(x > y)
-    zeta[index] = -zeta[index]
-    eta[index] = (4.0 / np.pi) * np.arctan(y[index] / x[index])
+    eta = eta.tolist()
+    # print(zeta/1e6)
+    zeta = zeta.tolist()
+    # x.tolist()
+    # y.tolist()
 
-    index = np.where(x < y)
-    eta[index] = (4.0 / np.pi) * np.arctan(x[index] / y[index])
+    # print(f'eta length pre: {len(eta)}')
+    # print(eta.shape)
+    del_these = []
+    for index,_ in enumerate(x):
+        if x[index] > y[index]:
+            zeta[index] = - zeta[index]
+            this_eta = (4.0 / np.pi) * np.arctan(y[index] / x[index])
+            if this_eta < eta_bound:
+                    eta[index] = this_eta
+            else:
+                # del_these.append(index)
+                # del zeta[index], eta[index]
+                # n_lost += 1
+                abundances[index] = 0
+        elif x[index] < y[index]:
+            this_eta = (4.0 / np.pi) * np.arctan(x[index] / y[index])
+            if this_eta < eta_bound:
+                eta[index] = this_eta
+            else:
+                # del zeta[index], eta[index]
+                # del_these.append(index)
+                # n_lost += 1
+                abundances[index] = 0
+        elif x[index] == y[index] and eta_bound < 1:
+            # del_these.append(index)
+            # n_lost += 1
+            abundances[index] = 0
+            
+    # print(np.asarray(eta))
+    # print(del_these)
+    # print(f'eta length post: {len(eta)}')
+    # print(f'n lost: {n_lost}')
+    if eta_bound ==1:
+        return np.asarray(zeta), np.asarray(eta)
+    else:
+        for idx in del_these[::-1]:
+            del zeta[idx], eta[idx]
+        # print(np.asarray(eta))
+        return np.asarray(zeta), np.asarray(eta), abundances
 
-    return zeta.ravel(), eta.ravel()
+
+
+
+
+# def _x_y_to_zeta_eta(x, y, eta_bound=1):
+#     """Same as def x_y_to_zeta_eta, but for ndarrays."""
+#     x = np.abs(x)
+#     y = np.abs(y)
+#     # print(x)
+#     # print(y)
+#     n_lost = 0
+#     zeta = np.sqrt(x**2 + y**2)  # + offset
+#     # print(zeta)
+#     eta = np.ones(zeta.shape)*100
+#     # print(eta.shape)
+#     for index,_ in np.ndenumerate(x):
+#         if x[index] > y[index]:
+#             zeta[index] = - zeta[index]
+#             this_eta = (4.0 / np.pi) * np.arctan(y[index] / x[index])
+#             if this_eta < eta_bound:
+#                     eta[index] = this_eta
+#             else:
+#                 n_lost += 1
+#         elif x[index] < y[index]:
+#             this_eta = (4.0 / np.pi) * np.arctan(x[index] / y[index])
+#             if this_eta < eta_bound:
+#                 eta[index] = this_eta
+#             else:
+#                 n_lost += 1
+#     print(eta)
+    
+#     if eta_bound ==1:
+#         return zeta.ravel(), eta.ravel()
+#     else:
+#         return zeta.ravel(), eta.ravel(), n_lost
+
+
+
+
 
 
 def zeta_eta_to_x_y(zeta, eta):
@@ -109,7 +190,7 @@ def zeta_eta_to_x_y(zeta, eta):
     return x.ravel(), y.ravel()
 
 
-def _x_y_to_zeta_eta_distribution(grid, supersampling):
+def _x_y_to_zeta_eta_distribution(grid, supersampling, eta_bound):
     """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
     x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)
     y_coordinates = _supersampled_coordinates(grid[1], supersampling=supersampling)
@@ -126,7 +207,7 @@ def _x_y_to_zeta_eta_distribution(grid, supersampling):
         np.abs(x_coordinates), np.abs(y_coordinates), indexing="xy"
     )
 
-    return _x_y_to_zeta_eta(x_mesh, y_mesh)
+    return _x_y_to_zeta_eta(x_mesh, y_mesh, eta_bound)
 
 
 def _x_y_to_cq_eta_distribution(grid, supersampling):

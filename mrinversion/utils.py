@@ -31,12 +31,12 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
         if item.origin_offset != 0
     ]
     data = csdm_object.y[0].components[0]
-
+    # print(f'data max: {data.max()}')
     extra_dims = 1
     if len(csdm_object.x) > 2:
         extra_dims = np.sum([item.coordinates.size for item in csdm_object.x[2:]])
     data.shape = (extra_dims, data.shape[-2], data.shape[-1])
-
+    
     reg_x, reg_y = (csdm_object.x[i].coordinates.value for i in range(2))
     dx = reg_x[1] - reg_x[0]
     dy = reg_y[1] - reg_y[0]
@@ -47,7 +47,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     d_eta = eta.increment.value / 2
     range_ = [
         [zeta.coordinates[0].value - d_zeta, zeta.coordinates[-1].value + d_zeta],
-        [eta.coordinates[0] - d_eta, eta.coordinates[-1] + d_eta],
+        [eta.coordinates[0].value - d_eta, eta.coordinates[-1].value + d_eta],
     ]
 
     avg_range_x = (np.arange(n) - (n - 1) / 2) * dx / n
@@ -75,13 +75,16 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
             np.append(eta, np.ones(index[0].size))
             for i in range(extra_dims):
                 weight = deepcopy(data[i]).ravel()
+                # print(f'weight max: {weight.max()}')
+                # print(f'range: {range_}')
                 weight[index] /= 2
                 np.append(weight, weight[index])
                 sol_, _, _ = np.histogram2d(
                     zeta_grid, eta_grid, weights=weight, bins=bins, range=range_
                 )
                 sol[i] += sol_
-
+                # print(f'sol max: {sol.max()}')
+                # print()
     sol /= n * n
 
     del zeta_grid, eta_grid, index, x_, y_, avg_range_x, avg_range_y

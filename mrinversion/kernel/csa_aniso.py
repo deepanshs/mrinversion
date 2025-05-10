@@ -204,7 +204,7 @@ class DAS(LineShape):
             # "DAS",
         )
 
-    def kernel(self, supersampling, mask_kernel=False):
+    def kernel(self, supersampling, mask_kernel=False, return_as_obj=False, eta_bound = 1):
         # update method for DAS spectra events
         das_event = dict(
             transition_queries=[{"ch1": {"P": [-1], "D": [0]}}],
@@ -214,12 +214,28 @@ class DAS(LineShape):
 
         method = Method.parse_dict_with_units(self.method_args)
         isotope = self.method_args["channels"][0]
-        Cq, eta = self._get_cq_eta(supersampling)
-        Cq, eta = self._get_zeta_eta(supersampling)
-        spin_systems = [
-            SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
-            for cq_, e in zip(Cq, eta)
-        ]
+        # Cq, eta = self._get_cq_eta(supersampling)
+        if eta_bound == 1:
+            Cq, eta = self._get_zeta_eta(supersampling, eta_bound)
+        else: 
+            Cq, eta, abundances = self._get_zeta_eta(supersampling, eta_bound)
+        # Cq  = list(Cq)
+        # eta = list(eta)
+        # print(f'len Cq: {len(Cq)}; len eta: {len(eta)}')
+        # for i, (_, eta_) in enumerate(zip(Cq, eta)):
+            # if eta_ > eta_bound:
+                # del Cq[i], eta[i]
+        # print(f'len Cq: {len(Cq)}; len eta: {len(eta)}')
+        if eta_bound == 1:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
+                for cq_, e in zip(Cq, eta)
+            ]
+        else:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))], abundance=abun)
+                for cq_, e,abun in zip(Cq, eta,abundances)
+            ]
         sim = Simulator()
         sim.config.number_of_sidebands = self.number_of_sidebands
         sim.config.decompose_spectrum = "spin_system"
@@ -229,5 +245,8 @@ class DAS(LineShape):
         sim.run(pack_as_csdm=False)
 
         amp = sim.methods[0].simulation.real
-
+        # print(Cq)
+        # print(eta)
+        if return_as_obj:
+            kernel = self._averaged_kernel(amp, supersampling, mask_kernel=mask_kernel)
         return self._averaged_kernel(amp, supersampling, mask_kernel=mask_kernel)
