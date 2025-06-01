@@ -523,10 +523,10 @@ class GeneralL2LassoCV:
 
 def cv(l1, X, y, cv):
     """Return the cross-validation score as negative of mean square error."""
-    if isinstance(l1, (Lasso, MultiTaskLasso)):
-        fit_params = {"check_input": False}
-    if isinstance(l1, LassoLars):
-        fit_params = None  # {"Xy": np.dot(X.T, y)}
+    # if isinstance(l1, (Lasso, MultiTaskLasso)):
+    #     fit_params = {"check_input": False}
+    # if isinstance(l1, LassoLars):
+    #     fit_params = None  # {"Xy": np.dot(X.T, y)}
 
     cv_score = cross_validate(
         l1,
@@ -534,7 +534,7 @@ def cv(l1, X, y, cv):
         y=y,
         scoring="neg_mean_squared_error",  # 'neg_mean_absolute_error",
         cv=cv,
-        fit_params=fit_params,
+        # fit_params=fit_params,
         n_jobs=1,
         verbose=0,
     )

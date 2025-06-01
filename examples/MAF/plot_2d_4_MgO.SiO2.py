@@ -144,7 +144,7 @@ lineshape = ShieldingPALineshape(
 # Once the ShieldingPALineshape instance is created, use the
 # :meth:`~mrinversion.kernel.nmr.ShieldingPALineshape.kernel` method of the
 # instance to generate the MAF line-shape kernel.
-K = lineshape.kernel(supersampling=1)
+K = lineshape.kernel(supersampling=1).real
 print(K.shape)
 
 # %%
