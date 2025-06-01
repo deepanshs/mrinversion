@@ -96,7 +96,7 @@ def fista(
 
 
 @nb.njit(fastmath=True)
-def fista_cv(
+def fista_cv_nb(
     matrix: np.ndarray,
     s: np.ndarray,
     matrix_test: np.ndarray,
@@ -112,9 +112,7 @@ def fista_cv(
     n_targets = s.shape[1]
     n_features = matrix.shape[1]
     prediction_error = np.zeros((n_lambda, n_fold))
-    iter_arr = np.zeros(n_lambda, dtype=int)
-    cv = np.zeros(n_lambda)
-    cvstd = np.zeros(n_lambda)
+    iter_arr = np.zeros(n_lambda)
 
     residue = np.zeros(max_iter)
     data_consistency = np.zeros(max_iter)
@@ -124,12 +122,12 @@ def fista_cv(
         y_train = s[..., fold]
         x_test = matrix_test[..., fold]
         y_test = s_test[..., fold]
-        y_points = np.prod(y_test.shape)
+        y_points = y_test.shape[0] * y_test.shape[1]
 
         gradient = x_train.T @ x_train
         c = x_train.T @ y_train
 
-        norm_factor = np.linalg.norm(y_train) ** 2
+        norm_factor = norm(y_train) ** 2
         f_k = np.zeros((n_features, n_targets))
         y_k = f_k.copy()
 
@@ -157,7 +155,7 @@ def fista_cv(
                 else:
                     f_k[:] = l1_soft_threshold(temp_c, l_inv * lam)
 
-                residue[k] = np.linalg.norm(x_train @ f_k - y_train) ** 2
+                residue[k] = norm(x_train @ f_k - y_train) ** 2
                 fk_l1 = np.sum(np.abs(f_k))
                 data_consistency[k] = residue[k] + lam * fk_l1
 
@@ -182,7 +180,24 @@ def fista_cv(
             prediction_error[j, fold] = err / y_points
             iter_arr[j] = k
 
+    return prediction_error, iter_arr
+
+
+def fista_cv(
+    matrix: np.ndarray,
+    s: np.ndarray,
+    matrix_test: np.ndarray,
+    s_test: np.ndarray,
+    max_iter: int,
+    lambda_vals: np.ndarray,
+    nonnegative: bool,
+    l_inv: float,
+    tol: float,
+):
+    prediction_error, iter_arr = fista_cv_nb(
+        matrix, s, matrix_test, s_test, max_iter, lambda_vals, nonnegative, l_inv, tol
+    )
+
     cv = prediction_error.mean(axis=1)
     cvstd = prediction_error.std(axis=1)
-
     return cv, cvstd, prediction_error, iter_arr
