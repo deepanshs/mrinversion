@@ -55,7 +55,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools
           pip install -r requirements-dev.txt
-          which gfortran
 
       - name: Build and install package from source
         run: python setup.py develop
