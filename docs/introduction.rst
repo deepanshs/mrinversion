@@ -5,7 +5,7 @@ Objective
 ---------
 
 The ``mrinversion`` package solves the linear inverse problems involving Fredholm integrals of
-the first kind, which are often encounted in magnetic resonance. The package currently
+the first kind, which are often encountered in magnetic resonance. The package currently
 supports inversion of
 
 - pure shielding anisotropic NMR lineshape into a distribution of the second-rank traceless
