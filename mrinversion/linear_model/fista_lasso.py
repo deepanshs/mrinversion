@@ -47,17 +47,6 @@ class LassoFista:
                 l_inv=(1 / lipszit),
                 tol=self.tolerance,
             )
-            # _ = fista.fista(
-            #     matrix=K_,
-            #     s=s_.mean(axis=1),
-            #     lambd=self.hyperparameters["lambda"],
-            #     maxiter=self.max_iterations,
-            #     f_k=self.f_1,
-            #     nonnegative=int(self.positive),
-            #     linv=(1 / lipszit),
-            #     tol=self.tolerance,
-            #     npros=1,
-            # )
             self.f = np.asfortranarray(np.tile(self.f_1, s_.shape[1]))
 
         _ = fista(
@@ -70,18 +59,6 @@ class LassoFista:
             l_inv=(1 / lipszit),
             tol=self.tolerance,
         )
-
-        # _ = fista.fista(
-        #     matrix=K_,
-        #     s=s_,
-        #     lambd=self.hyperparameters["lambda"],
-        #     maxiter=self.max_iterations,
-        #     f_k=self.f,
-        #     nonnegative=int(self.positive),
-        #     linv=(1 / lipszit),
-        #     tol=self.tolerance,
-        #     npros=1,
-        # )
 
         self.f *= self.scale
 
@@ -221,8 +198,6 @@ class LassoFistaCV:
             nonnegative=int(self.positive),
             l_inv=(1 / lipszit),
             tol=self.tolerance,
-            # npros=self.n_jobs,
-            # m=m,
         )
         # subtract the variance.
         self.cv_map -= (self.sigma / self.scale) ** 2
