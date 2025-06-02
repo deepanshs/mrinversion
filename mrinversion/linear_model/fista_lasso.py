@@ -39,29 +39,27 @@ class LassoFista:
 
         if warm_start:
             self.f_1 = np.asfortranarray(np.zeros((K_.shape[1], 1)))
-            _ = fista.fista(
+            _ = fista(
                 matrix=K_,
                 s=s_.mean(axis=1),
-                lambd=self.hyperparameters["lambda"],
-                maxiter=self.max_iterations,
+                lam=self.hyperparameters["lambda"],
+                max_iter=self.max_iterations,
                 f_k=self.f_1,
                 nonnegative=int(self.positive),
-                linv=(1 / lipszit),
+                l_inv=(1 / lipszit),
                 tol=self.tolerance,
-                npros=1,
             )
             self.f = np.asfortranarray(np.tile(self.f_1, s_.shape[1]))
 
-        _ = fista.fista(
+        _ = fista(
             matrix=K_,
             s=s_,
-            lambd=self.hyperparameters["lambda"],
-            maxiter=self.max_iterations,
+            lam=self.hyperparameters["lambda"],
+            max_iter=self.max_iterations,
             f_k=self.f,
             nonnegative=int(self.positive),
-            linv=(1 / lipszit),
+            l_inv=(1 / lipszit),
             tol=self.tolerance,
-            npros=1,
         )
 
         self.f *= self.scale
@@ -192,18 +190,16 @@ class LassoFistaCV:
             K_, s_, self.folds, self.randomize, self.times
         )
 
-        self.cv_map, self.std, _, _, _, self.prediction_error = fista_cv.fista(
+        self.cv_map, self.std, self.prediction_error, _ = fista_cv(
             matrix=k_train,
             s=s_train,
-            matrixtest=k_test,
-            stest=s_test,
-            lambdaval=self.cv_lambdas,
-            maxiter=self.max_iterations,
+            matrix_test=k_test,
+            s_test=s_test,
+            lambda_vals=self.cv_lambdas,
+            max_iter=self.max_iterations,
             nonnegative=int(self.positive),
-            linv=(1 / lipszit),
+            l_inv=(1 / lipszit),
             tol=self.tolerance,
-            npros=self.n_jobs,
-            m=m,
         )
         # subtract the variance.
         self.cv_map -= (self.sigma / self.scale) ** 2

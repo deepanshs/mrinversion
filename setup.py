@@ -1,11 +1,8 @@
 from os.path import abspath
 from os.path import dirname
 from os.path import join
-
 from setuptools import find_packages, setup
 
-# from numpy.distutils.core import setup
-# from numpy.distutils.core import Extension
 
 with open("mrinversion/__init__.py") as f:
     for line in f.readlines():
@@ -16,36 +13,17 @@ with open("mrinversion/__init__.py") as f:
 module_dir = dirname(abspath(__file__))
 
 install_requires = [
-    "numpy>2.0",
+    "numpy>=2.0",
     "setuptools>=27.3",
-    "csdmpy>=0.6",
-    "mrsimulator>=1.0",
-    "scikit-learn>=0.22",
-    # "pydantic<2.0",
+    "csdmpy>=0.7",
+    "mrsimulator>=1.0.0",
+    "scikit-learn>=1.5.2",
+    "numba>=0.61.2",
 ]
 
 setup_requires = ["setuptools>=27.3", "numpy"]
 extras = {"matplotlib": ["matplotlib>=3.0"]}
 
-# ext1 = Extension(
-#     name="mrinversion.linear_model.fista.fista",
-#     sources=["mrinversion/linear_model/fista/fista.f90"],
-#     # f2py_options=['only:', 'subroutine_name', ':'],
-#     extra_f90_compile_args=["-O3"],  # '-fopenmp'],
-#     libraries=["gomp", "blas"],
-#     # f2py_options=['only:', 'fista', ':'],
-#     language="f90",
-# )
-
-# ext2 = Extension(
-#     name="mrinversion.linear_model.fista.fista_cv",
-#     sources=["mrinversion/linear_model/fista/fista_cv.f90"],
-#     # f2py_options=['only:', 'subroutine_name', ':'],
-#     extra_f90_compile_args=["-O3"],  # '-fopenmp'],
-#     libraries=["gomp", "blas"],
-#     # f2py_options=['only:', 'fista', ':'],
-#     language="f90",
-# )
 
 setup(
     name="mrinversion",
@@ -58,10 +36,9 @@ setup(
     long_description_content_type="text/markdown",
     author="Deepansh J. Srivastava",
     author_email="deepansh2012@gmail.com",
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     url="https://github.com/DeepanshS/mrinversion/",
     packages=find_packages(),
-    # package_dir={"": "mrinversion"},
     install_requires=install_requires,
     setup_requires=setup_requires,
     extras_require=extras,
@@ -69,7 +46,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     license="BSD-3-Clause",
-    # ext_modules=[ext1, ext2],
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -84,5 +60,8 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Topic :: Scientific/Engineering",
+        "Topic :: Education",
+        "Topic :: Scientific/Engineering :: Chemistry",
+        "Topic :: Scientific/Engineering :: Physics",
     ],
 )
