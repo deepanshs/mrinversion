@@ -5,10 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from mrinversion.linear_model._base_l1l2 import prepare_signal
-
-# from mrinversion.linear_model.fista import fista
-# from mrinversion.linear_model.fista import fista_cv
-fista = fista_cv = None
+from mrinversion.linear_model.fista import fista
+from mrinversion.linear_model.fista import fista_cv
 
 __author__ = "Deepansh Srivastava"
 CPU_COUNTS = os.cpu_count()
