@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from mrsimulator import Simulator
 from mrsimulator import SpinSystem
+from mrsimulator.method import Method
 from mrsimulator.method.lib import BlochDecaySpectrum
 
 from mrinversion.kernel.base import LineShape
@@ -181,43 +182,71 @@ class SpinningSidebands(ShieldingPALineshape):
         )
 
 
-# class DAS(LineShape):
-#     def __init__(
-#         self,
-#         anisotropic_dimension,
-#         inverse_kernel_dimension,
-#         channel,
-#         magnetic_flux_density="9.4 T",
-#         rotor_angle="54.735 deg",
-#         rotor_frequency="600 Hz",
-#         number_of_sidebands=None,
-#     ):
-#         super().__init__(
-#             anisotropic_dimension,
-#             inverse_kernel_dimension,
-#             channel,
-#             magnetic_flux_density,
-#             rotor_angle,
-#             rotor_frequency,
-#             number_of_sidebands,
-#             # "DAS",
-#         )
+class DAS(LineShape):
+    def __init__(
+        self,
+        anisotropic_dimension,
+        inverse_kernel_dimension,
+        channel,
+        magnetic_flux_density="9.4 T",
+        rotor_angle="54.735 deg",
+        rotor_frequency="600 Hz",
+        number_of_sidebands=None,
+    ):
+        super().__init__(
+            anisotropic_dimension,
+            inverse_kernel_dimension,
+            channel,
+            magnetic_flux_density,
+            rotor_angle,
+            rotor_frequency,
+            number_of_sidebands,
+            # "DAS",
+        )
 
-#     def kernel(self, supersampling):
-#         method = BlochDecayCentralTransitionSpectrum.parse_dict_with_units(
-#             self.method_args
-#         )
-#         isotope = self.method_args["channels"][0]
-#         Cq, eta = self._get_zeta_eta(supersampling)
-#         spin_systems = [
-#             SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
-#             for cq_, e in zip(Cq, eta)
-#         ]
+    def kernel(self, supersampling, mask_kernel=False, return_as_obj=False, eta_bound = 1):
+        # update method for DAS spectra events
+        das_event = dict(
+            transition_queries=[{"ch1": {"P": [-1], "D": [0]}}],
+            freq_contrib=["Quad2_4"],
+        )
+        self.method_args["spectral_dimensions"][0]["events"] = [das_event]
 
-#         self.simulator.spin_systems = spin_systems
-#         self.simulator.methods = [method]
-#         self.simulator.run(pack_as_csdm=False)
+        method = Method.parse_dict_with_units(self.method_args)
+        isotope = self.method_args["channels"][0]
+        # Cq, eta = self._get_cq_eta(supersampling)
+        if eta_bound == 1:
+            Cq, eta = self._get_zeta_eta(supersampling, eta_bound)
+        else: 
+            Cq, eta, abundances = self._get_zeta_eta(supersampling, eta_bound)
+        # Cq  = list(Cq)
+        # eta = list(eta)
+        # print(f'len Cq: {len(Cq)}; len eta: {len(eta)}')
+        # for i, (_, eta_) in enumerate(zip(Cq, eta)):
+            # if eta_ > eta_bound:
+                # del Cq[i], eta[i]
+        # print(f'len Cq: {len(Cq)}; len eta: {len(eta)}')
+        if eta_bound == 1:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
+                for cq_, e in zip(Cq, eta)
+            ]
+        else:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))], abundance=abun)
+                for cq_, e,abun in zip(Cq, eta,abundances)
+            ]
+        sim = Simulator()
+        sim.config.number_of_sidebands = self.number_of_sidebands
+        sim.config.decompose_spectrum = "spin_system"
 
-#         amp = self.simulator.methods[0].simulation
+        sim.spin_systems = spin_systems
+        sim.methods = [method]
+        sim.run(pack_as_csdm=False)
 
-#         return self._averaged_kernel(amp, supersampling)
+        amp = sim.methods[0].simulation.real
+        # print(Cq)
+        # print(eta)
+        if return_as_obj:
+            kernel = self._averaged_kernel(amp, supersampling, mask_kernel=mask_kernel)
+        return self._averaged_kernel(amp, supersampling, mask_kernel=mask_kernel)
