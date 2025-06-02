@@ -39,7 +39,6 @@ setup(
     python_requires=">=3.10",
     url="https://github.com/DeepanshS/mrinversion/",
     packages=find_packages(),
-    # package_dir={"": "mrinversion"},
     install_requires=install_requires,
     setup_requires=setup_requires,
     extras_require=extras,
@@ -47,7 +46,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     license="BSD-3-Clause",
-    # ext_modules=[ext1, ext2],
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -62,5 +60,8 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Topic :: Scientific/Engineering",
+        "Topic :: Education",
+        "Topic :: Scientific/Engineering :: Chemistry",
+        "Topic :: Scientific/Engineering :: Physics",
     ],
 )

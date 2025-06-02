@@ -13,6 +13,7 @@ importTypes/
 app/
 c_lib/
 docs/galley_examples/**
+docs/sg_execution_times.rst
 
 # C extensions
 *.so
