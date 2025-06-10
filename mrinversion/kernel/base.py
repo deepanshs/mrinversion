@@ -2,8 +2,10 @@ from copy import deepcopy
 
 import csdmpy as cp
 import numpy as np
+import numpy.ma as ma
 from mrsimulator.method.lib import BlochDecaySpectrum
 
+from .utils import _x_y_to_cq_eta_distribution
 from .utils import _x_y_to_zeta_eta_distribution
 
 __dimension_list__ = (cp.Dimension, cp.LinearDimension, cp.MonotonicDimension)
@@ -51,7 +53,7 @@ class BaseModel:
         self.inverse_kernel_dimension = inverse_kernel_dimension
         self.inverse_dimension = self.inverse_kernel_dimension
 
-    def _averaged_kernel(self, amp, supersampling, xy_grid=True):
+    def _averaged_kernel(self, amp, supersampling, xy_grid=True, mask_kernel=False):
         """Return the kernel by averaging over the supersampled grid cells."""
         shape = ()
         inverse_kernel_dimension = self.inverse_kernel_dimension
@@ -61,15 +63,18 @@ class BaseModel:
         for item in inverse_kernel_dimension[::-1]:
             shape += (item.count, supersampling)
         shape += (self.kernel_dimension.count,)
-
+        # print(f'shape: {shape}')
         K = amp.reshape(shape)
 
         inv_len = len(inverse_kernel_dimension)
         axes = tuple(2 * i + 1 for i in range(inv_len))
         K = K.mean(axis=axes)
+        # print(f'K shape: {K.shape}')
 
         if xy_grid:
             section = [*[0 for _ in range(inv_len)], slice(None, None, None)]
+            # print(f'section: {section}')
+            # print(f'K[tuple(section)]: {K[tuple(section)]}')
             K /= K[tuple(section)].sum()
 
             section = [slice(None, None, None) for _ in range(inv_len + 1)]
@@ -78,7 +83,13 @@ class BaseModel:
                     section_ = deepcopy(section)
                     section_[i] = 0
                     K[tuple(section_)] /= 2.0
-
+        # print(f'K-shape: {K.shape}')
+        # if mask_kernel:
+        #     mask = np.zeros(K.shape)
+        #     for i in range(len(K)):
+        #         mask[i][len(K[0])-i:] += 1
+        #     K = ma.masked_array(K, mask=mask)
+            
         inv_size = np.asarray([item.count for item in inverse_kernel_dimension]).prod()
         K = K.reshape(inv_size, self.kernel_dimension.count).T
         return K
@@ -154,13 +165,27 @@ class LineShape(BaseModel):
         if number_of_sidebands is None:
             self.number_of_sidebands = dim.count
 
-    def _get_zeta_eta(self, supersampling):
+    def _get_zeta_eta(self, supersampling, eta_bound=1):
         """Return zeta and eta coordinates over x-y grid"""
 
-        zeta, eta = _x_y_to_zeta_eta_distribution(
+        if eta_bound == 1:
+            zeta, eta = _x_y_to_zeta_eta_distribution(
+                self.inverse_kernel_dimension, supersampling, eta_bound
+            )
+            return zeta, eta
+        else:
+            zeta, eta, abundances= _x_y_to_zeta_eta_distribution(
+                self.inverse_kernel_dimension, supersampling, eta_bound
+            )
+            return zeta, eta, abundances
+
+    def _get_cq_eta(self, supersampling):
+        """Return zeta and eta coordinates over x-y grid"""
+
+        cq, eta = _x_y_to_cq_eta_distribution(
             self.inverse_kernel_dimension, supersampling
         )
-        return zeta, eta
+        return cq, eta
 
 
 def _check_csdm_dimension(dimensions, dimension_id):
