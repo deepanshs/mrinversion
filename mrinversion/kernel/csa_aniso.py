@@ -1,8 +1,12 @@
 from copy import deepcopy
 
+import csdmpy as cp
+import numpy as np
+from mrsimulator.utils import get_spectral_dimensions
+
 from mrsimulator import Simulator
 from mrsimulator import SpinSystem
-from mrsimulator.method import Method
+from mrsimulator.method import Method, SpectralEvent
 from mrsimulator.method.lib import BlochDecaySpectrum
 
 from mrinversion.kernel.base import LineShape
@@ -204,7 +208,7 @@ class DAS(LineShape):
             # "DAS",
         )
 
-    def kernel(self, supersampling, mask_kernel=False, return_as_obj=False, eta_bound = 1):
+    def kernel(self, supersampling, eta_bound = 1):
         # update method for DAS spectra events
         das_event = dict(
             transition_queries=[{"ch1": {"P": [-1], "D": [0]}}],
@@ -214,18 +218,12 @@ class DAS(LineShape):
 
         method = Method.parse_dict_with_units(self.method_args)
         isotope = self.method_args["channels"][0]
-        # Cq, eta = self._get_cq_eta(supersampling)
+        
         if eta_bound == 1:
             Cq, eta = self._get_zeta_eta(supersampling, eta_bound)
         else: 
             Cq, eta, abundances = self._get_zeta_eta(supersampling, eta_bound)
-        # Cq  = list(Cq)
-        # eta = list(eta)
-        # print(f'len Cq: {len(Cq)}; len eta: {len(eta)}')
-        # for i, (_, eta_) in enumerate(zip(Cq, eta)):
-            # if eta_ > eta_bound:
-                # del Cq[i], eta[i]
-        # print(f'len Cq: {len(Cq)}; len eta: {len(eta)}')
+       
         if eta_bound == 1:
             spin_systems = [
                 SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
@@ -245,8 +243,235 @@ class DAS(LineShape):
         sim.run(pack_as_csdm=False)
 
         amp = sim.methods[0].simulation.real
-        # print(Cq)
-        # print(eta)
-        if return_as_obj:
-            kernel = self._averaged_kernel(amp, supersampling, mask_kernel=mask_kernel)
-        return self._averaged_kernel(amp, supersampling, mask_kernel=mask_kernel)
+        
+        return self._averaged_kernel(amp, supersampling)
+
+
+class MQMAS(LineShape):
+    def __init__(
+        self,
+        anisotropic_dimension,
+        inverse_kernel_dimension,
+        channel,
+        magnetic_flux_density="9.4 T",
+        rotor_angle="54.735 deg",
+        rotor_frequency="600 Hz",
+        number_of_sidebands=None,
+    ):
+        super().__init__(
+            anisotropic_dimension,
+            inverse_kernel_dimension,
+            channel,
+            magnetic_flux_density,
+            rotor_angle,
+            rotor_frequency,
+            number_of_sidebands,
+            # "DAS",
+        )
+
+    def kernel(self, supersampling, eta_bound = 1):
+        # update method for DAS spectra events
+        mqmas_events = [
+            dict(
+                fraction= -9/50,
+                transition_queries=[{"ch1": {"P": [-3], "D": [0]}}]
+            ),
+            dict(
+                fraction= 27/50,
+                transition_queries=[{"ch1": {"P": [-1], "D": [0]}}]
+            ),
+        ]
+        
+        self.method_args["spectral_dimensions"][0]["events"] = mqmas_events
+
+        method = Method.parse_dict_with_units(self.method_args)
+        isotope = self.method_args["channels"][0]
+        
+        if eta_bound == 1:
+            Cq, eta = self._get_zeta_eta(supersampling, eta_bound)
+        else: 
+            Cq, eta, abundances = self._get_zeta_eta(supersampling, eta_bound)
+       
+        if eta_bound == 1:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
+                for cq_, e in zip(Cq, eta)
+            ]
+        else:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))], abundance=abun)
+                for cq_, e,abun in zip(Cq, eta,abundances)
+            ]
+        sim = Simulator()
+        sim.config.number_of_sidebands = self.number_of_sidebands
+        sim.config.decompose_spectrum = "spin_system"
+
+        sim.spin_systems = spin_systems
+        sim.methods = [method]
+        sim.run(pack_as_csdm=False)
+
+        amp = sim.methods[0].simulation.real
+        print(f'amp shape: {amp.shape}')
+        return self._averaged_kernel(amp, supersampling)
+    
+
+class SL_MQMASnodist(LineShape):
+    def __init__(
+        self,
+        anisotropic_dimension,
+        inverse_kernel_dimension,
+        channel,
+        exp_dict,
+        magnetic_flux_density="9.4 T",
+        rotor_angle="54.735 deg",
+        rotor_frequency="600 Hz",
+        number_of_sidebands=None,
+    ):
+        super().__init__(
+            anisotropic_dimension,
+            inverse_kernel_dimension,
+            channel,
+            magnetic_flux_density,
+            rotor_angle,
+            rotor_frequency,
+            number_of_sidebands,
+            #
+            #  "DAS",
+        )
+        self.exp_dict = exp_dict
+        self.anisotropic_dimension = anisotropic_dimension
+
+    def kernel(self, supersampling, eta_bound = 1):
+        import sys
+        sys.path.insert(0, '/home/lexicon2810/github-repos-WSL/mrsmqmas')
+        # import src.processing as smproc
+        import src.simulation as smsim
+        # import src.fitting as smfit
+        
+        isotope = self.method_args["channels"][0]
+        if eta_bound == 1:
+            Cq, eta = self._get_zeta_eta(supersampling, eta_bound)
+        else: 
+            Cq, eta, abundances = self._get_zeta_eta(supersampling, eta_bound)
+
+        # print(f'Cq: {Cq}')
+        # print(f'eta: {eta}')
+        if eta_bound == 1:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
+                for cq_, e in zip(Cq, eta)
+            ]
+        else:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))], abundance=abun)
+                for cq_, e,abun in zip(Cq, eta,abundances)
+            ]
+        # print(self.anisotropic_dimension)
+        
+        obj = cp.CSDM(dimensions=[self.anisotropic_dimension])
+        spec_dim = get_spectral_dimensions(obj)
+        # print(obj.x[0])
+        # print(self.anisotropic_dimension)
+        # print(spec_dim)
+
+        amp = np.asarray([smsim.simulate_onesite_lineshape(
+            self.exp_dict, 
+            mysys, 
+            spec_dim[0], 
+            input_type='c0_c4', 
+            contribs='c0_c4', 
+            return_array=True,
+            distorted=False) for mysys in spin_systems])
+        # sim = Simulator()
+        # sim.config.number_of_sidebands = self.number_of_sidebands
+        # sim.config.decompose_spectrum = "spin_system"
+
+        # sim.spin_systems = spin_systems
+        # sim.methods = [method]
+        # sim.run(pack_as_csdm=False)
+        # obj_pre = cp.CSDM(
+        #     dimensions=[
+        #         aniso
+        #     ]
+        # )
+        # amp = sim.methods[0].simulation.real
+        # print(f'amp shape: {amp.shape}')
+        return self._averaged_kernel(amp, supersampling)
+        
+
+class SL_MQMAS(LineShape):
+    def __init__(
+        self,
+        anisotropic_dimension,
+        inverse_kernel_dimension,
+        channel,
+        exp_dict,
+        magnetic_flux_density="9.4 T",
+        rotor_angle="54.735 deg",
+        rotor_frequency="600 Hz",
+        number_of_sidebands=None,
+    ):
+        super().__init__(
+            anisotropic_dimension,
+            inverse_kernel_dimension,
+            channel,
+            magnetic_flux_density,
+            rotor_angle,
+            rotor_frequency,
+            number_of_sidebands,
+            #
+            #  "DAS",
+        )
+        self.exp_dict = exp_dict
+        self.anisotropic_dimension = anisotropic_dimension
+
+    def kernel(self, supersampling, eta_bound = 1):
+        import sys
+        sys.path.insert(0, '/home/lexicon2810/github-repos-WSL/mrsmqmas')
+        # import src.processing as smproc
+        import src.simulation as smsim
+        # import src.fitting as smfit
+        
+        isotope = self.method_args["channels"][0]
+        if eta_bound == 1:
+            Cq, eta = self._get_zeta_eta(supersampling, eta_bound)
+        else: 
+            Cq, eta, abundances = self._get_zeta_eta(supersampling, eta_bound)
+        
+        print(f'Cq: {Cq}')
+        print(f'eta: {eta}')
+        if eta_bound == 1:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))])
+                for cq_, e in zip(Cq, eta)
+            ]
+        else:
+            spin_systems = [
+                SpinSystem(sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))], abundance=abun)
+                for cq_, e,abun in zip(Cq, eta,abundances)
+            ]
+        # print(self.anisotropic_dimension)
+        
+        obj = cp.CSDM(dimensions=[self.anisotropic_dimension])
+        spec_dim = get_spectral_dimensions(obj)
+
+        amp = np.asarray([smsim.simulate_onesite_lineshape(
+            self.exp_dict, 
+            mysys, 
+            spec_dim[0], 
+            input_type='c0_c4', 
+            contribs='c0_c4', 
+            return_array=True,
+            distorted=True) for mysys in spin_systems])
+        # sim = Simulator()
+        # sim.config.number_of_sidebands = self.number_of_sidebands
+        # sim.config.decompose_spectrum = "spin_system"
+
+        # sim.spin_systems = spin_systems
+        # sim.methods = [method]
+        # sim.run(pack_as_csdm=False)
+
+        # amp = sim.methods[0].simulation.real
+        print(f'amp shape: {amp.shape}')
+        return self._averaged_kernel(amp, supersampling)
+    
