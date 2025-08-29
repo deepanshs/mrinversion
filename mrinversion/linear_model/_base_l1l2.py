@@ -64,10 +64,13 @@ class GeneralL2Lasso:
     ):
 
         if (
-            xygrid != "full" and xygrid != "mirrored" and xygrid != "positive" and xygrid != "negative"
+            xygrid != "full" and
+            xygrid != "mirrored" and
+            xygrid != "positive" and
+            xygrid != "negative"
         ):
             raise Exception(
-                "Please choose a valid option for 'xygrid'. Valid options are 'full', " 
+                "Please choose a valid option for 'xygrid'. Valid options are 'full', "
                 "'mirrored', 'positive', and 'negative'."
             )
 
@@ -319,7 +322,10 @@ class GeneralL2LassoCV:
         xygrid="full",
     ):
         if (
-            xygrid != "full" and xygrid != "mirrored" and xygrid != "positive" and xygrid != "negative"
+            xygrid != "full" and
+            xygrid != "mirrored" and
+            xygrid != "positive" and
+            xygrid != "negative"
         ):
             raise Exception(
                 "Please choose a valid option for 'xygrid'. Valid options are 'full', "
