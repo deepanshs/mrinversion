@@ -176,14 +176,6 @@ class LineShape(BaseModel):
             )
             return zeta, eta, abundances
 
-    def _get_cq_eta(self, supersampling):
-        """Return zeta and eta coordinates over x-y grid"""
-
-        cq, eta = _x_y_to_cq_eta_distribution(
-            self.inverse_kernel_dimension, supersampling
-        )
-        return cq, eta
-
 
 def _check_csdm_dimension(dimensions, dimension_id):
     if not isinstance(dimensions, (list, *__dimension_list__)):
