@@ -25,10 +25,6 @@ def find_optimum_singular_value(s):
 
 
 def TSVD(K):
-    # print(f'K: {K}')
-    # if ma.is_masked(K):
-        # U, S, VT = np.linalg.svd(K.filled(0), full_matrices=False)
-    # else:
     U, S, VT = np.linalg.svd(K, full_matrices=False)
     r = find_optimum_singular_value(S)
     return U, S, VT, r

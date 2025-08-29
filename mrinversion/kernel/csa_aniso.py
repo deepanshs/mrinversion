@@ -1,13 +1,8 @@
 from copy import deepcopy
 
-import csdmpy as cp
-import numpy as np
 from mrsimulator import Simulator
 from mrsimulator import SpinSystem
-from mrsimulator.method import Method
-from mrsimulator.method import SpectralEvent
 from mrsimulator.method.lib import BlochDecaySpectrum
-from mrsimulator.utils import get_spectral_dimensions
 
 from mrinversion.kernel.base import LineShape
 

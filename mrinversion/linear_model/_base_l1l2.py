@@ -353,7 +353,6 @@ class GeneralL2LassoCV:
         self.xygrid = xygrid
 
     def fit(self, K, s, cv_map_as_csdm=True):
-    def fit(self, K, s, cv_map_as_csdm=True):
         r"""Fit the model using the coordinate descent method from scikit-learn for
         all alpha anf lambda values using the `n`-folds cross-validation technique.
         The cross-validation metric is the mean squared error.
