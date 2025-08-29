@@ -3,6 +3,8 @@ import warnings
 from ._base_l1l2 import GeneralL2Lasso
 from ._base_l1l2 import GeneralL2LassoCV
 
+import warnings
+
 __author__ = "Deepansh J. Srivastava"
 __email__ = "srivastava.89@osu.edu"
 

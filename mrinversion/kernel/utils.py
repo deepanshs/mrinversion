@@ -150,6 +150,7 @@ def _x_y_to_zeta_eta_distribution(grid, supersampling, eta_bound, calc_pos=False
     )
 
     return _x_y_to_zeta_eta(x_mesh, y_mesh, eta_bound, calc_pos)
+    return _x_y_to_zeta_eta(x_mesh, y_mesh, eta_bound, calc_pos)
 
 
 # def _x_y_to_cq_eta_distribution(grid, supersampling):

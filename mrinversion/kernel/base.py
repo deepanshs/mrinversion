@@ -165,7 +165,7 @@ class LineShape(BaseModel):
         if number_of_sidebands is None:
             self.number_of_sidebands = dim.count
 
-    def _get_zeta_eta(self, supersampling, eta_bound=1, calc_pos=False):
+    def _get_zeta_eta(self, supersampling, eta_bound=1,calc_pos=False):
         """Return zeta and eta coordinates over x-y grid"""
         if eta_bound == 1 and not calc_pos:
             zeta, eta = _x_y_to_zeta_eta_distribution(
