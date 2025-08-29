@@ -49,101 +49,43 @@ def x_y_to_zeta_eta(x, y):
     return zeta * x_unit, eta
 
 
-def _x_y_to_zeta_eta(x, y, eta_bound=1):
+def _x_y_to_zeta_eta(x, y, eta_bound=1, calc_pos=False):
     """Same as def x_y_to_zeta_eta, but for ndarrays."""
     x = np.abs(x).ravel()
     y = np.abs(y).ravel()
-    # print(x/1e6)
-    # print(y/1e6)
-    n_lost = 0
     zeta = np.sqrt(x**2 + y**2)  # + offset
     abundances = np.ones(zeta.shape)
     eta = np.ones(zeta.shape)
     eta = eta.tolist()
-    # print(zeta/1e6)
     zeta = zeta.tolist()
-    # x.tolist()
-    # y.tolist()
-
-    # print(f'eta length pre: {len(eta)}')
-    # print(eta.shape)
     del_these = []
-    for index,_ in enumerate(x):
+    for index, _ in enumerate(x):
         if x[index] > y[index]:
-            zeta[index] = - zeta[index]
-            this_eta = (4.0 / np.pi) * np.arctan(y[index] / x[index])
-            if this_eta < eta_bound:
+            if not calc_pos:
+                zeta[index] = -zeta[index]
+                this_eta = (4.0 / np.pi) * np.arctan(y[index] / x[index])
+                if this_eta < eta_bound:
                     eta[index] = this_eta
+                else:
+                    abundances[index] = 0
             else:
-                # del_these.append(index)
-                # del zeta[index], eta[index]
-                # n_lost += 1
                 abundances[index] = 0
+
         elif x[index] < y[index]:
             this_eta = (4.0 / np.pi) * np.arctan(x[index] / y[index])
             if this_eta < eta_bound:
                 eta[index] = this_eta
             else:
-                # del zeta[index], eta[index]
-                # del_these.append(index)
-                # n_lost += 1
                 abundances[index] = 0
         elif x[index] == y[index] and eta_bound < 1:
-            # del_these.append(index)
-            # n_lost += 1
             abundances[index] = 0
-            
-    # print(np.asarray(eta))
-    # print(del_these)
-    # print(f'eta length post: {len(eta)}')
-    # print(f'n lost: {n_lost}')
-    if eta_bound ==1:
+
+    if eta_bound == 1 and not calc_pos:
         return np.asarray(zeta), np.asarray(eta)
     else:
         for idx in del_these[::-1]:
             del zeta[idx], eta[idx]
-        # print(np.asarray(eta))
         return np.asarray(zeta), np.asarray(eta), abundances
-
-
-
-
-
-# def _x_y_to_zeta_eta(x, y, eta_bound=1):
-#     """Same as def x_y_to_zeta_eta, but for ndarrays."""
-#     x = np.abs(x)
-#     y = np.abs(y)
-#     # print(x)
-#     # print(y)
-#     n_lost = 0
-#     zeta = np.sqrt(x**2 + y**2)  # + offset
-#     # print(zeta)
-#     eta = np.ones(zeta.shape)*100
-#     # print(eta.shape)
-#     for index,_ in np.ndenumerate(x):
-#         if x[index] > y[index]:
-#             zeta[index] = - zeta[index]
-#             this_eta = (4.0 / np.pi) * np.arctan(y[index] / x[index])
-#             if this_eta < eta_bound:
-#                     eta[index] = this_eta
-#             else:
-#                 n_lost += 1
-#         elif x[index] < y[index]:
-#             this_eta = (4.0 / np.pi) * np.arctan(x[index] / y[index])
-#             if this_eta < eta_bound:
-#                 eta[index] = this_eta
-#             else:
-#                 n_lost += 1
-#     print(eta)
-    
-#     if eta_bound ==1:
-#         return zeta.ravel(), eta.ravel()
-#     else:
-#         return zeta.ravel(), eta.ravel(), n_lost
-
-
-
-
 
 
 def zeta_eta_to_x_y(zeta, eta):
@@ -190,7 +132,7 @@ def zeta_eta_to_x_y(zeta, eta):
     return x.ravel(), y.ravel()
 
 
-def _x_y_to_zeta_eta_distribution(grid, supersampling, eta_bound):
+def _x_y_to_zeta_eta_distribution(grid, supersampling, eta_bound, calc_pos=False):
     """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
     x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)
     y_coordinates = _supersampled_coordinates(grid[1], supersampling=supersampling)
@@ -207,27 +149,27 @@ def _x_y_to_zeta_eta_distribution(grid, supersampling, eta_bound):
         np.abs(x_coordinates), np.abs(y_coordinates), indexing="xy"
     )
 
-    return _x_y_to_zeta_eta(x_mesh, y_mesh, eta_bound)
+    return _x_y_to_zeta_eta(x_mesh, y_mesh, eta_bound, calc_pos)
 
 
-def _x_y_to_cq_eta_distribution(grid, supersampling):
-    """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
-    x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)
-    y_coordinates = _supersampled_coordinates(grid[1], supersampling=supersampling)
+# def _x_y_to_cq_eta_distribution(grid, supersampling):
+#     """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
+#     x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)
+#     y_coordinates = _supersampled_coordinates(grid[1], supersampling=supersampling)
 
-    if x_coordinates.unit.physical_type == "frequency":
-        x_coordinates = x_coordinates.to("Hz").value
-        y_coordinates = y_coordinates.to("Hz").value
+#     if x_coordinates.unit.physical_type == "frequency":
+#         x_coordinates = x_coordinates.to("Hz").value
+#         y_coordinates = y_coordinates.to("Hz").value
 
-    elif x_coordinates.unit.physical_type == "dimensionless":
-        x_coordinates = x_coordinates.to("ppm").value
-        y_coordinates = y_coordinates.to("ppm").value
+#     elif x_coordinates.unit.physical_type == "dimensionless":
+#         x_coordinates = x_coordinates.to("ppm").value
+#         y_coordinates = y_coordinates.to("ppm").value
 
-    x_mesh, y_mesh = np.meshgrid(
-        np.abs(x_coordinates), np.abs(y_coordinates), indexing="xy"
-    )
+#     x_mesh, y_mesh = np.meshgrid(
+#         np.abs(x_coordinates), np.abs(y_coordinates), indexing="xy"
+#     )
 
-    return _x_y_to_cq_eta(x_mesh, y_mesh)
+#     return _x_y_to_cq_eta(x_mesh, y_mesh)
 
 
 def _supersampled_coordinates(dimension, supersampling=1):
@@ -274,52 +216,47 @@ def _supersampled_coordinates(dimension, supersampling=1):
     return array
 
 
-def cq_eta_to_x_y(cq, eta):
-    r"""Convert the coordinates :math:`(C_q,\eta)` to :math:`(x, y)` using the
-        following definition,
+# def cq_eta_to_x_y(cq, eta):
+#     r"""Convert the coordinates :math:`(C_q,\eta)` to :math:`(x, y)` using the
+#         following definition,
 
-        .. math::
-            \begin{array}{rl}
-            x &= C_q \sin\theta, \\
-            y &= C_q \cos\theta
-            \end{array} {~~~~~~~~}
+#         .. math::
+#             \begin{array}{rl}
+#             x &= C_q \sin\theta, \\
+#             y &= C_q \cos\theta
+#             \end{array} {~~~~~~~~}
 
-        where :math:`\theta = \frac{\pi}{2}\eta`.
+#         where :math:`\theta = \frac{\pi}{2}\eta`.
 
-        Args:
-            x: ndarray or list of floats. The coordinate x.
-            y: ndarray or list of floats. The coordinate y.
+#         Args:
+#             x: ndarray or list of floats. The coordinate x.
+#             y: ndarray or list of floats. The coordinate y.
 
-        Return:
-            A list of ndarrays. The first array holds the coordinate :math:`x`. The
-            second array holds the coordinates :math:`y`.
-    """
-    cq = np.asarray(cq)
-    eta = np.asarray(eta)
+#         Return:
+#             A list of ndarrays. The first array holds the coordinate :math:`x`. The
+#             second array holds the coordinates :math:`y`.
+#     """
+#     cq = np.asarray(cq)
+#     eta = np.asarray(eta)
 
-    theta = np.pi * eta / 2.0
-    x = np.zeros(cq.size)
-    y = np.zeros(cq.size)
+#     theta = np.pi * eta / 2.0
+#     x = np.zeros(cq.size)
+#     y = np.zeros(cq.size)
 
-    index = np.arange(len(cq))
-    x[index] = cq[index] * np.cos(theta[index])
-    y[index] = cq[index] * np.sin(theta[index])
+#     index = np.arange(len(cq))
+#     x[index] = cq[index] * np.cos(theta[index])
+#     y[index] = cq[index] * np.sin(theta[index])
 
-    return x.ravel(), y.ravel()
+#     return x.ravel(), y.ravel()
 
 
-def _x_y_to_cq_eta(x, y):
-    """Same as def x_y_to_zeta_eta, but for ndarrays."""
-    x = np.abs(x)
-    y = np.abs(y)
-    cq = np.sqrt(x**2 + y**2)  # + offset
-    eta = np.ones(cq.shape)
-    # index = np.where(x > y)
-    index = np.arange(len(cq))
-    # zeta[index] = -zeta[index]
-    eta[index] = (2.0 / np.pi) * np.arctan(y[index] / x[index])
+# def _x_y_to_cq_eta(x, y):
+#     """Same as def x_y_to_zeta_eta, but for ndarrays."""
+#     x = np.abs(x)
+#     y = np.abs(y)
+#     cq = np.sqrt(x**2 + y**2)  # + offset
+#     eta = np.ones(cq.shape)
+#     index = np.arange(len(cq))
+#     eta[index] = (2.0 / np.pi) * np.arctan(y[index] / x[index])
 
-    # index = np.where(x < y)
-    # eta[index] = (4.0 / np.pi) * np.arctan(x[index] / y[index])
-
-    return cq.ravel(), eta.ravel()
+#     return cq.ravel(), eta.ravel()
