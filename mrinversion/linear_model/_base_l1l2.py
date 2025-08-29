@@ -64,13 +64,11 @@ class GeneralL2Lasso:
     ):
 
         if (
-            xygrid != "full"
-            and xygrid != "mirrored"
-            and xygrid != "positive"
-            and xygrid != "negative"
+            xygrid != "full" and xygrid != "mirrored" and xygrid != "positive" and xygrid != "negative"
         ):
             raise Exception(
-                "Please choose a valid option for 'xygrid'. Valid options are 'full', 'mirrored', 'positive', and 'negative'."
+                "Please choose a valid option for 'xygrid'. Valid options are 'full', " 
+                "'mirrored', 'positive', and 'negative'."
             )
 
         self.hyperparameters = {"lambda": lambda1, "alpha": alpha}
@@ -208,7 +206,6 @@ class GeneralL2Lasso:
 
         if self.xygrid != "full":
             if self.xygrid == "mirrored":
-                # print('made it to mirrored')
                 self.f = self.mirror_inversion()
             elif self.xygrid == "negative":
                 self.f = self.flip_inversion()
@@ -322,13 +319,11 @@ class GeneralL2LassoCV:
         xygrid="full",
     ):
         if (
-            xygrid != "full"
-            and xygrid != "mirrored"
-            and xygrid != "positive"
-            and xygrid != "negative"
+            xygrid != "full" and xygrid != "mirrored" and xygrid != "positive" and xygrid != "negative"
         ):
             raise Exception(
-                "Please choose a valid option for 'xygrid'. Valid options are 'full', 'mirrored', 'positive', and 'negative'."
+                "Please choose a valid option for 'xygrid'. Valid options are 'full', "
+                "'mirrored', 'positive', and 'negative'."
             )
 
         self.cv_alphas = np.asarray(alphas).ravel()
@@ -442,46 +437,30 @@ class GeneralL2LassoCV:
 
         # Calculate the solution using the complete data at the optimized lambda and
         # alpha values
-        if self.xygrid == "full":
-            self.opt = GeneralL2Lasso(
-                alpha=self.hyperparameters["alpha"],
-                lambda1=self.hyperparameters["lambda"],
-                max_iterations=self.max_iterations,
-                tolerance=self.tolerance,
-                positive=self.positive,
-                regularizer=self.regularizer,
-                inverse_dimension=self.inverse_dimension,
-                method=self.method,
-            )
-            self.opt.fit(K, s)
-            self.f = self.opt.f
-            if cv_map_as_csdm:
-                self.cv_map_to_csdm()
+    
+        self.opt = GeneralL2Lasso(
+            alpha=self.hyperparameters["alpha"],
+            lambda1=self.hyperparameters["lambda"],
+            max_iterations=self.max_iterations,
+            tolerance=self.tolerance,
+            positive=self.positive,
+            regularizer=self.regularizer,
+            inverse_dimension=self.inverse_dimension,
+            method=self.method,
+            xygrid=self.xygrid,
+        )
 
-        else:
-            self.opt = GeneralL2Lasso(
-                alpha=self.hyperparameters["alpha"],
-                lambda1=self.hyperparameters["lambda"],
-                max_iterations=self.max_iterations,
-                tolerance=self.tolerance,
-                positive=self.positive,
-                regularizer=self.regularizer,
-                inverse_dimension=self.inverse_dimension,
-                method=self.method,
-                xygrid=self.xygrid,
-            )
+        self.opt.fit(K, s)
+        self.f = self.opt.f
 
-            self.opt.fit(K, s)
-            self.f = self.opt.f
+        if self.xygrid == "mirrored":
+            # print('made it to mirrored')
+            self.f = self.mirror_inversion()
+        elif self.xygrid == "negative":
+            self.f = self.flip_inversion()
 
-            if self.xygrid == "mirrored":
-                # print('made it to mirrored')
-                self.f = self.mirror_inversion()
-            elif self.xygrid == "negative":
-                self.f = self.flip_inversion()
-
-            if cv_map_as_csdm:
-                self.cv_map_to_csdm()
+        if cv_map_as_csdm:
+            self.cv_map_to_csdm()
 
     def cv_map_to_csdm(self):
         # convert cv_map to csdm

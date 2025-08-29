@@ -74,9 +74,9 @@ class DAS(LineShape):
         amp = sim.methods[0].simulation.real
 
         warnings.warn(
-            "This kernel is intended to be used with xygrid='mirrored', since we " \
-            "cannot distinguish +Cq from -Cq from an NMR experiment.  If you know the" \
-            "sign of Cq from other means, you can restrict the grid using " \
+            "This kernel is intended to be used with xygrid='mirrored', since we "
+            "cannot distinguish +Cq from -Cq from an NMR experiment.  If you know the"
+            "sign of Cq from other means, you can restrict the grid using "
             "xygrid='positive' or xygrid='negative."
         )
 
@@ -138,10 +138,10 @@ class MQMAS(LineShape):
         amp = sim.methods[0].simulation.real
 
         warnings.warn(
-            "This kernel is intended to be used with xygrid='mirrored', since we " \
-            "cannot distinguish +Cq from -Cq from an NMR experiment.  If you know the" \
-            "sign of Cq from other means, you can restrict the grid using " \
-            "xygrid='positive' or xygrid='negative."
+            "This kernel is intended to be used with xygrid='mirrored', since we "
+            "cannot distinguish +Cq from -Cq from an NMR experiment.  If you know the"
+            "sign of Cq from other means, you can restrict the grid using "
+            "xygrid='positive' or xygrid='negative'."
         )
 
         return self._averaged_kernel(amp, supersampling)
@@ -221,9 +221,9 @@ class SL_MQMASnodist(LineShape):
         )
 
         warnings.warn(
-            "This kernel is intended to be used with xygrid='mirrored', since we " \
-            "cannot distinguish +Cq from -Cq from an NMR experiment.  If you know the" \
-            "sign of Cq from other means, you can restrict the grid using " \
+            "This kernel is intended to be used with xygrid='mirrored', since we "
+            "cannot distinguish +Cq from -Cq from an NMR experiment.  If you know the"
+            "sign of Cq from other means, you can restrict the grid using "
             "xygrid='positive' or xygrid='negative."
         )
 
@@ -307,9 +307,9 @@ class SL_MQMAS(LineShape):
         )
 
         warnings.warn(
-            "This kernel is intended to be used with xygrid='mirrored', since we " \
-            "cannot distinguish +Cq from -Cq from an NMR experiment.  If you know the" \
-            "sign of Cq from other means, you can restrict the grid using " \
+            "This kernel is intended to be used with xygrid='mirrored', since we "
+            "cannot distinguish +Cq from -Cq from an NMR experiment.  If you know the"
+            "sign of Cq from other means, you can restrict the grid using "
             "xygrid='positive' or xygrid='negative."
         )
         
