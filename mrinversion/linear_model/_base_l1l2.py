@@ -64,10 +64,10 @@ class GeneralL2Lasso:
     ):
 
         if (
-            xygrid != "full" and
-            xygrid != "mirrored" and
-            xygrid != "positive" and
-            xygrid != "negative"
+            xygrid != "full"
+            and xygrid != "mirrored"
+            and xygrid != "positive"
+            and xygrid != "negative"
         ):
             raise Exception(
                 "Please choose a valid option for 'xygrid'. Valid options are 'full', "
@@ -322,10 +322,10 @@ class GeneralL2LassoCV:
         xygrid="full",
     ):
         if (
-            xygrid != "full" and
-            xygrid != "mirrored" and
-            xygrid != "positive" and
-            xygrid != "negative"
+            xygrid != "full"
+            and xygrid != "mirrored"
+            and xygrid != "positive"
+            and xygrid != "negative"
         ):
             raise Exception(
                 "Please choose a valid option for 'xygrid'. Valid options are 'full', "
@@ -443,7 +443,6 @@ class GeneralL2LassoCV:
 
         # Calculate the solution using the complete data at the optimized lambda and
         # alpha values
-    
         self.opt = GeneralL2Lasso(
             alpha=self.hyperparameters["alpha"],
             lambda1=self.hyperparameters["lambda"],

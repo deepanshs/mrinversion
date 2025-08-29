@@ -312,7 +312,6 @@ class SL_MQMAS(LineShape):
             "sign of Cq from other means, you can restrict the grid using "
             "xygrid='positive' or xygrid='negative."
         )
-        
         return self._averaged_kernel(amp, supersampling)
 
 
