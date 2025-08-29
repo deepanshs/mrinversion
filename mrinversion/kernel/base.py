@@ -4,7 +4,6 @@ import csdmpy as cp
 import numpy as np
 from mrsimulator.method.lib import BlochDecaySpectrum
 
-from .utils import _x_y_to_cq_eta_distribution
 from .utils import _x_y_to_zeta_eta_distribution
 
 __dimension_list__ = (cp.Dimension, cp.LinearDimension, cp.MonotonicDimension)
