@@ -202,11 +202,10 @@ class GeneralL2Lasso:
             self.f.dimensions[1] = s.dimensions[1]
             self.f.dimensions[0] = self.inverse_dimension[0]
 
-        if self.xygrid != "full":
-            if self.xygrid == "mirrored":
-                self.f = self.mirror_inversion()
-            elif self.xygrid == "negative":
-                self.f = self.flip_inversion()
+        if self.xygrid == "mirrored":
+            self.f = self.mirror_inversion()
+        elif self.xygrid == "negative":
+            self.f = self.flip_inversion()
 
     def flip_inversion(self):
         csdm_obj = self.f.copy()
