@@ -84,16 +84,14 @@ class CVMinimizer:
                         "and did not finish in the given number of iterations."
                     )
             if print_steps:
-                print(f"This minimization results:\n\n {this_result}")
+                print(f"This minimization results: \n\n{this_result}")
         else:
             if this_result.success:
                 print("This minimization completed in the iterations given. ")
             else:
-                print(
-                    "This minimization did not finish in the given number of iterations."
-                )
+                print("This minimization did not finish in given number of iterations.")
             if print_steps:
-                print(f"This minimization results:\n\n {this_result}")
+                print(f"This minimization results: \n\n{this_result}")
 
         print("--------------------------------------------------\n")
 

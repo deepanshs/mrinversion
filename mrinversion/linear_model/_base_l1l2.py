@@ -14,6 +14,7 @@ from sklearn.model_selection import KFold
 
 __author__ = "Deepansh J. Srivastava"
 __email__ = "srivastava.89@osu.edu"
+ALLOWED_GRIDS = ("full", "mirrored", "positive", "negative")
 
 
 class GeneralL2Lasso:
@@ -62,14 +63,8 @@ class GeneralL2Lasso:
         method="gradient_decent",
         xygrid="full",
     ):
-
-        if (
-            xygrid != "full"
-            and xygrid != "mirrored"
-            and xygrid != "positive"
-            and xygrid != "negative"
-        ):
-            raise Exception(
+        if xygrid not in ALLOWED_GRIDS:
+            raise KeyError(
                 "Please choose a valid option for 'xygrid'. Valid options are 'full', "
                 "'mirrored', 'positive', and 'negative'."
             )
@@ -321,13 +316,8 @@ class GeneralL2LassoCV:
         method="gradient_decent",
         xygrid="full",
     ):
-        if (
-            xygrid != "full"
-            and xygrid != "mirrored"
-            and xygrid != "positive"
-            and xygrid != "negative"
-        ):
-            raise Exception(
+        if xygrid not in ALLOWED_GRIDS:
+            raise KeyError(
                 "Please choose a valid option for 'xygrid'. Valid options are 'full', "
                 "'mirrored', 'positive', and 'negative'."
             )

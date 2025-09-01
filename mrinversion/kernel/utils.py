@@ -34,7 +34,7 @@ def x_y_to_zeta_eta(x, y):
         y = y.value
     if x_unit != y_unit:
         raise ValueError(
-            f"x and y must have same dimensionality; x ({x_unit}) != y ({y_unit})."
+            f"x and y must have same dimensionality: x ({x_unit}) != y ({y_unit})."
         )
 
     zeta = np.sqrt(x**2 + y**2)  # + offset
