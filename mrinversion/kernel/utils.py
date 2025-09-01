@@ -132,7 +132,7 @@ def zeta_eta_to_x_y(zeta, eta):
     return x.ravel(), y.ravel()
 
 
-def _x_y_to_zeta_eta_distribution(grid, supersampling, eta_bound, calc_pos=False):
+def _x_y_to_zeta_eta_distribution(grid, supersampling, eta_bound=1, calc_pos=False):
     """Return a list of zeta-eta coordinates from a list of x-y coordinates."""
     x_coordinates = _supersampled_coordinates(grid[0], supersampling=supersampling)
     y_coordinates = _supersampled_coordinates(grid[1], supersampling=supersampling)
@@ -149,7 +149,6 @@ def _x_y_to_zeta_eta_distribution(grid, supersampling, eta_bound, calc_pos=False
         np.abs(x_coordinates), np.abs(y_coordinates), indexing="xy"
     )
 
-    return _x_y_to_zeta_eta(x_mesh, y_mesh, eta_bound, calc_pos)
     return _x_y_to_zeta_eta(x_mesh, y_mesh, eta_bound, calc_pos)
 
 

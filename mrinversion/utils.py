@@ -36,7 +36,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     if len(csdm_object.x) > 2:
         extra_dims = np.sum([item.coordinates.size for item in csdm_object.x[2:]])
     data.shape = (extra_dims, data.shape[-2], data.shape[-1])
-    
+
     reg_x, reg_y = (csdm_object.x[i].coordinates.value for i in range(2))
     dx = reg_x[1] - reg_x[0]
     dy = reg_y[1] - reg_y[0]
@@ -142,10 +142,10 @@ def to_old_xq_yq_grid(csdm_object, xq, yq, n=5):
     avg_range_eta = (np.arange(n) - (n - 1) / 2) * d_eta / n
     # print(avg_range_cq)
     # print(avg_range_eta)
-    for i,cq_item in enumerate(avg_range_cq):
-        for j,eta_item in enumerate(avg_range_eta):
+    for i, cq_item in enumerate(avg_range_cq):
+        for j, eta_item in enumerate(avg_range_eta):
             # print(i,j)
-            cq__ = (reg_cq + cq_item)
+            cq__ = reg_cq + cq_item
             # print(np.abs(cq__).shape)
             eta__ = np.abs(reg_eta + eta_item)
             cq_, eta_ = np.meshgrid(cq__, eta__)
@@ -158,21 +158,20 @@ def to_old_xq_yq_grid(csdm_object, xq, yq, n=5):
             # print(eta_)
             # print()
 
-            theta = np.ones(eta_.shape)*1e10
+            theta = np.ones(eta_.shape) * 1e10
             # print(theta.shape)
 
             index = np.where(cq_ > 0)
             # print(f'pos index: {index}')
-            theta[index] = np.pi/2 * (1-eta_[index] / 2.0)
+            theta[index] = np.pi / 2 * (1 - eta_[index] / 2.0)
 
             index = np.where(cq_ <= 0)
             # print(f'neg index: {index}')
-            
-            theta[index] = np.pi/4.0 * eta_[index]
+
+            theta[index] = np.pi / 4.0 * eta_[index]
             # print(cq_)
             # print(np.where(theta * 180/np.pi==1e10))
             # print(list(zip(cq_, theta * 180/np.pi)))
-            
 
             xq_grid = np.abs(cq_) * np.sin(theta)
             yq_grid = np.abs(cq_) * np.cos(theta)

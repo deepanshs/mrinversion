@@ -67,18 +67,21 @@ class CVMinimizer:
             if this_result.fun < prev_result.fun:
                 if this_result.success:
                     print(
-                        "This minimization improved on the previous result and completed the minimization in the iterations given. "
+                        "This minimization improved on the previous result and \n"
+                        "completed the minimization in the iterations given. "
                     )
                 else:
                     print(
-                        "This minimization improved on the previous result, but did not finish in the given number of iterations."
+                        "This minimization improved on the previous result, but did \n"
+                        "not finish in the given number of iterations."
                     )
             else:
                 if this_result.success:
                     print("This minimization minimized to a worse solution.")
                 else:
                     print(
-                        "This minimization did not improve on the previous result, and did not finish in the given number of iterations."
+                        "This minimization did not improve on the previous result, \n"
+                        "and did not finish in the given number of iterations."
                     )
             if print_steps:
                 print(f"This minimization results:\n\n {this_result}")
