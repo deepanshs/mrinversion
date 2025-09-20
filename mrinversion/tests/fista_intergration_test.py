@@ -1,3 +1,4 @@
+"""Integration tests for FISTA implementation."""
 import csdmpy as cp
 import numpy as np
 
