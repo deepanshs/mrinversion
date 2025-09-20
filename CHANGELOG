@@ -1,6 +1,11 @@
 v0.3.1
+------
+
+What's new!
+'''''''''''
 
 - Simplified plot_3d function
+- Replace fortran code with numba jit python version.
 
 v0.3.0
 ------
@@ -8,7 +13,7 @@ v0.3.0
 What's new!
 '''''''''''
 
-- Added T1, T2 relaxation inversion kerenel.
+- Added T1, T2 relaxation inversion kernel.
 
 v0.2.0
 ------
