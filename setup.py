@@ -1,10 +1,11 @@
+"""Setup for mrinversion package."""
 from os.path import abspath
 from os.path import dirname
 from os.path import join
 from setuptools import find_packages, setup
 
 
-with open("mrinversion/__init__.py") as f:
+with open("mrinversion/__init__.py", encoding="utf-8") as f:
     for line in f.readlines():
         if "__version__" in line:
             before_keyword, keyword, after_keyword = line.partition("=")
@@ -32,7 +33,7 @@ setup(
         "Python based statistical learning of NMR tensor and relaxation parameters "
         "distribution."
     ),
-    long_description=open(join(module_dir, "README.md")).read(),
+    long_description=open(join(module_dir, "README.md"), encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="Deepansh J. Srivastava",
     author_email="deepansh2012@gmail.com",
