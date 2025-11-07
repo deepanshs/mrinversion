@@ -1,3 +1,4 @@
+"""Base classes for kernel generation."""
 from copy import deepcopy
 
 import csdmpy as cp

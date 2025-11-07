@@ -171,7 +171,7 @@ class SL_MQMASnodist(LineShape):
         self.exp_dict = exp_dict
         self.anisotropic_dimension = anisotropic_dimension
 
-    def kernel(self, supersampling, eta_bound=1):
+    def kernel(self, supersampling, eta_bound=1,nQ=3):
         import sys
 
         sys.path.insert(0, "/home/lexicon2810/github-repos-WSL/mrsmqmas")
@@ -254,7 +254,7 @@ class SL_MQMAS(LineShape):
         self.exp_dict = exp_dict
         self.anisotropic_dimension = anisotropic_dimension
 
-    def kernel(self, supersampling, eta_bound=1, cq_posneg=True):
+    def kernel(self, supersampling, eta_bound=1, cq_posneg=True,n_quantum=3):
         import sys
 
         sys.path.insert(0, "/home/lexicon2810/github-repos-WSL/mrsmqmas")
@@ -265,32 +265,19 @@ class SL_MQMAS(LineShape):
 
         isotope = self.method_args["channels"][0]
 
-        if eta_bound == 1 and cq_posneg:
-            Cq, eta = self._get_zeta_eta(supersampling, eta_bound)
-        else:
-            Cq, eta, abundances = self._get_zeta_eta(
-                supersampling, eta_bound, cq_posneg
-            )
+        Cq, eta, abundances = self._get_zeta_eta(supersampling, eta_bound,calc_pos=True)
 
-        if eta_bound == 1:
-            spin_systems = [
-                SpinSystem(
-                    sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))]
-                )
-                for cq_, e in zip(Cq, eta)
-            ]
-        else:
-            spin_systems = [
-                SpinSystem(
-                    sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))],
-                    abundance=abun,
-                )
-                for cq_, e, abun in zip(Cq, eta, abundances)
-            ]
+        spin_systems = [
+            SpinSystem(
+                sites=[dict(isotope=isotope, quadrupolar=dict(Cq=cq_, eta=e))],
+                abundance=abun,
+            )
+            for cq_, e, abun in zip(Cq, eta, abundances)
+        ]
 
         obj = cp.CSDM(dimensions=[self.anisotropic_dimension])
         spec_dim = get_spectral_dimensions(obj)
-
+        operators=smsim.build_spin_matrices(nucleus=isotope, n_quantum=n_quantum)
         amp = np.asarray(
             [
                 smsim.simulate_onesite_lineshape(
@@ -301,6 +288,7 @@ class SL_MQMAS(LineShape):
                     contribs="c0_c4",
                     return_array=True,
                     distorted=True,
+                    operators=operators
                 )
                 for mysys in spin_systems
             ]
