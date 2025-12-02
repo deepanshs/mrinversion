@@ -1,6 +1,6 @@
 [flake8]
 ignore = E203
-exclude = .eggs, *.egg,build, mrinversion/kernel/__init__.py, mrinversion/utils.py
+exclude = .eggs, *.egg,build, mrinversion/kernel/__init__.py, mrinversion/utils.py, examples/*
 filename = *.pyx, *.px*, *py
 max-line-length = 88
 max-complexity = 10
