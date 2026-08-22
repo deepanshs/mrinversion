@@ -1,7 +1,7 @@
 numpy>=2.0
 mrsimulator>=1.0.0
 scikit-learn>=1.7.2
-matplotlib>=3.3.4
+matplotlib>=3.10.9
 csdmpy>=0.7
 joblib>=1.0.0
 astropy>=5.1
@@ -9,7 +9,7 @@ numba>=0.61.2
 
 # development packages
 pytest-runner>=6.0.1
-pytest>=5.3
+pytest>=9.1.1
 black
 pre-commit>=1.16.1
 coverage>=4.5.3
