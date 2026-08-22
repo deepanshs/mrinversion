@@ -9,7 +9,7 @@ numba>=0.61.2
 
 # development packages
 pytest-runner>=5.0
-pytest>=5.3
+pytest>=9.1.1
 black
 pre-commit>=1.16.1
 coverage>=4.5.3
