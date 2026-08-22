@@ -1,6 +1,6 @@
 numpy>=2.0
 mrsimulator>=1.0.0
-scikit-learn>=1.5.2
+scikit-learn>=1.7.2
 matplotlib>=3.3.4
 csdmpy>=0.7
 joblib>=1.0.0
