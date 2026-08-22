@@ -18,7 +18,8 @@ codecov
 
 # Building Docs requirements
 sphinxjp.themes.basicstrap
-sphinx>=2.0
+sphinx>=4.0
+standard-imghdr; python_version >= "3.13"
 sphinx-gallery>=0.10
 pillow>=7.1.2
 breathe==4.34.0

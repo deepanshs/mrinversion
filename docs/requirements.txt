@@ -1,5 +1,6 @@
 sphinxjp.themes.basicstrap
-sphinx>=2.1.2
+sphinx>=4
+standard-imghdr; python_version >= "3.13"
 sphinx-gallery
 pillow
 matplotlib
