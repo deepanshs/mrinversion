@@ -8,7 +8,7 @@ astropy>=5.1
 numba>=0.61.2
 
 # development packages
-pytest-runner>=5.0
+pytest-runner>=6.0.1
 pytest>=9.1.1
 black
 pre-commit>=1.16.1
