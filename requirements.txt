@@ -1,6 +1,6 @@
 
 numpy>=2.0
-matplotlib>=3.0
+matplotlib>=3.10.9
 csdmpy>=0.7
 joblib>=0.13.2
 mrsimulator>=1.0.0
