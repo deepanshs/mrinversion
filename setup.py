@@ -15,14 +15,14 @@ module_dir = dirname(abspath(__file__))
 
 install_requires = [
     "numpy>=2.0",
-    "setuptools>=27.3",
+    "setuptools>=70.1",
     "csdmpy>=0.7",
     "mrsimulator>=1.0.0",
     "scikit-learn>=1.5.2",
     "numba>=0.61.2",
 ]
 
-setup_requires = ["setuptools>=27.3", "numpy"]
+setup_requires = ["setuptools>=70.1", "numpy"]
 extras = {"matplotlib": ["matplotlib>=3.0"]}
 
 
