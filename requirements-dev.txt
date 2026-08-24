@@ -5,7 +5,7 @@ matplotlib>=3.10.9
 csdmpy>=0.7
 joblib>=1.0.0
 astropy>=5.1
-numba>=0.61.2
+numba>=0.67.0
 
 # development packages
 pytest-runner>=6.0.1
