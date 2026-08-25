@@ -5,4 +5,3 @@ sphinx-gallery
 pillow
 matplotlib
 scikit-learn>=1.7.2
-astropy>=5.1
