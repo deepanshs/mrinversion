@@ -12,7 +12,7 @@ pytest-runner>=6.0.1
 pytest>=9.1.1
 black
 pre-commit>=4.6.2
-coverage>=4.5.3
+coverage>=7.15.4
 pytest-cov
 codecov
 
