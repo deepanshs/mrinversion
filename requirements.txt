@@ -5,5 +5,4 @@ csdmpy>=0.7
 joblib>=1.5.3
 mrsimulator>=1.0.0
 scikit-learn>=1.7.2
-astropy>=6.1.7
 numba>=0.67.0

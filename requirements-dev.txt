@@ -4,7 +4,6 @@ scikit-learn>=1.7.2
 matplotlib>=3.10.9
 csdmpy>=0.7
 joblib>=1.5.3
-astropy>=6.1.7
 numba>=0.67.0
 
 # development packages
