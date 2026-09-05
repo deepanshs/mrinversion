@@ -59,6 +59,15 @@ class SmoothLasso(GeneralL2Lasso):
         If True, the amplitudes in the solution, :math:`{\bf f}`, is constrained to only
         positive values, else the solution may contain positive and negative amplitudes.
         The default is True.
+    xygrid: 'full', 'mirrored', 'positive', or 'negative'
+        If 'full', the inversion is performed over the entire xygrid and returned as-is.
+        For quadrupolar kernels, 'mirrored', 'positive', or 'negative' should be used.
+        If 'mirrored', the inversion is calculated over the positive half-quadrant and
+        reflected over the :math:`\eta_q=1` line to display both :math:`+C_q` and
+        :math:`-C_q` results.  If 'positive', the inversion is calculated over the
+        positive half-quadrant and returned as is.  If 'negative', the inversion is
+        calculated over the positive half-quadrant and flipped about the
+        :math:`\eta_q=1` line to display :math:`-C_q` results. The default is 'full'.
 
     Attributes
     ----------
@@ -80,6 +89,7 @@ class SmoothLasso(GeneralL2Lasso):
         tolerance=1e-5,
         positive=True,
         method="gradient_decent",
+        xygrid="full",
     ):
         super().__init__(
             alpha=alpha,
@@ -90,6 +100,7 @@ class SmoothLasso(GeneralL2Lasso):
             regularizer="smooth lasso",
             inverse_dimension=inverse_dimension,
             method=method,
+            xygrid=xygrid,
         )
 
 
@@ -168,6 +179,15 @@ class SmoothLassoCV(GeneralL2LassoCV):
     n_jobs: int
         The number of CPUs used for computation. The default is -1, that is, all
         available CPUs are used.
+    xygrid: 'full', 'mirrored', 'positive', or 'negative'
+        If 'full', the inversion is performed over the entire xygrid and returned as-is.
+        For quadrupolar kernels, 'mirrored', 'positive', or 'negative' should be used.
+        If 'mirrored', the inversion is calculated over the positive half-quadrant and
+        reflected over the :math:`\eta_q=1` line to display both :math:`+C_q` and
+        :math:`-C_q` results.  If 'positive', the inversion is calculated over the
+        positive half-quadrant and returned as is.  If 'negative', the inversion is
+        calculated over the positive half-quadrant and flipped about the
+        :math:`\eta_q=1` line to display :math:`-C_q` results. The default is 'full'.
 
 
     Attributes
@@ -199,6 +219,7 @@ class SmoothLassoCV(GeneralL2LassoCV):
         verbose=False,
         n_jobs=-1,
         method="gradient_decent",
+        xygrid="full",
     ):
         super().__init__(
             alphas=alphas,
@@ -215,4 +236,5 @@ class SmoothLassoCV(GeneralL2LassoCV):
             verbose=verbose,
             n_jobs=n_jobs,
             method=method,
+            xygrid=xygrid,
         )

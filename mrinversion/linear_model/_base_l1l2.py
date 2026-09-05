@@ -14,6 +14,7 @@ from sklearn.model_selection import KFold
 
 __author__ = "Deepansh J. Srivastava"
 __email__ = "srivastava.89@osu.edu"
+ALLOWED_GRIDS = ("full", "mirrored", "positive", "negative")
 
 
 class GeneralL2Lasso:
@@ -60,7 +61,13 @@ class GeneralL2Lasso:
         regularizer=None,
         inverse_dimension=None,
         method="gradient_decent",
+        xygrid="full",
     ):
+        if xygrid not in ALLOWED_GRIDS:
+            raise KeyError(
+                "Please choose a valid option for 'xygrid'. Valid options are 'full', "
+                "'mirrored', 'positive', and 'negative'."
+            )
 
         self.hyperparameters = {"lambda": lambda1, "alpha": alpha}
         self.max_iterations = max_iterations
@@ -74,6 +81,7 @@ class GeneralL2Lasso:
         # attributes
         self.f = None
         self.n_iter = None
+        self.xygrid = xygrid
 
     def fit(self, K, s):
         r"""Fit the model using the coordinate descent method from scikit-learn.
@@ -194,6 +202,40 @@ class GeneralL2Lasso:
             self.f.dimensions[1] = s.dimensions[1]
             self.f.dimensions[0] = self.inverse_dimension[0]
 
+        if self.xygrid == "mirrored":
+            self.f = self.mirror_inversion()
+        elif self.xygrid == "negative":
+            self.f = self.flip_inversion()
+
+    def flip_inversion(self):
+        csdm_obj = self.f.copy()
+        y = csdm_obj.y[0].components[0]
+        for idx, val in np.ndenumerate(y):
+            dim0 = idx[0]
+            dim1 = idx[1]
+            if dim1 < dim0:
+                if y[dim1, dim0] < 1e-6:
+                    y[dim1, dim0] = val
+                    y[dim0, dim1] = 0
+        new_obj = cp.CSDM(
+            dimensions=csdm_obj.x, dependent_variables=[cp.as_dependent_variable(y)]
+        )
+        return new_obj
+
+    def mirror_inversion(self):
+        csdm_obj = self.f.copy()
+        y = csdm_obj.y[0].components[0]
+        for idx, val in np.ndenumerate(y):
+            dim0 = idx[0]
+            dim1 = idx[1]
+            if dim1 < dim0:
+                if y[dim1, dim0] < 1e-6:
+                    y[dim1, dim0] = val
+        new_obj = cp.CSDM(
+            dimensions=csdm_obj.x, dependent_variables=[cp.as_dependent_variable(y)]
+        )
+        return new_obj
+
     def predict(self, K):
         r"""Predict the signal using the linear model.
 
@@ -271,7 +313,13 @@ class GeneralL2LassoCV:
         inverse_dimension=None,
         n_jobs=-1,
         method="gradient_decent",
+        xygrid="full",
     ):
+        if xygrid not in ALLOWED_GRIDS:
+            raise KeyError(
+                "Please choose a valid option for 'xygrid'. Valid options are 'full', "
+                "'mirrored', 'positive', and 'negative'."
+            )
 
         self.cv_alphas = np.asarray(alphas).ravel()
         self.cv_lambdas = np.asarray(lambdas).ravel()
@@ -292,8 +340,9 @@ class GeneralL2LassoCV:
         self.verbose = verbose
         self.inverse_dimension = inverse_dimension
         self.f_shape = tuple(item.count for item in inverse_dimension)[::-1]
+        self.xygrid = xygrid
 
-    def fit(self, K, s):
+    def fit(self, K, s, cv_map_as_csdm=True):
         r"""Fit the model using the coordinate descent method from scikit-learn for
         all alpha anf lambda values using the `n`-folds cross-validation technique.
         The cross-validation metric is the mean squared error.
@@ -392,10 +441,20 @@ class GeneralL2LassoCV:
             regularizer=self.regularizer,
             inverse_dimension=self.inverse_dimension,
             method=self.method,
+            xygrid=self.xygrid,
         )
+
         self.opt.fit(K, s)
         self.f = self.opt.f
-        self.cv_map_to_csdm()
+
+        if self.xygrid == "mirrored":
+            # print('made it to mirrored')
+            self.f = self.mirror_inversion()
+        elif self.xygrid == "negative":
+            self.f = self.flip_inversion()
+
+        if cv_map_as_csdm:
+            self.cv_map_to_csdm()
 
     def cv_map_to_csdm(self):
         # convert cv_map to csdm
@@ -476,6 +535,35 @@ class GeneralL2LassoCV:
                 random_state=None,
             )
 
+    def flip_inversion(self):
+        csdm_obj = self.f.copy()
+        y = csdm_obj.y[0].components[0]
+        for idx, val in np.ndenumerate(y):
+            dim0 = idx[0]
+            dim1 = idx[1]
+            if dim1 < dim0:
+                if y[dim1, dim0] < 1e-6:
+                    y[dim1, dim0] = val
+                    y[dim0, dim1] = 0
+        new_obj = cp.CSDM(
+            dimensions=csdm_obj.x, dependent_variables=[cp.as_dependent_variable(y)]
+        )
+        return new_obj
+
+    def mirror_inversion(self):
+        csdm_obj = self.f.copy()
+        y = csdm_obj.y[0].components[0]
+        for idx, val in np.ndenumerate(y):
+            dim0 = idx[0]
+            dim1 = idx[1]
+            if dim1 < dim0:
+                if y[dim1, dim0] < 1e-6:
+                    y[dim1, dim0] = val
+        new_obj = cp.CSDM(
+            dimensions=csdm_obj.x, dependent_variables=[cp.as_dependent_variable(y)]
+        )
+        return new_obj
+
     def predict(self, K):
         r"""Predict the signal using the linear model.
 
@@ -523,10 +611,10 @@ class GeneralL2LassoCV:
 
 def cv(l1, X, y, cv):
     """Return the cross-validation score as negative of mean square error."""
-    # if isinstance(l1, (Lasso, MultiTaskLasso)):
-    #     fit_params = {"check_input": False}
-    # if isinstance(l1, LassoLars):
-    #     fit_params = None  # {"Xy": np.dot(X.T, y)}
+    if isinstance(l1, (Lasso, MultiTaskLasso)):
+        fit_params = {"check_input": False}
+    if isinstance(l1, LassoLars):
+        fit_params = None  # {"Xy": np.dot(X.T, y)}
 
     cv_score = cross_validate(
         l1,
@@ -534,7 +622,7 @@ def cv(l1, X, y, cv):
         y=y,
         scoring="neg_mean_squared_error",  # 'neg_mean_absolute_error",
         cv=cv,
-        # fit_params=fit_params,
+        params=fit_params,
         n_jobs=1,
         verbose=0,
     )

@@ -31,7 +31,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
         if item.origin_offset != 0
     ]
     data = csdm_object.y[0].components[0]
-
+    # print(f'data max: {data.max()}')
     extra_dims = 1
     if len(csdm_object.x) > 2:
         extra_dims = np.sum([item.coordinates.size for item in csdm_object.x[2:]])
@@ -47,7 +47,7 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
     d_eta = eta.increment.value / 2
     range_ = [
         [zeta.coordinates[0].value - d_zeta, zeta.coordinates[-1].value + d_zeta],
-        [eta.coordinates[0] - d_eta, eta.coordinates[-1] + d_eta],
+        [eta.coordinates[0].value - d_eta, eta.coordinates[-1].value + d_eta],
     ]
 
     avg_range_x = (np.arange(n) - (n - 1) / 2) * dx / n
@@ -75,19 +75,141 @@ def to_Haeberlen_grid(csdm_object, zeta, eta, n=5):
             np.append(eta, np.ones(index[0].size))
             for i in range(extra_dims):
                 weight = deepcopy(data[i]).ravel()
+                # print(f'weight max: {weight.max()}')
+                # print(f'range: {range_}')
                 weight[index] /= 2
                 np.append(weight, weight[index])
                 sol_, _, _ = np.histogram2d(
                     zeta_grid, eta_grid, weights=weight, bins=bins, range=range_
                 )
                 sol[i] += sol_
-
+                # print(f'sol max: {sol.max()}')
+                # print()
     sol /= n * n
 
     del zeta_grid, eta_grid, index, x_, y_, avg_range_x, avg_range_y
     csdm_new = cp.as_csdm(np.squeeze(sol))
     csdm_new.x[0] = eta
     csdm_new.x[1] = zeta
+    if len(csdm_object.x) > 2:
+        csdm_new.x[2] = csdm_object.x[2]
+    return csdm_new
+
+
+def to_old_xq_yq_grid(csdm_object, xq, yq, n=5):
+    """Convert the three-dimensional p(iso, Cq, eta) to p(iso, xq, yq) tensor
+    distribution.
+
+    Args
+    ----
+
+    csdm_object: CSDM
+        A CSDM object containing the 3D p(iso, Cq, eta) distribution.
+    xq: CSDM.Dimension
+        A CSDM dimension object describing the xq dimension.
+    yq: CSDM.Dimension
+        A CSDM dimension object describing the yq dimension.
+    n: int
+        An integer used in linear interpolation of the data. The default is 5.
+    """
+    [
+        item.to("ppm", "nmr_frequency_ratio")
+        for item in csdm_object.x
+        if item.origin_offset != 0
+    ]
+    data = csdm_object.y[0].components[0]
+    print(data)
+    # csdm_object.plot()
+    extra_dims = 1
+    if len(csdm_object.x) > 2:
+        extra_dims = np.sum([item.coordinates.size for item in csdm_object.x[2:]])
+    data.shape = (extra_dims, data.shape[-2], data.shape[-1])
+
+    reg_cq, reg_eta = (csdm_object.x[i].coordinates.value for i in range(2))
+    d_cq = reg_cq[1] - reg_cq[0]
+    d_eta = reg_eta[1] - reg_eta[0]
+    sol = np.zeros((extra_dims, xq.count, yq.count))
+
+    bins = [xq.count, yq.count]
+    dx = xq.increment.value / 2
+    dy = yq.increment.value / 2
+    range_ = [
+        [xq.coordinates[0].value - dx, xq.coordinates[-1].value + dx],
+        [yq.coordinates[0].value - dy, yq.coordinates[-1].value + dy],
+    ]
+    # print(range_)
+    avg_range_cq = (np.arange(n) - (n - 1) / 2) * d_cq / n
+    avg_range_eta = (np.arange(n) - (n - 1) / 2) * d_eta / n
+    # print(avg_range_cq)
+    # print(avg_range_eta)
+    for i, cq_item in enumerate(avg_range_cq):
+        for j, eta_item in enumerate(avg_range_eta):
+            # print(i,j)
+            cq__ = reg_cq + cq_item
+            # print(np.abs(cq__).shape)
+            eta__ = np.abs(reg_eta + eta_item)
+            cq_, eta_ = np.meshgrid(cq__, eta__)
+            # print(cq_)
+            # print()
+            cq_ = cq_.ravel()
+            eta_ = eta_.ravel()
+            # print(cq_.shape)
+            # print(eta_.shape)
+            # print(eta_)
+            # print()
+
+            theta = np.ones(eta_.shape) * 1e10
+            # print(theta.shape)
+
+            index = np.where(cq_ > 0)
+            # print(f'pos index: {index}')
+            theta[index] = np.pi / 2 * (1 - eta_[index] / 2.0)
+
+            index = np.where(cq_ <= 0)
+            # print(f'neg index: {index}')
+
+            theta[index] = np.pi / 4.0 * eta_[index]
+            # print(cq_)
+            # print(np.where(theta * 180/np.pi==1e10))
+            # print(list(zip(cq_, theta * 180/np.pi)))
+
+            xq_grid = np.abs(cq_) * np.sin(theta)
+            yq_grid = np.abs(cq_) * np.cos(theta)
+
+            # index = np.arange(xq.count)
+            # print(f'index: {index}')
+            # print(data[0].ravel())
+            # print(data[0].shape)
+            ################eta_grid = (2 / np.pi) * np.arctan(y_ / x_)
+            # print(f'extra dims: {extra_dims}')
+            for i in range(extra_dims):
+                weight = deepcopy(data[i]).ravel()
+                # weight[index] /= 2
+                # np.append(weight, weight[index])
+                # plt.plot(weight)
+                # plt.show()
+                # print(np.where(weight>0.1))
+                # print(range_)
+                sol_, _, _ = np.histogram2d(
+                    xq_grid, yq_grid, weights=weight, bins=bins, range=range_
+                )
+                sol[i] += sol_
+    # print(sol)
+    # print(np.where(sol>0.1))
+    # plt.imshow(sol[0,:,:])
+    # plt.imshow(sol_)
+    # print(xq.coordinates.shape)
+    # print(yq.coordinates.shape)
+    # plt.plot(weight)
+    # plt.show()
+
+    sol /= n * n
+    # plt.plot(weight)
+    # plt.show()
+    del xq_grid, yq_grid, index, cq_, eta_, avg_range_cq, avg_range_eta
+    csdm_new = cp.as_csdm(np.squeeze(sol))
+    csdm_new.x[0] = yq
+    csdm_new.x[1] = xq
     if len(csdm_object.x) > 2:
         csdm_new.x[2] = csdm_object.x[2]
     return csdm_new
@@ -139,6 +261,56 @@ def get_polar_grids(ax, ticks=None, offset=0):
     for ang_ in angle2:
         ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=lw)
     ax.plot(x, x, "k", alpha=0.5, linewidth=2 * lw)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+
+def get_quadpolar_grids(ax, ticks=None, offset=0):
+    """Generate a piece-wise polar grid of Haeberlen parameters, zeta and eta.
+
+    Args:
+        ax: Matplotlib Axes.
+        ticks: Tick coordinates where radial grids are drawn. The value can be a list
+            or a numpy array. The default value is None.
+        offset: The grid is drawn at an offset away from the origin.
+    """
+    ylim = ax.get_ylim()
+    xlim = ax.get_xlim()
+    if ticks is None:
+        x = np.asarray(ax.get_xticks())
+        inc = x[1] - x[0]
+        size = x.size
+        x = np.arange(size + 5) * inc
+    else:
+        x = np.asarray(ticks)
+
+    lw = 0.3
+    # t1 = plt.Polygon([[0, 0], [0, x[-1]], [x[-1], x[-1]]], color="b", alpha=0.05)
+    # t2 = plt.Polygon([[0, 0], [x[-1], 0], [x[-1], x[-1]]], color="r", alpha=0.05)
+
+    # ax.add_artist(t1)
+    # ax.add_artist(t2)
+    for x_ in x:
+        if x_ - offset > 0:
+            ax.add_artist(
+                plt.Circle(
+                    (0, 0),
+                    x_ - offset,
+                    fill=False,
+                    color="k",
+                    linestyle="--",
+                    linewidth=lw,
+                    alpha=0.5,
+                )
+            )
+
+    angle1 = np.tan(np.pi * np.asarray([0, 0.2, 0.4, 0.6, 0.8]) / 2.0)
+    # angle2 = np.tan(np.pi * np.asarray([0.8, 0.6, 0.4, 0.2, 0]) / 4.0)
+    for ang_ in angle1:
+        ax.plot(x, ((x - offset) * ang_) + offset, "k--", alpha=0.5, linewidth=lw)
+    # for ang_ in angle2:
+    # ax.plot(((x - offset) * ang_) + offset, x, "k--", alpha=0.5, linewidth=lw)
+    # ax.plot(x, x, "k", alpha=0.5, linewidth=2 * lw)
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
