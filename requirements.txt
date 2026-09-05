@@ -1,9 +1,8 @@
 
-numpy>=2.0
-matplotlib>=3.0
+numpy>=2.2.6
+matplotlib>=3.10.9
 csdmpy>=0.7
-joblib>=0.13.2
+joblib>=1.6.0
 mrsimulator>=1.0.0
-scikit-learn>=1.5.2
-astropy>=5.1
-numba>=0.61.2
+scikit-learn>=1.7.2
+numba>=0.67.0
